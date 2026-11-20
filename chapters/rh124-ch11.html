@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 11 – Controlling Access to Files</title>
+<style>
+:root{--bg:#0a0e17;--card:#1a2234;--tx:#e2e8f0;--tx2:#94a3b8;--red:#ee0000;--grn:#22c55e;--yel:#eab308;--blu:#3b82f6;--pur:#a855f7;--cyn:#06b6d4;--org:#f97316;--bd:#1e293b;--bd2:#334155;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.7}
+.top{position:sticky;top:0;z-index:9;background:rgba(10,14,23,.94);border-bottom:1px solid var(--bd);padding:9px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.top a{color:var(--tx2);text-decoration:none;font-size:.78rem;padding:3px 10px;border:1px solid var(--bd2);border-radius:20px}
+.top a:hover,.top .b{color:var(--red);border-color:var(--red)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:2rem;margin:14px 0 6px}h2{font-size:1.45rem;margin:44px 0 12px;padding-left:12px;border-left:4px solid var(--red)}
+h3{font-size:1.05rem;margin:20px 0 6px;color:var(--cyn)}p{margin:7px 0}
+.card,.q{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.kw{background:rgba(238,0,0,.14);color:#ff9a9a;border-radius:6px;padding:0 7px;font-weight:600}
+code{font-family:Consolas,monospace;background:#0d1423;color:#7dd3fc;padding:1px 6px;border-radius:5px;font-size:.9em}
+pre{background:#0d1423;border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin:10px 0;overflow-x:auto;font:.84rem/1.6 Consolas,monospace;color:#cbd5e1}
+.c{color:#64748b}.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem}
+th,td{border:1px solid var(--bd2);padding:7px 9px;text-align:left}th{background:#111b2e;color:var(--tx2)}
+.note,.warn,.tip,.where,.sc{border-radius:var(--r);padding:12px 15px;margin:14px 0;border-left:4px solid}
+.note{background:rgba(59,130,246,.09);border-color:var(--blu)}.warn{background:rgba(249,115,22,.09);border-color:var(--org)}
+.tip{background:rgba(34,197,94,.09);border-color:var(--grn)}.where{background:rgba(238,0,0,.07);border-color:var(--red)}
+.sc{background:rgba(168,85,247,.09);border-color:var(--pur)}.where h4{color:#ff9a9a}.sc h4{color:#d8b4fe}
+.r{color:var(--grn);font-weight:700}.w{color:var(--yel);font-weight:700}.x{color:var(--red);font-weight:700}
+.ls,.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center;align-items:stretch}
+.ls div,.flow div{background:var(--card);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px;text-align:center;font-size:.85rem}
+.ls div{min-width:72px}.ls b{display:block;font:700 1.05rem Consolas,monospace}.ls span{display:block;font-size:.72rem;color:var(--tx2)}
+.flow .ar{border:0;background:none;color:var(--red);font-size:1.4rem;align-self:center}
+.bar{display:flex;gap:3px;justify-content:center;margin:4px 0}.bar i{width:34px;height:30px;border-radius:6px;font:700 .85rem/30px Consolas,monospace;text-align:center;font-style:normal}
+.on{background:#14532d;color:#86efac}.off{background:#3f1d1d;color:#fca5a5}.mk{background:#4c1d95;color:#ddd6fe}
+.calc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.col{background:var(--card);border:1px solid var(--bd2);border-radius:var(--r);padding:8px;text-align:center}
+.col label{display:block;cursor:pointer}.out{text-align:center;font:700 1.5rem Consolas,monospace;margin-top:10px}
+input[type=text]{background:#0d1423;border:1px solid var(--bd2);color:var(--tx);border-radius:8px;padding:6px;font:1rem Consolas,monospace;width:90px;text-align:center}
+.q{margin:12px 0}.q label{display:block;padding:6px 8px;border-radius:8px;cursor:pointer}.q label:hover{background:#111b2e}
+.ex{display:none;margin-top:8px;font-size:.9rem}.q.ok{border-color:var(--grn)}.q.bad{border-color:var(--red)}
+button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px 22px;font-size:1rem;cursor:pointer}
+@media(max-width:600px){.calc{grid-template-columns:1fr}h1{font-size:1.5rem}}
+</style></head><body>
+<div class="top"><a class="b" href="../Index.html">← Dashboard</a><a href="#a">10 bits</a><a href="#b">r w x</a><a href="#c">chmod</a><a href="#d">chown</a><a href="#e">umask</a><a href="#f">Special</a><a href="#g">ACL</a><a href="#h">Must know</a><a href="#quiz">Quiz</a></div>
+<div class="wrap">
+<small style="color:var(--red);font-weight:700">CHAPTER 10</small>
+<h1>🔐 Controlling Access to Files</h1>
+<p>Many people share one Linux server. Permissions decide <b>who may read, change or run</b> each file and folder. Without them, any user could delete the system files or read your passwords.</p>
+<div class="card"><b>Five kinds of permission in this chapter</b>
+<div class="flow"><div><b>1. General</b><br>chmod on one file</div><div><b>2. Recursive</b><br>chmod -R on a folder tree</div><div><b>3. Default</b><br>umask for new files</div><div><b>4. Special</b><br>SUID, SGID, sticky</div><div><b>5. ACL</b><br>per-user extra rules</div></div></div>
+
+<h2 id="a">1. The 10 Characters of <code>ls -l</code></h2>
+<p>Run <code>ls -l</code>. Every line starts with 10 characters. They are the whole permission story of that file.</p>
+<div class="ls">
+<div style="border-color:var(--pur)"><b>-</b><span>Type</span></div><div style="border-color:var(--grn)"><b>rw-</b><span>Owner</span></div><div style="border-color:var(--yel)"><b>r--</b><span>Group</span></div><div style="border-color:var(--red)"><b>---</b><span>Others</span></div><div style="border-color:var(--cyn)"><b>.</b><span>SELinux</span></div>
+<div><b>1</b><span>Links</span></div><div><b>john</b><span>Owner name</span></div><div><b>developers</b><span>Group name</span></div><div><b>1024</b><span>Size</span></div><div><b>Jan 15</b><span>Changed</span></div><div><b>myfile.txt</b><span>Name</span></div></div>
+<p style="text-align:center;color:var(--tx2)">Full line: <code>-rw-r-----. 1 john developers 1024 Jan 15 myfile.txt</code></p>
+<h3>Character 1: file type</h3>
+<div class="tw"><table><tr><th><code>-</code></th><th><code>d</code></th><th><code>l</code></th><th><code>b</code></th><th><code>c</code></th><th><code>p</code></th><th><code>s</code></th></tr>
+<tr><td>Normal file</td><td>Directory (folder)</td><td>Link (shortcut)</td><td>Block device (disk, <code>/dev/sda</code>)</td><td>Character device (keyboard, terminal)</td><td>Pipe</td><td>Socket</td></tr></table></div>
+<h3>Characters 2 to 10: three groups of three</h3>
+<div class="grid"><div class="card"><b>👤 Owner (u)</b><br>One user, usually who created the file.</div><div class="card"><b>👥 Group (g)</b><br>All members of the file's group (like the "developers" team).</div><div class="card"><b>🌍 Others (o)</b><br>Everyone else: normal users who are neither the owner nor in the group. <span class="kw">root</span> is not limited by these rules.</div></div>
+<div class="note"><b>Linux stops at the first match:</b><div class="flow"><div>Are you the <b>owner</b>?<br>Use owner bits</div><div class="ar">→</div><div>No. In the <b>group</b>?<br>Use group bits</div><div class="ar">→</div><div>No.<br>Use <b>others</b> bits</div></div>An owner with <code>---</code> is blocked, even if the group has <code>rwx</code>.</div>
+<h3>The dot <code>.</code> and the plus <code>+</code> after the permissions</h3>
+<div class="tw"><table><tr><th>Symbol</th><th>Meaning</th></tr><tr><td><code>.</code></td><td>The file has an <b>SELinux</b> security label. Normal on RHEL. Show it with <code>ls -Z</code>.</td></tr><tr><td><code>+</code></td><td>The file has an <b>ACL</b>. That plus sign is the "logo" of an ACL. See section 7.</td></tr></table></div>
+<p>Now look at the line from your notes:</p>
+<pre>drwx------. 15 ak ak 4096 Oct 26 15:28 .</pre>
+<p><code>d</code> = directory, <code>rwx------</code> = only owner <code>ak</code> has access, <code>.</code> after the permissions = SELinux label, <code>15</code> = links, <code>ak ak</code> = owner and group, <code>4096</code> = size. The last <code>.</code> is the <b>name</b>: it means "this current folder" (shown with <code>ls -la</code>). <code>..</code> is the parent folder.</p>
+
+<h2 id="b">2. Read, Write, Execute</h2>
+<div class="tw"><table><tr><th></th><th>On a FILE</th><th>On a DIRECTORY</th></tr>
+<tr><td><span class="r">r</span> read</td><td>Open and see the content (<code>cat</code>)</td><td>See the <b>names</b> inside (<code>ls</code>)</td></tr>
+<tr><td><span class="w">w</span> write</td><td>Edit the content</td><td>Create, delete and rename files inside (needs <code>x</code> too)</td></tr>
+<tr><td><span class="x">x</span> execute</td><td>Run it as a program or script</td><td>Enter it with <code>cd</code> and reach files inside</td></tr></table></div>
+<h3>Why a file opens with <code>r</code> but a folder does not</h3>
+<div class="grid"><div class="card">📄 <b>A file is a book.</b> If you may read it, you open it and read it. Done.</div><div class="card">🚪 <b>A directory is a room with a notice board outside.</b><br><span class="r">r</span> = you may read the notice board (list of names).<br><span class="x">x</span> = you hold the <b>key</b> to open the door and go in.<br>With <code>r</code> only, you see the names but cannot enter.</div></div>
+<div class="tw"><table><tr><th>Directory mode</th><th>What you can do</th></tr><tr><td><code>r-x</code></td><td>List and enter. A normal read-only folder.</td></tr><tr><td><code>r--</code></td><td>See names only. <code>cd</code> fails.</td></tr><tr><td><code>--x</code></td><td>Cannot list, but can enter if you know the exact name.</td></tr><tr><td><code>rwx</code></td><td>Full control.</td></tr><tr><td><code>rw-</code></td><td>Useless: without <code>x</code> you cannot reach anything.</td></tr></table></div>
+<div class="note"><b>"Everyone can enter <code>/</code>, but only permitted users can change it":</b> the root directory <code>/</code> is <code>rwxr-xr-x</code>. Others have <code>r-x</code> (enter and list) but no <code>w</code>, so only root can create or delete there. To open <code>/a/b/file</code> you need <code>x</code> on <code>/</code>, <code>a</code> and <code>b</code> (check with <code>namei -l /a/b/file</code>).</div>
+<div class="warn">Deleting a file is decided by the <b>folder's</b> <code>w</code>, not the file's own permission.</div>
+<div class="sc"><h4>🧪 Try it: lock a folder</h4><pre># as root
+mkdir /test ; echo hello &gt; /test/text.txt
+chmod o-r /test/text.txt ; ls -l /test/text.txt
+-rw-r-----. 1 root root 6 Oct 31 10:00 /test/text.txt   <span class="c"># others lost read</span>
+chmod o-x /test/
+su - student
+cd /test/
+-bash: cd: /test/: Permission denied                     <span class="c"># no x on the folder</span></pre></div>
+<div class="where"><h4>📍 Where to Add What</h4>No file is edited here. Permissions are stored on the file itself.</div>
+
+<h2 id="c">3. Changing Permissions: <code>chmod</code></h2>
+<p><span class="kw">chmod</span> (change mode) changes permissions of a file or folder. Two styles:</p>
+<h3>Style 1: Symbolic (letters)</h3>
+<div class="grid"><div class="card"><b>Who</b><br><code>u</code> owner · <code>g</code> group · <code>o</code> others · <code>a</code> all three</div><div class="card"><b>Operator</b><br><code>+</code> add · <code>-</code> remove · <code>=</code> set exactly (wipes the old ones)</div></div>
+<pre>chmod u+x script.sh          <span class="c"># owner may run it</span>
+chmod o-r /test/text.txt     <span class="c"># others lose read</span>
+chmod g=rw file.txt          <span class="c"># group becomes exactly rw-</span>
+chmod a+r file.txt           <span class="c"># everybody can read</span>
+chmod u=rwx,g=rx,o= file.txt <span class="c"># set all three at once</span></pre>
+<h3>Style 2: Numeric (numbers)</h3>
+<div class="ls"><div><b class="r">4</b><span>read</span></div><div><b class="w">2</b><span>write</span></div><div><b class="x">1</b><span>execute</span></div><div><b>rwx</b><span>4+2+1 = 7</span></div><div><b>rw-</b><span>4+2 = 6</span></div><div><b>r-x</b><span>4+1 = 5</span></div><div><b>r--</b><span>4</span></div><div><b>---</b><span>0</span></div></div>
+<p><b>640</b> means 6 = owner (rw-), 4 = group (r--), 0 = others (---). Practise here:</p>
+<div class="card"><div class="calc" id="calc"></div><div class="out"><span id="oct"></span> &nbsp; <span id="sym" style="color:var(--cyn)"></span></div><p style="text-align:center"><input type="text" id="inp" maxlength="3" value="644" oninput="fromNum()"> <small>type a number</small></p></div>
+<div class="tw"><table><tr><th>Number</th><th>Symbol</th><th>Typical use</th></tr><tr><td>600</td><td>rw-------</td><td>Private file, SSH key</td></tr><tr><td>644</td><td>rw-r--r--</td><td>Normal file</td></tr><tr><td>640</td><td>rw-r-----</td><td>Group reads, others nothing</td></tr><tr><td>700</td><td>rwx------</td><td>Private folder</td></tr><tr><td>755</td><td>rwxr-xr-x</td><td>Programs, public folders</td></tr><tr><td>770</td><td>rwxrwx---</td><td>Team folder</td></tr><tr><td>777</td><td>rwxrwxrwx</td><td>⚠️ Everyone can do everything. Avoid.</td></tr></table></div>
+<h3>Recursive: the folder and everything inside</h3>
+<pre>mkdir -p /test/dir1               <span class="c"># -p creates parent folders too</span>
+touch /test/dir1/file.txt
+chgrp -R developers /test/        <span class="c"># -R = recursive (note: chgrp, not chrgp)</span>
+ls -lR /test/
+/test/:
+drwxr-xr-x. 2 root developers 22 Oct 31 10:10 dir1
+/test/dir1:
+-rw-r--r--. 1 root developers 0 Oct 31 10:10 file.txt
+chmod -R g+rwX /test/             <span class="c"># capital X: x only on folders, not on normal files</span></pre>
+<div class="sc"><h4>🏢 Scenario: developers cannot upload to the website</h4><pre>$ ls -ld /var/www/html/uploads
+drwxr-xr-x. 2 root root 4096 Oct 31 10:00 /var/www/html/uploads
+$ sudo chown :developers /var/www/html/uploads
+$ sudo chmod 775 /var/www/html/uploads
+drwxrwxr-x. 2 root developers 4096 Oct 31 10:05 /var/www/html/uploads</pre></div>
+<div class="where"><h4>📍 Where to Add What</h4>No file is edited. Type the command in the terminal (use <code>sudo</code> for files you do not own).</div>
+
+<h2 id="d">4. Changing Owner and Group</h2>
+<div class="tw"><table><tr><th>Command</th><th>Changes</th></tr><tr><td><code>chown amit file</code></td><td>Owner only</td></tr><tr><td><code>chown :devteam file</code></td><td>Group only</td></tr><tr><td><code>chown amit:devteam file</code></td><td>Owner and group</td></tr><tr><td><code>chgrp devteam file</code></td><td>Group only</td></tr><tr><td><code>chown -R amit:devteam /data</code></td><td>Whole folder tree</td></tr></table></div>
+<div class="note">Only <b>root</b> can change an owner. A normal owner may change the group, but only to a group they belong to. Use a colon <code>user:group</code>, not a dot.</div>
+<pre>$ ls -l report.txt
+-rw-r--r--. 1 amit amit 0 Oct 31 10:00 report.txt
+$ sudo chown ravi:devteam report.txt
+-rw-r--r--. 1 ravi devteam 0 Oct 31 10:01 report.txt</pre>
+<div class="where"><h4>📍 Where to Add What</h4>No file is edited. Users and groups live in <code>/etc/passwd</code> and <code>/etc/group</code>. Use <code>useradd</code>, <code>groupadd</code> and <code>usermod -aG</code> instead of editing them by hand.</div>
+
+<h2 id="e">5. Default Permissions: <code>umask</code></h2>
+<p>When you create a file or folder, Linux starts from a <b>maximum</b> and <span class="kw">umask</span> takes some permissions away. Check it with <code>umask</code>. The usual answer is <code>0022</code>.</p>
+<div class="grid"><div class="card"><b>New file: max 666</b><br>Files never get <code>x</code> automatically. A new file can never run by accident (safety). That is why 666 and not 777.</div><div class="card"><b>New folder: max 777</b><br>A folder needs <code>x</code> so people can enter it.</div></div>
+<h3>How to subtract (digit by digit)</h3>
+<pre>umask 022:   file 666-022 = 644 (rw-r--r--)    folder 777-022 = 755 (rwxr-xr-x)</pre>
+<div class="note">Rule: subtract each digit and never go below 0. <b>Question: umask is 027, what does a new file get?</b></div>
+<div class="tw"><table><tr><th></th><th>Owner</th><th>Group</th><th>Others</th></tr><tr><td>umask 027</td><td>0</td><td>2</td><td>7</td></tr><tr><td>File: start 666</td><td>6−0 = 6</td><td>6−2 = 4</td><td>6−7 → 0</td></tr><tr><td><b>File result</b></td><td>rw-</td><td>r--</td><td>---</td></tr><tr><td>Folder: start 777</td><td>7−0 = 7</td><td>7−2 = 5</td><td>7−7 = 0</td></tr><tr><td><b>Folder result</b></td><td>rwx</td><td>r-x</td><td>---</td></tr></table></div>
+<p><b>Answer: file = 640, folder = 750.</b> Visual for the group digit (mask 2 removes write):</p>
+<div class="bar"><i class="on">r</i><i class="on">w</i><i class="off">-</i> <small style="align-self:center;margin:0 8px">start 6 (rw-)</small><i class="mk">−w</i> <small style="align-self:center;margin:0 8px">mask 2</small><i class="on">r</i><i class="off">-</i><i class="off">-</i> <small style="align-self:center;margin-left:8px">= 4 (r--)</small></div>
+<pre>$ umask 027 ; touch report.txt ; mkdir reports ; ls -ld report.txt reports
+-rw-r-----. 1 ak ak 0 Oct 31 10:00 report.txt
+drwxr-x---. 2 ak ak 6 Oct 31 10:00 reports</pre>
+<div class="note">Strictly, umask switches bits off. With a file and umask 033, the answer is 644 (not 633), because files never had <code>x</code>. Simple subtraction is fine for 022, 002, 027, 077.</div>
+<div class="card" style="text-align:center">Try: umask <input type="text" id="um" maxlength="3" value="027" oninput="calcU()"> → file <b id="uf" style="color:var(--grn)"></b>, folder <b id="ud" style="color:var(--cyn)"></b></div>
+<h3>Making umask permanent</h3>
+<p><code>umask 077</code> typed in a terminal lasts only for that terminal. Put it in a startup file:</p>
+<div class="where"><h4>📍 Where to Add What</h4><div class="tw"><table><tr><th>Who</th><th>File</th><th>Line to add (at the very bottom)</th></tr><tr><td>Only you</td><td><code>~/.bash_profile</code> (or <code>~/.bashrc</code>)</td><td><code>umask 027</code></td></tr><tr><td>All users (global, in /etc)</td><td>Create <code>/etc/profile.d/local-umask.sh</code> as root</td><td><code>umask 027</code></td></tr></table></div>
+<pre>$ echo "umask 027" &gt;&gt; ~/.bash_profile    <span class="c"># &gt;&gt; appends. A single &gt; erases the file!</span>
+$ tail -n 1 ~/.bash_profile
+umask 027
+$ exit        <span class="c"># log in again</span>
+$ umask
+0027</pre></div>
+<div class="sc"><h4>🏢 Scenario: audit says "other users can read finance reports"</h4>New files are <code>644</code>, so others can read them. Set <code>umask 027</code> in <code>/etc/profile.d/local-umask.sh</code>. New files become 640. Old files do not change, so also run <code>chmod -R o-rwx /data/finance</code>.</div>
+
+<h2 id="f">6. Special Permissions (the 4th permission)</h2>
+<div class="tw"><table><tr><th>Name</th><th>Set</th><th>Num</th><th>On a file</th><th>On a folder</th></tr><tr><td><span class="kw">SUID</span></td><td><code>u+s</code></td><td>4</td><td>Runs as the <b>owner</b></td><td>No effect</td></tr><tr><td><span class="kw">SGID</span></td><td><code>g+s</code></td><td>2</td><td>Runs as the <b>group</b></td><td>New files get the <b>folder's group</b></td></tr><tr><td><span class="kw">Sticky</span></td><td><code>o+t</code></td><td>1</td><td>No effect</td><td>Only the owner can delete their files</td></tr></table></div>
+<div class="tw"><table><tr><th>Special</th><th>Seen in</th><th>With x</th><th>Without x</th><th>Example</th></tr><tr><td>SUID</td><td>owner</td><td><code>s</code></td><td><code>S</code></td><td><code>-rws</code>r-xr-x</td></tr><tr><td>SGID</td><td>group</td><td><code>s</code></td><td><code>S</code></td><td><code>drwxrws</code>r-x</td></tr><tr><td>Sticky</td><td>others</td><td><code>t</code></td><td><code>T</code></td><td><code>drwxrwxrwt</code></td></tr></table></div>
+<p>Capital <code>S</code> or <code>T</code> = special bit is set but <code>x</code> is missing, so it does nothing. Usually a mistake.</p>
+<div class="grid"><div class="card">🔑 <b>SUID: <code>passwd</code></b><br><code>-rwsr-xr-x root</code><br>You run it, but it runs as root so it can write the password file. You get only that one task, not root power.</div><div class="card">📁 <b>SGID: team folder</b><br>Every new file gets the folder's group, so the team can all edit it.</div><div class="card">📌 <b>Sticky: <code>/tmp</code></b><br><code>drwxrwxrwt</code><br>Anyone can create files, but only the owner can delete their own.</div></div>
+<pre>chmod u+s /usr/sbin/fdisk   <span class="c"># practice only. Undo it: chmod u-s /usr/sbin/fdisk</span>
+chmod g+s /srv/project      <span class="c"># or numeric: chmod 2770 /srv/project</span>
+chmod o+t /srv/public       <span class="c"># or numeric: chmod 1777 /srv/public</span>
+chmod 4755 file             <span class="c"># 4 = SUID, 2 = SGID, 1 = sticky, as the first digit</span>
+$ ls -l /usr/sbin/fdisk
+-rwsr-xr-x. 1 root root 123456 Oct 31 10:00 /usr/sbin/fdisk</pre>
+<div class="warn">SUID on programs like <code>fdisk</code> lets any user run them as root. That is a big security hole. Find all SUID files with <code>find / -xdev -perm -4000 -type f</code>. SUID on scripts is ignored.</div>
+<div class="sc"><h4>🏢 Scenario: three developers share /srv/project</h4><pre>$ sudo groupadd devteam ; sudo usermod -aG devteam amit   <span class="c"># repeat for ravi, sita</span>
+$ sudo mkdir /srv/project ; sudo chown :devteam /srv/project
+$ sudo chmod 2770 /srv/project
+drwxrws---. 2 root devteam 6 Oct 31 10:00 /srv/project
+$ touch /srv/project/plan.txt                              <span class="c"># as amit</span>
+-rw-rw-r--. 1 amit devteam 0 Oct 31 10:02 plan.txt</pre>The group is <b>devteam</b>, not "amit". SGID only affects <b>new</b> files; fix old ones with <code>chgrp -R devteam /srv/project</code>.</div>
+<div class="where"><h4>📍 Where to Add What</h4>No file is edited. Use <code>chmod</code> in the terminal. Group membership is saved in <code>/etc/group</code> by <code>usermod -aG</code>. The user must log out and in again.</div>
+
+<h2 id="g">7. ACL – Access Control List</h2>
+<p>Normal permissions give only <b>one owner, one group and others</b>. An <span class="kw">ACL</span> gives <b>different permissions to different users on the same file</b>. If a file has an ACL, <code>ls -l</code> shows a <code>+</code>.</p>
+<div class="flow"><div>📄 File<br>owner root, group root</div><div class="ar">+</div><div>ACL list<br><b>student</b> rw-<br><b>user1</b> ---<br><b>grp</b> rw-</div><div class="ar">=</div><div>Shows <code>+</code> in <code>ls -l</code></div></div>
+<div class="tw"><table><tr><th>Command</th><th>Use</th></tr><tr><td><code>getfacl</code></td><td>Show ACL of a file or folder</td></tr><tr><td><code>setfacl -m u:name:perm</code></td><td>Modify: give a user permissions</td></tr><tr><td><code>setfacl -m g:name:perm</code></td><td>Give a group permissions</td></tr><tr><td><code>setfacl -m d:u:name:perm dir</code></td><td>Default ACL: new files inside copy it</td></tr><tr><td><code>setfacl -x g:grp file</code></td><td>Remove one entry</td></tr><tr><td><code>setfacl -b file</code></td><td>Remove all ACL entries</td></tr></table></div>
+<pre>$ mkdir /all-in-one ; vim /all-in-one/information
+$ ls -l /all-in-one/information
+-rw-r--r--. 1 root root 12 Oct 31 10:00 /all-in-one/information
+$ getfacl /all-in-one/information
+# file: all-in-one/information     <span class="c"># file name</span>
+# owner: root                      <span class="c"># owner</span>
+# group: root                      <span class="c"># group</span>
+user::rw-                          <span class="c"># owner permission</span>
+group::r--                         <span class="c"># group permission</span>
+other::r--                         <span class="c"># others permission</span>
+
+$ setfacl -m u:student:rw /all-in-one/information
+$ setfacl -m u:user1:--- /all-in-one/information
+$ setfacl -m g:grp:rw /all-in-one/information
+$ ls -ld /all-in-one/information
+-rw-rw-r--+ 1 root root 12 Oct 31 10:00 /all-in-one/information   <span class="c"># + appeared</span>
+$ getfacl /all-in-one/information
+user::rw-
+user:student:rw-       <span class="c"># named user student</span>
+user:user1:---         <span class="c"># user1 blocked</span>
+group::r--
+group:grp:rw-          <span class="c"># named group grp</span>
+mask::rw-              <span class="c"># upper limit for all named entries</span>
+other::r--
+$ setfacl -x g:grp /all-in-one/information     <span class="c"># remove grp entry</span>
+$ setfacl -b /all-in-one/information           <span class="c"># remove everything, + disappears</span></pre>
+<h3>Default ACL on a folder</h3>
+<pre>$ mkdir /kk
+$ setfacl -m d:u:student:rw /kk/     <span class="c"># d: = default for future files</span>
+$ touch /kk/hh
+$ getfacl /kk/hh
+user:student:rw-                     <span class="c"># inherited automatically</span>
+$ setfacl -m o::--- /kk              <span class="c"># o:: means others, no name needed. Others get ---</span></pre>
+<div class="sc"><h4>🏢 Scenario: auditor needs read-only access</h4><code>/data/reports</code> is <code>770 root:finance</code>. Auditor <code>meena</code> must only read. Adding her to finance would give write access, so use an ACL:<pre>$ sudo setfacl -R -m u:meena:rX /data/reports
+$ sudo setfacl -d -m u:meena:rX /data/reports</pre></div>
+<div class="where"><h4>📍 Where to Add What</h4>No file is edited. ACLs are stored in the file system (XFS supports them). Run <code>setfacl</code> in the terminal.</div>
+
+<h2 id="h">8. Extra Things You Must Know</h2>
+<div class="grid">
+<div class="card"><b>root ignores permissions</b><br>root can read or change anything, except when SELinux or <code>chattr +i</code> stops it.</div>
+<div class="card"><b>Group changes need a new login</b><br>After <code>usermod -aG devteam amit</code>, amit must log out and in, or run <code>newgrp devteam</code>.</div>
+<div class="card"><b>Moving vs copying</b><br>A copy becomes a new file owned by you, using your umask. A move keeps owner and permissions.</div>
+<div class="card"><b>Immutable file</b><br><code>chattr +i file</code> stops even root from changing or deleting it. Check with <code>lsattr</code>, remove with <code>chattr -i</code>.</div>
+<div class="card"><b>SELinux</b><br>Permissions can be fine and access still denied. See <code>ls -Z</code>. Never fix this with 777.</div>
+<div class="card"><b>Create with a mode</b><br><code>mkdir -m 750 /data/team</code></div></div>
+<pre>find /home -perm -o+w -type f          <span class="c"># files others can write: a security risk</span>
+find / -nouser -o -nogroup 2>/dev/null <span class="c"># files with a deleted owner</span>
+stat -c '%a %U:%G %n' report.txt       <span class="c"># prints: 640 amit:devteam report.txt</span>
+namei -l /srv/project/plan.txt         <span class="c"># shows permissions of every folder in the path</span></pre>
+<div class="warn"><b>Common mistakes:</b> <code>chmod -R 777</code> to "fix" things · folder with <code>r</code> but no <code>x</code> · expecting SGID to change old files · umask typed in terminal but not saved · testing group access without logging in again · using <code>&gt;</code> instead of <code>&gt;&gt;</code> on startup files.</div>
+<h3>Cheat sheet (<code>f</code> = a file name, <code>d</code> = a directory name)</h3>
+<pre>chmod 640 report.txt         chmod -R g+rwX /data/team     chown amit:devteam report.txt
+umask 027                    chmod 2770 /data/team         chmod 1777 /data/public
+setfacl -m u:bob:rw report.txt    getfacl report.txt       setfacl -b report.txt</pre>
+
+<h2 id="quiz">📝 Quiz</h2>
+<div id="qbox"></div><button onclick="grade()">Check answers</button><div class="out" id="score" style="font-size:1.2rem"></div>
+</div>
+<script>
+var N=['Owner (u)','Group (g)','Others (o)'],calc=document.getElementById('calc');
+N.forEach(function(n,i){calc.innerHTML+='<div class="col"><b>'+n+'</b>'+[['r',4],['w',2],['x',1]].map(function(p){return '<label><input type="checkbox" data-i="'+i+'" data-v="'+p[1]+'" onchange="fromBox()"> '+p[0]+' ('+p[1]+')</label>'}).join('')+'</div>'});
+function show(d){document.getElementById('oct').textContent=d.join('');document.getElementById('sym').textContent=d.map(function(v){return (v&4?'r':'-')+(v&2?'w':'-')+(v&1?'x':'-')}).join('');
+document.querySelectorAll('#calc input').forEach(function(c){c.checked=!!(d[c.dataset.i]&c.dataset.v)})}
+function fromBox(){var d=[0,0,0];document.querySelectorAll('#calc input').forEach(function(c){if(c.checked)d[c.dataset.i]+=+c.dataset.v});show(d);document.getElementById('inp').value=d.join('')}
+function fromNum(){var v=document.getElementById('inp').value;if(/^[0-7]{3}$/.test(v))show(v.split('').map(Number))}
+function calcU(){var v=document.getElementById('um').value;if(!/^[0-7]{3}$/.test(v))return;
+document.getElementById('uf').textContent=v.split('').map(function(m){return Math.max(6-m,0)}).join('');
+document.getElementById('ud').textContent=v.split('').map(function(m){return 7-m}).join('')}
+show([6,4,4]);calcU();
+var Q=[
+["In <code>-rw-r-----</code> who can read the file?",["Only the owner","Owner and group","Owner, group and others","Only root"],1,"Owner rw-, group r--, others ---."],
+["A folder gives you only <code>r--</code>. What happens with <code>cd</code>?",["It works","Permission denied","It deletes the folder","It lists hidden files"],1,"Entering a folder needs x."],
+["<code>chmod 750 file</code> gives:",["rwxr-x---","rwxr-xr-x","rw-r-----","rwx------"],0,"7 = rwx, 5 = r-x, 0 = ---."],
+["umask is 027. A new file gets:",["750","640","755","627"],1,"666 minus 027, digit by digit, never below 0 = 640."],
+["umask is 027. A new folder gets:",["750","640","777","705"],0,"777 minus 027 = 750."],
+["Which command changes only the group?",["chown amit file","chmod g file","chown :devteam file","umask devteam"],2,"A colon with no name before it means group only."],
+["SGID on a folder means:",["Files run as root","New files get the folder's group","Others can delete files","Nothing"],1,"SGID makes new files inherit the folder's group."],
+["Why can you not delete another user's file in /tmp?",["SUID","SGID","Sticky bit","umask"],2,"The sticky bit (t) lets only the owner delete."],
+["A <code>+</code> after the permissions in <code>ls -l</code> means:",["SELinux label","An ACL is set","SUID is on","File is hidden"],1,"A dot is SELinux, a plus is ACL."],
+["Which line makes umask 027 permanent for only your user?",["umask 027 in ~/.bash_profile","chmod 027 /","umask 027 in /etc/passwd","chown 027 ~"],0,"Add umask 027 at the bottom of ~/.bash_profile or ~/.bashrc."],
+["Which command gives bob read and write without changing the group?",["chmod bob+rw f","chown bob f","setfacl -m u:bob:rw f","umask bob"],2,"setfacl -m u:name:perm adds an ACL entry."]];
+var qb=document.getElementById('qbox');
+Q.forEach(function(q,i){var h='<div class="q" id="q'+i+'"><b>'+(i+1)+'. '+q[0]+'</b>';q[1].forEach(function(o,j){h+='<label><input type="radio" name="q'+i+'" value="'+j+'"> '+o+'</label>'});qb.innerHTML+=h+'<div class="ex"></div></div>'});
+function grade(){var n=0;Q.forEach(function(q,i){var b=document.getElementById('q'+i),c=document.querySelector('input[name="q'+i+'"]:checked'),ok=!!c&&+c.value===q[2];if(ok)n++;
+b.className='q '+(ok?'ok':'bad');var e=b.querySelector('.ex');e.style.display='block';e.innerHTML=(ok?'✅ Correct. ':'❌ Answer: '+q[1][q[2]]+'. ')+q[3]});
+document.getElementById('score').textContent='Score: '+n+' / '+Q.length}
+</script></body></html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 15 – Monitoring and Managing Linux Processes</title>
+<style>
+:root{--bg:#0a0e17;--card:#1a2234;--tx:#e2e8f0;--tx2:#94a3b8;--red:#ee0000;--grn:#22c55e;--yel:#eab308;--blu:#3b82f6;--pur:#a855f7;--cyn:#06b6d4;--org:#f97316;--bd:#1e293b;--bd2:#334155;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.7}
+.top{position:sticky;top:0;z-index:9;background:rgba(10,14,23,.94);border-bottom:1px solid var(--bd);padding:9px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.top a{color:var(--tx2);text-decoration:none;font-size:.78rem;padding:3px 10px;border:1px solid var(--bd2);border-radius:20px}
+.top a:hover,.top .b{color:var(--red);border-color:var(--red)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:2rem;margin:14px 0 6px}h2{font-size:1.45rem;margin:44px 0 12px;padding-left:12px;border-left:4px solid var(--red)}
+h3{font-size:1.05rem;margin:20px 0 6px;color:var(--cyn)}p{margin:7px 0}
+.card,.q{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.kw{background:rgba(238,0,0,.14);color:#ff9a9a;border-radius:6px;padding:0 7px;font-weight:600}
+code{font-family:Consolas,monospace;background:#0d1423;color:#7dd3fc;padding:1px 6px;border-radius:5px;font-size:.9em}
+pre{background:#0d1423;border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin:10px 0;overflow-x:auto;font:.84rem/1.6 Consolas,monospace;color:#cbd5e1}
+.c{color:#64748b}.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem}
+th,td{border:1px solid var(--bd2);padding:7px 9px;text-align:left}th{background:#111b2e;color:var(--tx2)}
+.note,.warn,.tip,.where,.sc{border-radius:var(--r);padding:12px 15px;margin:14px 0;border-left:4px solid}
+.note{background:rgba(59,130,246,.09);border-color:var(--blu)}.warn{background:rgba(249,115,22,.09);border-color:var(--org)}
+.tip{background:rgba(34,197,94,.09);border-color:var(--grn)}.where{background:rgba(238,0,0,.07);border-color:var(--red)}
+.sc{background:rgba(168,85,247,.09);border-color:var(--pur)}.where h4{color:#ff9a9a}.sc h4{color:#d8b4fe}
+.r{color:var(--grn);font-weight:700}.w{color:var(--yel);font-weight:700}.x{color:var(--red);font-weight:700}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center;align-items:stretch}
+.flow div{background:var(--card);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 12px;text-align:center;font-size:.85rem}
+.flow .ar{border:0;background:none;color:var(--red);font-size:1.4rem;align-self:center;padding:0}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.st div{background:var(--card);border:2px solid;border-radius:var(--r);padding:10px;text-align:center;font-size:.85rem}
+.st b{display:block;font:700 1.8rem Consolas,monospace}
+.nice{height:34px;border-radius:8px;background:linear-gradient(90deg,#ee0000,#eab308,#22c55e);margin:8px 0 2px}
+.nl{display:flex;justify-content:space-between;font:.78rem Consolas,monospace;color:var(--tx2)}
+.tree{font:.9rem/1.5 Consolas,monospace}
+.q{margin:12px 0}.q label{display:block;padding:6px 8px;border-radius:8px;cursor:pointer}.q label:hover{background:#111b2e}
+.ex{display:none;margin-top:8px;font-size:.9rem}.q.ok{border-color:var(--grn)}.q.bad{border-color:var(--red)}
+.out{text-align:center;font:700 1.2rem Consolas,monospace;margin-top:8px}
+input[type=text]{background:#0d1423;border:1px solid var(--bd2);color:var(--tx);border-radius:8px;padding:6px;font:1rem Consolas,monospace;width:70px;text-align:center}
+button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px 22px;font-size:1rem;cursor:pointer}
+</style></head><body>
+<div class="top"><a class="b" href="../Index.html">← Dashboard</a><a href="#a">Process</a><a href="#b">States</a><a href="#c">ps</a><a href="#d">top</a><a href="#e">Nice</a><a href="#f">Jobs</a><a href="#g">Signals</a><a href="#h">Must know</a><a href="#quiz">Quiz</a></div>
+<div class="wrap">
+<small style="color:var(--red);font-weight:700">CHAPTER 11</small>
+<h1>⚙️ Monitoring and Managing Linux Processes</h1>
+<p>A server runs hundreds of programs at once. As an admin you must <b>see</b> what is running, <b>find</b> what is slowing the server, and <b>stop or control</b> it. That is this whole chapter.</p>
+<div class="flow"><div>1. What is a process</div><div class="ar">→</div><div>2. States</div><div class="ar">→</div><div>3. See them (<code>ps</code>, <code>top</code>)</div><div class="ar">→</div><div>4. Priority (<code>nice</code>)</div><div class="ar">→</div><div>5. Jobs</div><div class="ar">→</div><div>6. Kill (signals)</div></div>
+
+<h2 id="a">1. What is a Process?</h2>
+<p>A <span class="kw">program</span> is a file sitting on disk (like <code>/usr/bin/ls</code>). A <span class="kw">process</span> is that program <b>running in memory</b>. One program can have many processes: open 3 terminals and you have 3 <code>bash</code> processes.</p>
+<div class="tw"><table><tr><th>ID</th><th>Meaning</th><th>Example</th></tr><tr><td><span class="kw">PID</span></td><td>Process ID, a unique number</td><td>1234</td></tr><tr><td><span class="kw">PPID</span></td><td>Parent PID: the process that started me</td><td>1000</td></tr><tr><td><span class="kw">UID</span></td><td>The user it runs as. Decides which files it can touch (Chapter 11)</td><td>john</td></tr></table></div>
+<h3>Three kinds of process</h3>
+<div class="grid"><div class="card"><b>👤 User process</b><br>Started by a person: <code>ls</code>, <code>vim</code>, Firefox. Has a terminal.</div><div class="card"><b>🛎️ Daemon process</b><br>A background service: <code>sshd</code>, <code>httpd</code>, <code>crond</code>. No terminal, so <code>TTY</code> shows <code>?</code>. Names often end in <b>d</b>.</div><div class="card"><b>🧠 Kernel process</b><br>Run by the kernel itself. Shown in <b>[square brackets]</b> like <code>[kthreadd]</code>. You cannot and should not kill them.</div></div>
+<h3>Parent and child: the family tree</h3>
+<p>Every process is created by another process, so they form a tree. The root is <span class="kw">PID 1 = systemd</span>. (The old <code>init</code> program was discontinued. <b>systemd</b> replaced it, and it starts and manages everything.)</p>
+<pre class="tree">systemd (1)
+ ├─ sshd (850)
+ │   └─ sshd (3001)
+ │       └─ bash (3010)        &lt;- your shell
+ │           ├─ sleep (3050)   &lt;- child of bash
+ │           └─ ps (3060)
+ └─ crond (870)</pre>
+<pre>$ pstree -p | head -5
+systemd(1)─┬─sshd(850)───sshd(3001)───sshd(3009)───bash(3010)───pstree(3070)
+           ├─crond(870)
+$ echo $$ $PPID       <span class="c"># my shell's PID and its parent's PID</span>
+3010 3009</pre>
+<h3>Life cycle of a process</h3>
+<div class="flow"><div><b>fork</b><br>parent makes a copy of itself = child</div><div class="ar">→</div><div><b>exec</b><br>child loads a new program (e.g. <code>ls</code>)</div><div class="ar">→</div><div><b>run</b><br>parent waits (sleeps)</div><div class="ar">→</div><div><b>exit</b><br>child ends and frees memory</div><div class="ar">→</div><div><b>reap</b><br>parent collects the result, PID is removed</div></div>
+<div class="grid"><div class="card">🧟 <b>Zombie</b>: the child has finished, but the parent has not collected its result yet. It uses no CPU or memory, only a PID slot. You <b>cannot kill</b> a zombie, because it is already dead. Fix it by killing or restarting the <b>parent</b>.</div><div class="card">👶 <b>Orphan</b>: the parent died first. <b>systemd adopts</b> the child and cleans it up properly.</div></div>
+<div class="note">Built-in commands like <code>cd</code> and <code>jobs</code> run inside the shell (no new process). External commands like <code>ls</code> and <code>ps</code> become a new child process.</div>
+
+<h2 id="b">2. Process States</h2>
+<p>Every process is in one state. See it in the <code>STAT</code> column of <code>ps</code> or the <code>S</code> column of <code>top</code>.</p>
+<div class="st">
+<div style="border-color:var(--grn)"><b class="r">R</b>Running<br>on the CPU, or waiting in line to run</div>
+<div style="border-color:var(--blu)"><b style="color:var(--blu)">S</b>Sleeping<br>waiting for input, timer or event. Most processes are here</div>
+<div style="border-color:var(--pur)"><b style="color:var(--pur)">D</b>Deep sleep<br>waiting for disk or network. Cannot be interrupted</div>
+<div style="border-color:var(--yel)"><b class="w">T</b>Stopped<br>paused with Ctrl+Z or SIGSTOP</div>
+<div style="border-color:var(--org)"><b style="color:var(--org)">Z</b>Zombie<br>finished, waiting for parent</div>
+<div style="border-color:var(--tx2)"><b style="color:var(--tx2)">X</b>Dead<br>fully gone. Never seen in tools</div></div>
+<p><b>I</b> = idle kernel thread. <b>K</b> = killable deep sleep. A CPU core runs one process at a time, but many can show <code>R</code> because they are queued.</p>
+<div class="flow"><div>New process</div><div class="ar">→</div><div class="r">R running</div><div class="ar">⇄</div><div style="color:var(--blu)">S sleeping</div><div class="ar">…</div><div class="w">T stopped</div><div class="ar">→</div><div style="color:var(--org)">Z zombie</div><div class="ar">→</div><div>X gone</div></div>
+<h3>Extra letters after the state in <code>ps</code></h3>
+<div class="tw"><table><tr><th>Letter</th><th>Meaning</th><th>Letter</th><th>Meaning</th></tr><tr><td><code>s</code></td><td>session leader (a login shell)</td><td><code>&lt;</code></td><td>high priority</td></tr><tr><td><code>+</code></td><td>in the foreground</td><td><code>N</code></td><td>low priority</td></tr><tr><td><code>l</code></td><td>multi-threaded</td><td><code>L</code></td><td>pages locked in memory</td></tr></table></div>
+<p><code>Ss</code> = sleeping session leader (your shell). <code>R+</code> = running in foreground (the <code>ps</code> command itself).</p>
+
+<h2 id="c">3. Listing Processes: <code>ps</code></h2>
+<p><code>ps</code> is a <b>photo</b> (snapshot) of the processes at that moment. <code>top</code> is a live video.</p>
+<div class="tw"><table><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>ps</code></td><td>Only your processes on this terminal</td></tr><tr><td><code>ps aux</code></td><td><b>a</b> = all users, <b>u</b> = user format (CPU, memory), <b>x</b> = also processes without a terminal (daemons)</td></tr><tr><td><code>ps -ef</code></td><td>All processes, with PPID (UNIX style)</td></tr><tr><td><code>ps lax</code></td><td>Long format with PPID, priority and nice. Faster</td></tr><tr><td><code>ps -ef --forest</code></td><td>Tree view</td></tr><tr><td><code>ps -u john</code></td><td>One user's processes</td></tr></table></div>
+<div class="warn"><code>ps aux</code> (no dash) is not the same as <code>ps -aux</code>. Write it without the dash.</div>
+<pre>$ ps aux
+USER   PID %CPU %MEM    VSZ   RSS TTY   STAT START  TIME COMMAND
+root     1  0.0  0.1 169836 12456 ?     Ss   10:00  0:02 /usr/lib/systemd/systemd
+root     2  0.0  0.0      0     0 ?     S    10:00  0:00 [kthreadd]
+john  3010  0.0  0.1 227916  5100 pts/0 Ss   10:05  0:00 -bash
+john  3060  0.0  0.0 228364  3800 pts/0 R+   10:09  0:00 ps aux</pre>
+<div class="tw"><table><tr><th>Column</th><th>Meaning</th></tr><tr><td>TTY</td><td>Terminal. <code>?</code> = none (daemon or kernel). <code>pts/0</code> = SSH or terminal window</td></tr><tr><td>VSZ / VIRT</td><td>All memory the process <i>could</i> use (virtual)</td></tr><tr><td>RSS / RES</td><td>Real RAM it is using now</td></tr><tr><td>[name]</td><td>Brackets mean a kernel process</td></tr></table></div>
+<h3>Find things quickly</h3>
+<pre>ps aux | grep sshd                      <span class="c"># find a process (also shows the grep line)</span>
+pgrep -l sshd                           <span class="c"># cleaner: PID and name</span>
+ps -eo pid,ppid,stat,%cpu,%mem,cmd --sort=-%cpu | head -5   <span class="c"># top CPU users</span>
+ps -eo pid,stat,cmd | awk '$2 ~ /^Z/'   <span class="c"># list zombies</span>
+$ pgrep -l sshd
+850 sshd
+3001 sshd</pre>
+
+<h2 id="d">4. Real-time Monitoring: <code>top</code></h2>
+<p><span class="kw">top</span> refreshes every <b>3 seconds</b>. Press <code>q</code> to quit. Here is how to read it:</p>
+<pre>top - 10:30:00 up 5 days,  2:30,  2 users,  load average: 0.15, 0.10, 0.05  <span class="c"># 1, 5, 15 min</span>
+Tasks: 150 total,   1 running, 149 sleeping,   0 stopped,   0 zombie        <span class="c"># process states</span>
+%Cpu(s):  2.0 us,  1.0 sy,  0.0 ni, 96.5 id,  0.5 wa,  0.0 hi,  0.0 si     <span class="c"># CPU use</span>
+MiB Mem :   7976.5 total,  2345.6 free,  3456.7 used,  2174.2 buff/cache
+MiB Swap:   2048.0 total,  2048.0 free,     0.0 used.  4123.4 avail Mem
+
+  PID USER   PR  NI    VIRT    RES    SHR S  %CPU  %MEM    TIME+ COMMAND
+ 1234 john   20   0  123456  56789  12345 S   5.0   0.7  1:23.45 firefox</pre>
+<div class="tw"><table><tr><th>Part</th><th>Meaning</th></tr>
+<tr><td><code>us</code> / <code>sy</code></td><td>CPU used by user programs / by the kernel</td></tr><tr><td><code>id</code></td><td><b>Idle</b>. High is good (CPU has free time)</td></tr><tr><td><code>wa</code></td><td><b>Waiting for disk or network</b>. High means an I/O problem</td></tr><tr><td><code>st</code></td><td>Time stolen by the host in a virtual machine</td></tr><tr><td><code>avail Mem</code></td><td>The memory number to watch. The <code>free</code> number is misleading because Linux uses spare RAM as cache</td></tr><tr><td><code>NI</code> / <code>PR</code></td><td>Nice value / priority (section 5)</td></tr><tr><td><code>S</code></td><td>State letter (section 2)</td></tr><tr><td><code>%CPU</code></td><td>Can go above 100% on multi-core (400% max on 4 cores)</td></tr></table></div>
+<h3>Keys inside <code>top</code></h3>
+<div class="tw"><table><tr><th>Key</th><th>What it does</th></tr>
+<tr><td><code>1</code></td><td>Show each CPU separately (press again to join). Same as the "Ctrl+1" in your notes: just press <code>1</code></td></tr>
+<tr><td><code>Shift+P</code> / <code>Shift+M</code></td><td>Sort by <b>CPU</b> / by <b>memory</b></td></tr>
+<tr><td><code>u</code> then a name</td><td>Show only that user's processes (like <code>top -u john</code>). <code>Shift+U</code> also works</td></tr>
+<tr><td><code>f</code></td><td>Choose columns. Move with arrows, <b>Space</b> selects or unselects a column, <code>s</code> sets the sort column, <code>q</code> goes back</td></tr>
+<tr><td><code>Shift+W</code></td><td><b>Save</b> your settings permanently to <code>~/.config/procps/toprc</code></td></tr>
+<tr><td><code>k</code> / <code>r</code></td><td><b>Kill</b> / <b>renice</b> a process (asks for PID)</td></tr>
+<tr><td><code>c</code> · <code>V</code> · <code>s</code> · <code>h</code> · <code>q</code></td><td>Full command · tree view · change refresh seconds · help · quit</td></tr></table></div>
+<pre>top -u john             <span class="c"># only john's processes</span>
+top -d 5                <span class="c"># refresh every 5 seconds</span>
+top -b -n 1 | head -15  <span class="c"># one snapshot, good for scripts</span></pre>
+<div class="where"><h4>📍 Where to Add What</h4>You do not edit a file by hand. Press <code>f</code> and <code>Shift+P</code> to set what you want, then press <code>Shift+W</code>. This creates <code>/home/you/.config/procps/toprc</code>, which <code>top</code> reads every time it starts.</div>
+<h3>Load average: how busy is the server?</h3>
+<p>Load average is the number of processes that are <b>running (R)</b> or <b>waiting for disk/network (D)</b>. It shows three numbers: the average of the last <b>1, 5 and 15 minutes</b>.</p>
+<pre>$ uptime
+ 15:29:03 up 14 min,  2 users,  load average: 2.92, 4.48, 5.20
+$ lscpu | grep '^CPU(s)'      <span class="c"># how many logical CPUs?</span>
+CPU(s):                          4
+$ nproc
+4</pre>
+<p>Load only means something <b>per CPU</b>. Divide each number by the CPU count. Try it:</p>
+<div class="card" style="text-align:center">Load: <input type="text" id="l1" value="2.92"> <input type="text" id="l5" value="4.48"> <input type="text" id="l15" value="5.20"> &nbsp; CPUs: <input type="text" id="cpu" value="4">
+<div class="out" id="lres" style="color:var(--cyn)"></div><div id="ltr" style="color:var(--tx2)"></div></div>
+<div class="grid"><div class="card"><b class="r">Per CPU below 1</b><br>Healthy. Little or no waiting.</div><div class="card"><b class="w">About 1</b><br>CPUs fully used.</div><div class="card"><b class="x">Above 1</b><br>Overloaded. Processes are queueing and the server slows down.</div></div>
+<div class="note"><b>Trend:</b> 1-min &lt; 5-min &lt; 15-min means the load is <b>falling</b> (recovering). 1-min &gt; 5-min &gt; 15-min means it is <b>rising</b> (getting worse). High load but low CPU use? Look at the disk or network (<code>wa</code> in top, <code>vmstat 1 5</code>).</div>
+<h3>htop and free</h3>
+<pre>free -h                 <span class="c"># memory in human sizes. Check the "available" column</span>
+sudo dnf install epel-release htop   <span class="c"># htop is not in the default RHEL repos; on RHEL enable EPEL first</span>
+htop                    <span class="c"># colours, mouse support, F9 to kill, F6 to sort</span></pre>
+<div class="sc"><h4>🏢 Scenario: "the server is slow"</h4><pre>$ uptime
+ 11:02:10 up 20 days,  load average: 8.10, 6.50, 3.20     <span class="c"># 4 CPUs, load is rising and above 1 per CPU</span>
+$ top                          <span class="c"># press Shift+P: sort by CPU</span>
+  PID USER   %CPU COMMAND
+ 7712 app    380.0 java                     <span class="c"># one process is eating 4 cores</span>
+$ ps -o pid,ppid,user,etime,cmd -p 7712     <span class="c"># who owns it, how long has it run?</span>
+$ kill 7712                                 <span class="c"># polite stop first (see section 7)</span></pre></div>
+
+<h2 id="e">5. Priority: <code>nice</code> and <code>renice</code></h2>
+<p>When many processes want the CPU, the <span class="kw">nice value</span> decides who goes first. Think: a <b>"nice"</b> process lets others go before it.</p>
+<div class="nice"></div><div class="nl"><span>-20</span><span>-10</span><span>0 (default)</span><span>+10</span><span>+19</span></div>
+<div class="nl" style="color:var(--red);margin-top:2px"><span>highest priority (least nice)</span><span style="color:var(--grn)">lowest priority (very nice)</span></div>
+<div class="note"><b>One correction to your notes:</b> the nice range is <b>-20 to +19</b>, nothing lower. The "-99 to -1" numbers you may see are the <code>PR</code> column in <code>top</code>, used by <b>real-time</b> processes that the kernel controls. You cannot set them with <code>nice</code>. For normal processes, <code>PR = 20 + NI</code>.</div>
+<div class="tw"><table><tr><th>Who</th><th>What they can do</th></tr><tr><td>Regular user</td><td>Only on <b>their own</b> processes, and only <b>increase</b> the value (0 to +19). Cannot lower it again.</td></tr><tr><td>root</td><td>Any value from -20 to +19, on any process.</td></tr></table></div>
+<pre>nice -n 10 ./backup.sh        <span class="c"># start with low priority</span>
+renice -n 5 -p 4023           <span class="c"># change a running process (by PID)</span>
+sudo renice -n -5 -p 4023     <span class="c"># raise priority: root only</span>
+$ ps -o pid,ni,cmd -p 4023
+  PID  NI CMD
+ 4023   5 ./backup.sh</pre>
+<div class="where"><h4>📍 Where to Add What</h4><div class="tw"><table><tr><th>Goal</th><th>File</th><th>Line</th></tr>
+<tr><td>Nightly backup at low priority</td><td><code>crontab -e</code> (opens your cron file)</td><td><code>0 2 * * * nice -n 15 tar -czf /backup/data.tar.gz /data</code></td></tr>
+<tr><td>Every process of user <code>student</code> starts with nice 10</td><td>Create <code>/etc/security/limits.d/90-nice.conf</code> (as root)</td><td><code>student - priority 10</code></td></tr></table></div>The limits line takes effect at the next login of that user.</div>
+
+<h2 id="f">6. Jobs: Foreground and Background</h2>
+<p>A <span class="kw">job</span> is a command started from your terminal. Every job is a process, but not every process is a job (daemons are not jobs, and <code>fg</code>/<code>bg</code> cannot touch them). Jobs are numbered by the shell (<code>%1</code>), processes by the system (PID).</p>
+<div class="grid"><div class="card"><b>🖥️ Foreground</b><br><code>sleep 300</code><br>Takes over the terminal. You wait. Only one per terminal.</div><div class="card"><b>🌙 Background</b><br><code>sleep 200 &amp;</code><br>Terminal is free. You can run many.</div></div>
+<pre>$ sleep 200 &amp;
+[1] 4410                 <span class="c"># job number 1, PID 4410</span>
+$ sleep 300
+^Z                       <span class="c"># Ctrl+Z pauses it</span>
+[2]+  Stopped                 sleep 300
+$ jobs
+[1]-  Running                 sleep 200 &amp;
+[2]+  Stopped                 sleep 300
+$ bg %2                  <span class="c"># let job 2 continue in the background</span>
+[2]+ sleep 300 &amp;
+$ fg %1                  <span class="c"># bring job 1 to the front</span>
+sleep 200
+^C                       <span class="c"># Ctrl+C ends it</span></pre>
+<div class="tw"><table><tr><th>Key / command</th><th>Effect</th></tr><tr><td><code>cmd &amp;</code></td><td>Start in background</td></tr><tr><td><code>Ctrl+Z</code></td><td>Pause (SIGTSTP)</td></tr><tr><td><code>Ctrl+C</code></td><td>Terminate (SIGINT)</td></tr><tr><td><code>bg %n</code> / <code>fg %n</code></td><td>Resume in background / bring to front</td></tr><tr><td><code>jobs</code></td><td>List jobs. <b>+</b> = default job, <b>-</b> = next default</td></tr></table></div>
+<div class="sc"><h4>🏢 Scenario: edit a file, then jump back to the shell</h4><pre>$ vim abc          <span class="c"># Ctrl+Z to pause vim</span>
+[1]+  Stopped                 vim abc
+$ ls ; cat /etc/hostname      <span class="c"># do other work</span>
+$ fg %1            <span class="c"># back to vim exactly where you left it</span></pre>(<code>vim abc &amp;</code> in the background will be stopped at once, because vim needs the keyboard.)</div>
+<h3>What happens when the terminal closes?</h3>
+<p>Normal jobs get a hangup signal and <b>die</b>. To keep a long task alive after logout:</p>
+<pre>nohup ./long_task.sh &amp;         <span class="c"># output goes to nohup.out</span>
+./long_task.sh &amp; disown        <span class="c"># remove from the job list</span>
+tmux                           <span class="c"># reconnect to it later (best for long work)</span></pre>
+
+<h2 id="g">7. Signals: Controlling and Killing Processes</h2>
+<p>A <span class="kw">signal</span> is a message you send to a process. <code>kill -l</code> lists all signals. Use the <b>name</b> instead of the number when you can.</p>
+<div class="tw"><table><tr><th>No.</th><th>Name</th><th>Meaning</th><th>Can it be ignored?</th></tr>
+<tr><td>1</td><td>SIGHUP</td><td>Hangup. Daemons also use it as "reload config"</td><td>Yes</td></tr><tr><td>2</td><td>SIGINT</td><td>Interrupt, same as Ctrl+C</td><td>Yes</td></tr><tr><td>15</td><td><b>SIGTERM</b></td><td><b>Polite stop</b>, lets the program clean up. <b>Default</b></td><td>Yes</td></tr><tr><td>9</td><td><b>SIGKILL</b></td><td><b>Force kill</b>, no clean up</td><td><b>No</b></td></tr><tr><td>19</td><td>SIGSTOP</td><td>Pause</td><td>No</td></tr><tr><td>18</td><td>SIGCONT</td><td>Continue a paused process</td><td>No</td></tr><tr><td>20</td><td>SIGTSTP</td><td>Ctrl+Z pause</td><td>Yes</td></tr></table></div>
+<div class="warn"><b>Right order:</b> SIGTERM first, SIGINT next, SIGKILL only as the <b>last</b> choice. SIGKILL gives the program no chance to save data or delete temp files.</div>
+<h3><code>kill</code>: by PID or job number</h3>
+<pre>kill 4410                  <span class="c"># SIGTERM (default)</span>
+kill -9 4410               <span class="c"># SIGKILL. Note the dash: "kill 9 %1" is wrong</span>
+kill -9 %1                 <span class="c"># job number 1</span>
+kill -SIGSTOP %2           <span class="c"># pause job 2</span>
+kill -SIGCONT %2           <span class="c"># resume job 2</span>
+kill -HUP 850              <span class="c"># ask sshd to reload its config</span></pre>
+<h3><code>killall</code> vs <code>pkill</code> vs <code>pgrep</code></h3>
+<div class="tw"><table><tr><th>Command</th><th>Picks processes by</th><th>Example</th></tr><tr><td><code>kill</code></td><td>PID or job number</td><td><code>kill 4410</code></td></tr><tr><td><code>killall</code></td><td><b>Exact name</b></td><td><code>killall sleep</code></td></tr><tr><td><code>pkill</code></td><td>Name pattern, user, terminal, parent</td><td><code>pkill -u john</code> · <code>pkill -t pts/1</code> · <code>pkill -P 8391</code></td></tr><tr><td><code>pgrep</code></td><td>Same as pkill but <b>only lists</b>, never kills</td><td><code>pgrep -l -u john</code></td></tr></table></div>
+<div class="tip"><b>Habit:</b> run <code>pgrep -l</code> first. If the list looks right, replace it with <code>pkill</code>. Careful: <code>pkill -u yourself</code> kills your own shell and ends your session.</div>
+<pre>$ pgrep -l -u john
+6964 bash
+6998 sleep
+6999 sleep
+$ pstree -p john          <span class="c"># who is the parent?</span>
+bash(6964)─┬─sleep(6998)
+           └─sleep(6999)
+$ pstree -p 6964          <span class="c"># tree of one process id</span>
+$ sudo pkill -SIGKILL -u john      <span class="c"># log john out completely</span></pre>
+<div class="grid"><div class="card">🧟 <b>Zombie?</b><pre style="font-size:.78rem">ps -eo stat,pid,ppid,cmd | awk '$1~/^Z/'
+kill 2210     # kill the PARENT (PPID)</pre></div><div class="card">🧊 <b>Stuck in D state?</b><br><code>kill -9</code> will not work until the disk or network I/O finishes. Check the storage or NFS mount instead.</div></div>
+<div class="sc"><h4>🏢 Scenario: log out a user who is abusing the server</h4><pre>$ w                         <span class="c"># who is logged in, from where</span>
+USER  TTY    FROM          LOGIN@  IDLE  WHAT
+bob   pts/1  10.0.0.15     12:28   14:42 -bash
+$ sudo pkill -t pts/1               <span class="c"># everything on that terminal except his shell</span>
+$ sudo pkill -SIGKILL -t pts/1      <span class="c"># including the shell: he is out</span>
+$ sudo loginctl terminate-user bob  <span class="c"># modern one-line way</span></pre>His login shell ignores SIGTERM on purpose, so only SIGKILL removes it.</div>
+<div class="sc"><h4>🏢 Scenario: pause a heavy report, then resume</h4><pre>$ pgrep -l report        <span class="c"># 5120 report.sh</span>
+$ kill -SIGSTOP 5120     <span class="c"># state becomes T, CPU is free for the business</span>
+$ kill -SIGCONT 5120     <span class="c"># continues from the same spot</span></pre></div>
+<div class="where"><h4>📍 Where to Add What</h4>No file is edited for signals. For a daemon like <code>sshd</code>, prefer <code>sudo systemctl reload sshd</code> and <code>systemctl stop</code> over <code>kill</code>, so systemd stays in sync.</div>
+
+<h2 id="h">8. Extra Things You Must Know</h2>
+<div class="grid">
+<div class="card"><b>/proc folder</b><br>Every process has <code>/proc/PID/</code> with its status, command and open files. Try <code>cat /proc/$$/status | head</code>.</div>
+<div class="card"><b>Limit runaway users</b><br>Add <code>john hard nproc 200</code> to <code>/etc/security/limits.d/90-limits.conf</code> so one user cannot start unlimited processes.</div>
+<div class="card"><b>watch</b><br><code>watch -n 2 uptime</code> repeats a command every 2 seconds.</div>
+<div class="card"><b>Other tools</b><br><code>vmstat 1 5</code>, <code>iostat</code>, <code>sar</code>, <code>pidstat</code> (package sysstat) show if the problem is CPU, memory or disk.</div></div>
+<div class="warn"><b>Common mistakes:</b> using <code>kill -9</code> first · trying to kill a zombie · <code>pkill name</code> without checking <code>pgrep -l</code> · reading load average without dividing by CPU count · judging the load right after a change (it is a moving average) · closing a terminal that holds important jobs · trusting <code>free</code> instead of <code>avail Mem</code> · killing a daemon with <code>kill</code> instead of <code>systemctl</code>.</div>
+<h3>Cheat sheet</h3>
+<pre>ps aux | ps -ef | pstree -p | pgrep -l name          uptime | lscpu | nproc | free -h
+top   (1 P M u f W k r q)                            nice -n 10 cmd | renice -n 5 -p PID
+cmd &amp; | jobs | fg %1 | bg %1 | Ctrl+Z | Ctrl+C | nohup cmd &amp;
+kill PID | kill -9 PID | killall name | pkill -u user | pkill -t pts/1</pre>
+
+<h2 id="quiz">📝 Quiz</h2>
+<div id="qbox"></div><button onclick="grade()">Check answers</button><div class="out" id="score"></div>
+</div>
+<script>
+function lcalc(){var c=parseFloat(document.getElementById('cpu').value),v=['l1','l5','l15'].map(function(i){return parseFloat(document.getElementById(i).value)});
+if(!c||v.some(isNaN)){return}var p=v.map(function(x){return (x/c).toFixed(2)});
+document.getElementById('lres').textContent='Per CPU: '+p.join(' / ')+'  ('+(p[0]<1?'healthy':p[0]<=1.05?'fully used':'overloaded')+' now)';
+document.getElementById('ltr').textContent=v[0]<v[1]&&v[1]<v[2]?'Trend: falling, recovering':v[0]>v[1]&&v[1]>v[2]?'Trend: rising, getting worse':'Trend: steady or mixed'}
+['l1','l5','l15','cpu'].forEach(function(i){document.getElementById(i).oninput=lcalc});lcalc();
+var Q=[
+["What is PID 1 on RHEL?",["init","bash","systemd","kthreadd"],2,"systemd replaced init and starts everything."],
+["A process finished but its parent has not collected the result. It is a:",["Orphan","Zombie","Daemon","Job"],1,"A zombie (Z) is dead but still has a PID slot."],
+["How do you remove a zombie?",["kill -9 the zombie","Restart or kill its parent","Run nice","Reboot is the only way"],1,"The zombie is already dead. The parent must reap it."],
+["Which state means paused by Ctrl+Z?",["R","S","T","Z"],2,"T = stopped."],
+["In <code>ps aux</code>, the <b>x</b> option adds:",["Extra colours","Processes without a terminal","Only root processes","Sorting by CPU"],1,"x includes daemons that have no terminal."],
+["Load average on a 4-CPU server is <code>8.0, 6.0, 3.0</code>. What is true?",["Healthy and falling","Overloaded and rising","Idle","Memory is full"],1,"8/4 = 2 per CPU, above 1, and 1-min is higher than 15-min, so rising."],
+["Which top key sorts by memory?",["Shift+P","Shift+M","Shift+W","k"],1,"Shift+M = memory, Shift+P = CPU."],
+["Which key saves top settings permanently?",["Shift+W","Ctrl+S","q","s"],0,"Shift+W writes ~/.config/procps/toprc."],
+["Which nice value gives the HIGHEST priority?",["+19","0","-20","+10"],2,"Lower nice = higher priority. The range is -20 to +19."],
+["A regular user runs <code>renice -n 5</code> on their own process, then tries <code>renice -n 2</code>. Result?",["Works","Permission denied","Process dies","Becomes root"],1,"Regular users can only increase the nice value."],
+["How do you pause job number 2 using a signal?",["kill 9 %2","kill -SIGSTOP %2","kill -SIGCONT %2","pkill %2"],1,"SIGSTOP pauses, SIGCONT resumes."],
+["Which signal can NOT be ignored by a process?",["SIGTERM","SIGHUP","SIGINT","SIGKILL"],3,"SIGKILL (9) and SIGSTOP cannot be caught."],
+["Which command only LISTS matching processes without killing?",["pkill","killall","pgrep","kill"],2,"pgrep lists. Always test with it before pkill."],
+["Which keeps a task running after you close the terminal?",["sleep 100 &amp;","nohup ./task.sh &amp;","fg %1","Ctrl+Z"],1,"nohup ignores the hangup signal."]];
+var qb=document.getElementById('qbox');
+Q.forEach(function(q,i){var h='<div class="q" id="q'+i+'"><b>'+(i+1)+'. '+q[0]+'</b>';q[1].forEach(function(o,j){h+='<label><input type="radio" name="q'+i+'" value="'+j+'"> '+o+'</label>'});qb.innerHTML+=h+'<div class="ex"></div></div>'});
+function grade(){var n=0;Q.forEach(function(q,i){var b=document.getElementById('q'+i),c=document.querySelector('input[name="q'+i+'"]:checked'),ok=!!c&&+c.value===q[2];if(ok)n++;
+b.className='q '+(ok?'ok':'bad');var e=b.querySelector('.ex');e.style.display='block';e.innerHTML=(ok?'✅ Correct. ':'❌ Answer: '+q[1][q[2]]+'. ')+q[3]});
+document.getElementById('score').textContent='Score: '+n+' / '+Q.length}
+</script></body></html>

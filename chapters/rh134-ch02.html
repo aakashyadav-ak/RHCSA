@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 2 - Using Regular Expressions for Practical Applications</title>
+<style>
+:root{
+  --bg:#f6f7fb; --card:#ffffff; --text:#1d2433; --muted:#5b6478; --line:#dde1ec;
+  --accent:#c4161c; --accent2:#2563eb; --good:#15803d; --bad:#b91c1c; --warn:#b45309;
+  --code-bg:#0f172a; --code-text:#e2e8f0; --key:#fff3c4; --keytext:#5c4400;
+  --svg-box:#eef2ff; --svg-stroke:#4f46e5; --svg-box2:#ecfdf5; --svg-stroke2:#059669;
+  --svg-box3:#fff7ed; --svg-stroke3:#ea580c; --svg-text:#1d2433; --mark:#fde047; --marktext:#1d2433;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b1020; --card:#131a2e; --text:#e6e9f2; --muted:#9aa4bd; --line:#26304d;
+    --accent:#ff5a5f; --accent2:#7aa2ff; --good:#4ade80; --bad:#f87171; --warn:#fbbf24;
+    --code-bg:#070b16; --code-text:#e2e8f0; --key:#3a2f00; --keytext:#ffe58a;
+    --svg-box:#1e2547; --svg-stroke:#8b93ff; --svg-box2:#0f2a22; --svg-stroke2:#34d399;
+    --svg-box3:#2d1c10; --svg-stroke3:#fb923c; --svg-text:#e6e9f2; --mark:#a16207; --marktext:#fff;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header.hero{background:linear-gradient(135deg,#1e3a8a,#7f1d1d);color:#fff;padding:40px 20px 32px}
+header.hero .wrap{max-width:1100px;margin:auto}
+header.hero h1{margin:0 0 8px;font-size:clamp(26px,4vw,40px)}
+header.hero p{margin:0;opacity:.92;max-width:780px}
+.layout{max-width:1100px;margin:auto;display:grid;grid-template-columns:240px 1fr;gap:28px;padding:24px 16px 80px}
+nav.toc{position:sticky;top:16px;align-self:start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:14px;max-height:calc(100vh - 32px);overflow:auto}
+nav.toc h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+nav.toc a{display:block;padding:5px 8px;border-radius:6px;color:var(--text);text-decoration:none}
+nav.toc a:hover{background:var(--bg);color:var(--accent)}
+main section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+h2{margin:0 0 6px;font-size:26px;border-bottom:3px solid var(--accent);padding-bottom:8px}
+h3{margin:26px 0 8px;font-size:20px;color:var(--accent2)}
+h4{margin:18px 0 6px;font-size:16px}
+p{margin:8px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--bg);border:1px solid var(--line);padding:1px 6px;border-radius:5px}
+pre{background:var(--code-bg);color:var(--code-text);padding:14px 16px;border-radius:10px;overflow:auto;margin:10px 0;position:relative;line-height:1.5}
+pre code{background:none;border:0;padding:0;color:inherit;font-size:13.5px}
+pre .c{color:#7dd3a8}
+pre .h{background:#a16207;color:#fff;border-radius:3px;padding:0 2px}
+.copy{position:absolute;top:8px;right:8px;background:#334155;color:#fff;border:0;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer}
+.copy:hover{background:#475569}
+.kw{background:var(--key);color:var(--keytext);padding:1px 7px;border-radius:999px;font-weight:600;font-size:.9em;white-space:nowrap}
+.keywords{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.callout{border-left:5px solid var(--accent2);background:var(--bg);padding:10px 14px;border-radius:8px;margin:12px 0}
+.callout.warn{border-color:var(--warn)}
+.callout.good{border-color:var(--good)}
+.callout.bad{border-color:var(--bad)}
+.callout b.t{display:block;margin-bottom:2px}
+.scenario{border:2px dashed var(--svg-stroke3);background:var(--svg-box3);border-radius:12px;padding:12px 16px;margin:14px 0}
+.scenario .tag{display:inline-block;background:var(--svg-stroke3);color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:6px}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:15px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+td.y{background:rgba(21,128,61,.2);color:var(--good);font-weight:700;text-align:center}
+td.n{color:var(--muted);text-align:center}
+.fig{margin:16px 0;text-align:center}
+.fig svg{max-width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.fig figcaption{font-size:13px;color:var(--muted);margin-top:4px}
+svg text{fill:var(--svg-text);font-family:system-ui,sans-serif}
+.b1{fill:var(--svg-box);stroke:var(--svg-stroke);stroke-width:2}
+.b2{fill:var(--svg-box2);stroke:var(--svg-stroke2);stroke-width:2}
+.b3{fill:var(--svg-box3);stroke:var(--svg-stroke3);stroke-width:2}
+.ln{stroke:var(--muted);stroke-width:2;fill:none}
+.arrowhead{fill:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}nav.toc{position:static;max-height:none}.two{grid-template-columns:1fr}}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
+.pill.ok{background:var(--good)}.pill.no{background:var(--bad)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding:8px 8px 8px 44px;margin:6px 0;background:var(--bg);border-radius:8px}
+.steps li::before{content:counter(s);position:absolute;left:10px;top:8px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;font-weight:700;line-height:26px}
+details{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin:10px 0}
+summary{cursor:pointer;font-weight:700}
+/* tester */
+.lab{background:var(--bg);border:2px solid var(--accent2);border-radius:14px;padding:14px 16px;margin:16px 0}
+.lab label{font-size:14px;margin-right:12px}
+.lab input[type=text],.lab select,.lab textarea{font:inherit;font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.lab input[type=text]{width:100%;margin:6px 0}
+.lab textarea{width:100%;height:150px;margin:6px 0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0}
+.chip{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,Consolas,monospace}
+.chip:hover{border-color:var(--accent2);color:var(--accent2)}
+#res{background:var(--code-bg);color:var(--code-text);border-radius:10px;padding:10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;max-height:300px;overflow:auto}
+#res div{white-space:pre-wrap;padding:1px 0}
+#res .dim{opacity:.35}
+#res .ln{color:#64748b;margin-right:10px;display:inline-block;min-width:22px;text-align:right;border:0;stroke:none}
+#res mark{background:var(--mark);color:var(--marktext);border-radius:3px;padding:0 1px}
+#cmd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--muted)}
+#err{color:var(--bad);font-size:14px;min-height:20px}
+/* Quiz */
+.q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--bg)}
+.q .qt{font-weight:700;margin-bottom:8px}
+.q pre{margin:6px 0 10px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font:inherit;font-family:inherit}
+.opt:hover:not([disabled]){border-color:var(--accent2)}
+.opt.right{background:rgba(21,128,61,.18);border-color:var(--good)}
+.opt.wrong{background:rgba(185,28,28,.18);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;font-size:14px;color:var(--muted)}
+.exp.show{display:block}
+#score{position:sticky;bottom:10px;background:var(--card);border:2px solid var(--accent);border-radius:12px;padding:10px 16px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+button.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:13px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Chapter 2: Using Regular Expressions for Practical Applications</h1>
+    <p>Learn the pattern language that lets you find, filter and check text in files, logs and command output in seconds. Beginner to intermediate, in simple English, with a live tester you can play with.</p>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc">
+  <h3>Jump to</h3>
+  <a href="#s21">2.1 Matching Text with Regex</a>
+  <a href="#play">Live Regex Tester</a>
+  <a href="#grep">grep and its options</a>
+  <a href="#s22">2.2 Guided Exercise</a>
+  <a href="#s23">2.3 Quiz Walkthrough</a>
+  <a href="#s24">2.4 Summary</a>
+  <a href="#extra">Extra Must-Know</a>
+  <a href="#real">Real-World Scenarios</a>
+  <a href="#mistakes">Common Mistakes</a>
+  <a href="#cheat">Cheat Sheet</a>
+  <a href="#quiz">Final Quiz (25 MCQ)</a>
+</nav>
+
+<main>
+
+<!-- ============ 2.1 ============ -->
+<section id="s21">
+<h2>2.1 Matching Text with Regular Expressions</h2>
+<p><b>Goal:</b> build patterns that find the exact lines you want in a file or in the output of any command.</p>
+<div class="keywords"><span class="kw">regex</span><span class="kw">pattern</span><span class="kw">metacharacter</span><span class="kw">anchor ^ $</span><span class="kw">wildcard .</span><span class="kw">multiplier * + ? {}</span><span class="kw">grep</span><span class="kw">BRE / ERE</span></div>
+
+<h3>What is a regular expression?</h3>
+<p>A <span class="kw">regular expression</span> (<span class="kw">regex</span>) is a small pattern that describes text. Instead of searching for one fixed word, you describe a <i>shape</i>: "a line that starts with a number", "any word ending in dog", "an IP address". A tool reads each line and tells you if the line fits the pattern.</p>
+<p>Tools that understand regex: <code>grep</code>, <code>sed</code>, <code>awk</code>, <code>less</code>, <code>vim</code>, and languages like Python, C and Rust. The syntax is almost the same everywhere, with small differences. This chapter uses the Bash/Linux version.</p>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Finding one needle in 200,000 log lines.</b> A website is slow. The log file has hundreds of thousands of lines. With regex you ask for "every line with status 500 or 503 from this hour" and get 40 lines in under a second. Without it you would scroll for days.</p></div>
+
+<h3>The simplest pattern: exact text</h3>
+<p>Plain letters match themselves, in the same order, with nothing between them. The pattern <code>cat</code> means: letter c, then a, then t.</p>
+<figure class="fig">
+<svg viewBox="0 0 720 190" width="720" role="img" aria-label="Pattern cat found inside concatenate">
+  <text x="360" y="22" text-anchor="middle" font-size="14" font-weight="700">Pattern: cat   Text: concatenate</text>
+  <g font-size="22" text-anchor="middle" font-weight="700">
+    <rect x="118" y="50" width="44" height="44" class="b1"/><text x="140" y="80">c</text>
+    <rect x="162" y="50" width="44" height="44" class="b1"/><text x="184" y="80">o</text>
+    <rect x="206" y="50" width="44" height="44" class="b1"/><text x="228" y="80">n</text>
+    <rect x="250" y="50" width="44" height="44" class="b2"/><text x="272" y="80">c</text>
+    <rect x="294" y="50" width="44" height="44" class="b2"/><text x="316" y="80">a</text>
+    <rect x="338" y="50" width="44" height="44" class="b2"/><text x="360" y="80">t</text>
+    <rect x="382" y="50" width="44" height="44" class="b1"/><text x="404" y="80">e</text>
+    <rect x="426" y="50" width="44" height="44" class="b1"/><text x="448" y="80">n</text>
+    <rect x="470" y="50" width="44" height="44" class="b1"/><text x="492" y="80">a</text>
+    <rect x="514" y="50" width="44" height="44" class="b1"/><text x="536" y="80">t</text>
+    <rect x="558" y="50" width="44" height="44" class="b1"/><text x="580" y="80">e</text>
+  </g>
+  <rect x="118" y="104" width="132" height="26" rx="6" fill="none" stroke="#b91c1c" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="184" y="122" text-anchor="middle" font-size="13" fill="#b91c1c">"con" is not "cat"</text>
+  <rect x="250" y="104" width="132" height="26" rx="6" fill="none" stroke="#15803d" stroke-width="2"/>
+  <text x="316" y="122" text-anchor="middle" font-size="13" fill="#15803d">"cat" found</text>
+  <text x="360" y="165" text-anchor="middle" font-size="13">The engine slides along the line until the pattern fits. One fit is enough: the whole line is a match.</text>
+</svg>
+<figcaption>A plain pattern can match in the start, middle or end of a line.</figcaption>
+</figure>
+
+<p>Searching this file for <code>cat</code>:</p>
+<pre><code>cat
+dog
+concatenate
+dogma
+category
+educated
+boondoggle
+vindication
+chilidog</code></pre>
+<p>Matches: <code>cat</code>, <code>concatenate</code>, <code>category</code>, <code>educated</code> (edu<b>cat</b>ed), <code>vindication</code> (vindi<b>cat</b>ion). Notice the pattern does not care about word borders.</p>
+
+<h3>Anchors: control WHERE on the line</h3>
+<table>
+<tr><th>Anchor</th><th>Meaning</th><th>Memory trick</th></tr>
+<tr><td><code>^</code></td><td>Start of the line</td><td>caret points up to the "top / start"</td></tr>
+<tr><td><code>$</code></td><td>End of the line</td><td>dollar sign is the "bottom line"</td></tr>
+<tr><td><code>^...$</code></td><td>The line is exactly this and nothing else</td><td>fence on both sides</td></tr>
+</table>
+<p>Try every pattern on every line. A green tick means the line matches:</p>
+<table>
+<tr><th>Line</th><th><code>cat</code></th><th><code>^cat</code></th><th><code>cat$</code></th><th><code>^cat$</code></th><th><code>dog$</code></th><th><code>d.g</code></th></tr>
+<tr><td>cat</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">·</td><td class="n">·</td></tr>
+<tr><td>dog</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">✔</td><td class="y">✔</td></tr>
+<tr><td>concatenate</td><td class="y">✔</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td></tr>
+<tr><td>dogma</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">✔</td></tr>
+<tr><td>category</td><td class="y">✔</td><td class="y">✔</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td></tr>
+<tr><td>educated</td><td class="y">✔</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td></tr>
+<tr><td>boondoggle</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">✔</td></tr>
+<tr><td>vindication</td><td class="y">✔</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td></tr>
+<tr><td>chilidog</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">✔</td><td class="y">✔</td></tr>
+</table>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Find empty lines and comment lines.</b> <code>^$</code> matches a blank line (start immediately followed by end). <code>^#</code> matches lines that begin with a hash, which are comments in most config files. Anchors are what make both patterns possible.</p></div>
+
+<h3>Wildcard: the dot</h3>
+<p>The <span class="kw">dot</span> <code>.</code> means "any one character" (but not the line break). So <code>c.t</code> means: c, one anything, t.</p>
+<pre><code>c.t   matches:  cat   cut   cot   c9t   c t   c$t   (and inside concatenate, vindication)
+c.t   does NOT match:  ct   (nothing between)   cart   (two letters between)</code></pre>
+
+<h3>Brackets: choose from a set</h3>
+<p>Square brackets <code>[ ]</code> mean "one character from this list". It is a safer wildcard because you decide the allowed letters.</p>
+<figure class="fig">
+<svg viewBox="0 0 720 210" width="720" role="img" aria-label="Pattern c[aou]t as paths">
+  <defs><marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <text x="360" y="22" text-anchor="middle" font-size="14" font-weight="700">c[aou]t : one path through the diagram</text>
+  <rect x="60" y="85" width="80" height="50" rx="10" class="b1"/><text x="100" y="118" text-anchor="middle" font-size="22" font-weight="700">c</text>
+  <rect x="290" y="45" width="70" height="40" rx="8" class="b2"/><text x="325" y="72" text-anchor="middle" font-size="20" font-weight="700">a</text>
+  <rect x="290" y="95" width="70" height="40" rx="8" class="b2"/><text x="325" y="122" text-anchor="middle" font-size="20" font-weight="700">o</text>
+  <rect x="290" y="145" width="70" height="40" rx="8" class="b2"/><text x="325" y="172" text-anchor="middle" font-size="20" font-weight="700">u</text>
+  <rect x="520" y="85" width="80" height="50" rx="10" class="b1"/><text x="560" y="118" text-anchor="middle" font-size="22" font-weight="700">t</text>
+  <path d="M140 110 L290 65" class="ln" marker-end="url(#m1)"/>
+  <path d="M140 110 L290 115" class="ln" marker-end="url(#m1)"/>
+  <path d="M140 110 L290 165" class="ln" marker-end="url(#m1)"/>
+  <path d="M360 65 L520 110" class="ln" marker-end="url(#m1)"/>
+  <path d="M360 115 L520 110" class="ln" marker-end="url(#m1)"/>
+  <path d="M360 165 L520 110" class="ln" marker-end="url(#m1)"/>
+  <text x="640" y="104" font-size="13">cat</text><text x="640" y="122" font-size="13">cot</text><text x="640" y="140" font-size="13">cut</text>
+</svg>
+<figcaption>Exactly one letter from the bracket is used at that position.</figcaption>
+</figure>
+<table>
+<tr><th>Bracket</th><th>Means</th></tr>
+<tr><td><code>[abc]</code></td><td>a or b or c</td></tr>
+<tr><td><code>[a-z]</code></td><td>any lowercase letter (a range)</td></tr>
+<tr><td><code>[0-9]</code></td><td>any digit</td></tr>
+<tr><td><code>[A-Za-z0-9]</code></td><td>any letter or digit</td></tr>
+<tr><td><code>[^0-9]</code></td><td><b>NOT</b> a digit (the <code>^</code> inside brackets means "not")</td></tr>
+<tr><td><code>[#;]</code></td><td># or ;</td></tr>
+<tr><td><code>[Nn][Tt][Pp]</code></td><td>ntp in any mix of upper and lower case</td></tr>
+</table>
+<div class="callout warn"><b class="t">Two different jobs for ^</b>
+Outside brackets <code>^</code> means "start of line". Inside the very first spot of a bracket it means "not". <code>^[0-9]</code> = line starts with a digit. <code>[^0-9]</code> = one character that is not a digit.</div>
+
+<h3>Multipliers: how many times?</h3>
+<p>A <span class="kw">multiplier</span> (also called quantifier) applies to the <b>one item just before it</b> (a letter, a dot, or a bracket).</p>
+<table>
+<tr><th>Extended</th><th>Basic</th><th>Meaning</th><th>Example</th><th>Matches</th></tr>
+<tr><td><code>*</code></td><td><code>*</code></td><td>zero or more</td><td><code>ab*c</code></td><td>ac, abc, abbbc</td></tr>
+<tr><td><code>+</code></td><td><code>\+</code></td><td>one or more</td><td><code>ab+c</code></td><td>abc, abbc (not ac)</td></tr>
+<tr><td><code>?</code></td><td><code>\?</code></td><td>zero or one (optional)</td><td><code>colou?r</code></td><td>color, colour</td></tr>
+<tr><td><code>{n}</code></td><td><code>\{n\}</code></td><td>exactly n times</td><td><code>[0-9]{4}</code></td><td>2026</td></tr>
+<tr><td><code>{n,}</code></td><td><code>\{n,\}</code></td><td>n or more</td><td><code>[a-z]{3,}</code></td><td>abc, hello</td></tr>
+<tr><td><code>{,m}</code></td><td><code>\{,m\}</code></td><td>at most m</td><td><code>[0-9]{,2}</code></td><td>"", 7, 42</td></tr>
+<tr><td><code>{n,m}</code></td><td><code>\{n,m\}</code></td><td>between n and m</td><td><code>[0-9]{2,4}</code></td><td>12, 123, 1234</td></tr>
+</table>
+<pre><code>c[aou]*t    matches  ct  cat  coat  coot     <span class="c"># zero or more of a, o or u</span>
+c.*t        matches  ct  cat  coat  culvert  <span class="c"># c, anything (or nothing), t</span>
+c.{2}t      matches  coat  cart              <span class="c"># c, exactly two of anything, t</span></code></pre>
+<p>Test <code>c.{2}t</code> on this list: <code>cat</code> (only 1 between: no), <code>coat</code> (yes), <code>convert</code> (no), <code>cart</code> (yes), <code>covert</code> (no), <code>cypher</code> (no). Two matches.</p>
+<div class="callout"><b class="t">.* is the "anything" combo</b>
+<code>.*</code> = any number of any characters. <code>start.*end</code> finds lines where "start" comes first and "end" comes later.</div>
+
+<h3>Basic vs Extended: the backslash switch</h3>
+<p>There are two flavours of regex. They differ in how these characters act: <code>|  +  ?  (  )  {  }</code></p>
+<figure class="fig">
+<svg viewBox="0 0 720 210" width="720" role="img" aria-label="Basic versus extended syntax">
+  <rect x="20" y="20" width="320" height="170" rx="12" class="b1"/>
+  <text x="180" y="46" text-anchor="middle" font-size="16" font-weight="700">BASIC (default grep)</text>
+  <text x="180" y="78" text-anchor="middle" font-size="14">Plain  + ? ( ) { } |  are LITERAL text</text>
+  <text x="180" y="104" text-anchor="middle" font-size="14">Add backslash to make them SPECIAL</text>
+  <text x="180" y="138" text-anchor="middle" font-size="15" font-family="monospace">grep 'a\+b\{2\}'</text>
+  <text x="180" y="168" text-anchor="middle" font-size="13">Used by: grep, sed, vim</text>
+  <rect x="380" y="20" width="320" height="170" rx="12" class="b2"/>
+  <text x="540" y="46" text-anchor="middle" font-size="16" font-weight="700">EXTENDED (grep -E)</text>
+  <text x="540" y="78" text-anchor="middle" font-size="14">Plain  + ? ( ) { } |  are SPECIAL</text>
+  <text x="540" y="104" text-anchor="middle" font-size="14">Add backslash to make them LITERAL</text>
+  <text x="540" y="138" text-anchor="middle" font-size="15" font-family="monospace">grep -E 'a+b{2}'</text>
+  <text x="540" y="168" text-anchor="middle" font-size="13">Used by: grep -E, sed -E, less</text>
+</svg>
+<figcaption>Same idea, opposite use of the backslash.</figcaption>
+</figure>
+<div class="callout good"><b class="t">Beginner advice</b>
+Use <code>grep -E</code> (extended) for most work. It reads more naturally and needs fewer backslashes. The older <code>egrep</code> command is outdated, so use <code>grep -E</code> instead.</div>
+
+<h3>Character classes: ready-made sets</h3>
+<p>Classes are named sets written inside brackets, like <code>[[:digit:]]</code> (note the double brackets). They are safer than ranges because they work in every language setting.</p>
+<table>
+<tr><th>Class</th><th>Meaning</th><th>Same as</th></tr>
+<tr><td><code>[:digit:]</code></td><td>digits</td><td>0-9</td></tr>
+<tr><td><code>[:alpha:]</code></td><td>letters</td><td>A-Za-z</td></tr>
+<tr><td><code>[:alnum:]</code></td><td>letters and digits</td><td>0-9A-Za-z</td></tr>
+<tr><td><code>[:lower:]</code></td><td>lowercase letters</td><td>a-z</td></tr>
+<tr><td><code>[:upper:]</code></td><td>uppercase letters</td><td>A-Z</td></tr>
+<tr><td><code>[:blank:]</code></td><td>space and tab</td><td></td></tr>
+<tr><td><code>[:space:]</code></td><td>space, tab, newline and similar</td><td></td></tr>
+<tr><td><code>[:punct:]</code></td><td>punctuation like ! " # $ % &amp; ( ) *</td><td></td></tr>
+<tr><td><code>[:xdigit:]</code></td><td>hex digits</td><td>0-9A-Fa-f</td></tr>
+<tr><td><code>[:cntrl:]</code></td><td>control characters</td><td></td></tr>
+<tr><td><code>[:graph:]</code></td><td>visible characters (letters, digits, punctuation)</td><td></td></tr>
+<tr><td><code>[:print:]</code></td><td>visible characters plus space</td><td></td></tr>
+</table>
+<pre><code>grep '[[:digit:]]'   file     <span class="c"># lines with at least one digit</span>
+grep '^[[:upper:]]'  file     <span class="c"># lines starting with a capital letter</span>
+grep '[^[:alnum:]]'  file     <span class="c"># lines containing a symbol or space</span></code></pre>
+
+<h3>Word and space shortcuts</h3>
+<table>
+<tr><th>Shortcut</th><th>Meaning</th></tr>
+<tr><td><code>\&lt;</code></td><td>start of a word</td></tr>
+<tr><td><code>\&gt;</code></td><td>end of a word</td></tr>
+<tr><td><code>\b</code></td><td>edge of a word (start or end)</td></tr>
+<tr><td><code>\B</code></td><td>NOT a word edge</td></tr>
+<tr><td><code>\w</code></td><td>word character: letter, digit or underscore</td></tr>
+<tr><td><code>\W</code></td><td>not a word character</td></tr>
+<tr><td><code>\s</code></td><td>white space</td></tr>
+<tr><td><code>\S</code></td><td>not white space</td></tr>
+</table>
+<pre><code>grep '\&lt;cat\&gt;' file     <span class="c"># the whole word cat only (not category, not concatenate)</span>
+grep '\bcat\b'  file     <span class="c"># same idea</span>
+grep -w cat     file     <span class="c"># shortcut for whole word</span></code></pre>
+
+<h3>Regex vs shell globbing: do not mix them up</h3>
+<p>Both use symbols like <code>*</code>, but they are different tools with different rules.</p>
+<figure class="fig">
+<svg viewBox="0 0 720 250" width="720" role="img" aria-label="Glob versus regex">
+  <defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <text x="360" y="20" text-anchor="middle" font-size="14" font-weight="700">Who reads the star?</text>
+  <rect x="10" y="40" width="150" height="56" rx="10" class="b3"/>
+  <text x="85" y="63" text-anchor="middle" font-size="13" font-family="monospace">ls *.txt</text>
+  <text x="85" y="82" text-anchor="middle" font-size="12">you type</text>
+  <line x1="160" y1="68" x2="200" y2="68" class="ln" marker-end="url(#m2)"/>
+  <rect x="205" y="40" width="220" height="56" rx="10" class="b1"/>
+  <text x="315" y="63" text-anchor="middle" font-size="13">SHELL expands the glob</text>
+  <text x="315" y="82" text-anchor="middle" font-size="12">a.txt b.txt notes.txt</text>
+  <line x1="425" y1="68" x2="465" y2="68" class="ln" marker-end="url(#m2)"/>
+  <rect x="470" y="40" width="240" height="56" rx="10" class="b2"/>
+  <text x="590" y="63" text-anchor="middle" font-size="13">ls receives a file list</text>
+  <text x="590" y="82" text-anchor="middle" font-size="12">glob = file NAMES</text>
+
+  <rect x="10" y="140" width="150" height="56" rx="10" class="b3"/>
+  <text x="85" y="163" text-anchor="middle" font-size="13" font-family="monospace">grep 'a.*b' f</text>
+  <text x="85" y="182" text-anchor="middle" font-size="12">you type</text>
+  <line x1="160" y1="168" x2="200" y2="168" class="ln" marker-end="url(#m2)"/>
+  <rect x="205" y="140" width="220" height="56" rx="10" class="b1"/>
+  <text x="315" y="163" text-anchor="middle" font-size="13">SHELL leaves it (quotes)</text>
+  <text x="315" y="182" text-anchor="middle" font-size="12">passes  a.*b  untouched</text>
+  <line x1="425" y1="168" x2="465" y2="168" class="ln" marker-end="url(#m2)"/>
+  <rect x="470" y="140" width="240" height="56" rx="10" class="b2"/>
+  <text x="590" y="163" text-anchor="middle" font-size="13">grep runs the regex</text>
+  <text x="590" y="182" text-anchor="middle" font-size="12">regex = TEXT patterns</text>
+  <text x="360" y="232" text-anchor="middle" font-size="13">Quotes protect your pattern from the shell.</text>
+</svg>
+<figcaption>Glob matches file names in the shell. Regex matches text inside lines.</figcaption>
+</figure>
+<table>
+<tr><th>Symbol</th><th>In a shell glob</th><th>In a regex</th></tr>
+<tr><td><code>*</code></td><td>any characters (including none)</td><td>zero or more of the <b>previous item</b></td></tr>
+<tr><td><code>?</code></td><td>exactly one character</td><td>previous item is optional (extended)</td></tr>
+<tr><td><code>.</code></td><td>just a dot</td><td>any one character</td></tr>
+<tr><td><code>[abc]</code></td><td>one of a, b, c</td><td>one of a, b, c (same)</td></tr>
+</table>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>The classic mix-up.</b> A new admin types <code>grep *.conf /etc</code> to "find all conf files". The shell expands <code>*.conf</code> to local file names and grep gets confused. Correct tools: <code>ls /etc/*.conf</code> for file names, or <code>grep -r 'Listen' /etc --include='*.conf'</code> to search inside them.</p></div>
+</section>
+
+<!-- ============ PLAYGROUND ============ -->
+<section id="play">
+<h2>Live Regex Tester</h2>
+<p>Practise safely. Pick a sample, type a pattern, and see which lines match. Matched parts are highlighted. You can also edit the text box and paste your own lines.</p>
+<div class="lab">
+  <div class="row">
+    <label>Sample text:
+      <select id="ds">
+        <option value="words">Cat and dog words</option>
+        <option value="file">Words file (bash, RedHat, 404...)</option>
+        <option value="conf">Config file with comments</option>
+        <option value="log">Login log with IP addresses</option>
+      </select></label>
+    <label>Style:
+      <select id="mode">
+        <option value="ere">Extended (grep -E)</option>
+        <option value="bre">Basic (grep)</option>
+      </select></label>
+    <label><input type="checkbox" id="ci"> ignore case (-i)</label>
+    <label><input type="checkbox" id="inv"> invert (-v)</label>
+  </div>
+  <label>Pattern:</label>
+  <input type="text" id="pat" value="^cat" spellcheck="false" autocomplete="off">
+  <div class="row" id="chips"></div>
+  <textarea id="txt" spellcheck="false"></textarea>
+  <div id="err"></div>
+  <div id="cmd"></div>
+  <div id="res"></div>
+</div>
+<div class="callout"><b class="t">Tip</b>
+The tester uses your browser's regex engine, so it matches grep for the basics shown in this chapter. Try the same patterns later in a real terminal to confirm.</div>
+</section>
+
+<!-- ============ GREP ============ -->
+<section id="grep">
+<h2>Using grep: the main regex tool</h2>
+<div class="keywords"><span class="kw">grep PATTERN FILE</span><span class="kw">pipe |</span><span class="kw">-i</span><span class="kw">-v</span><span class="kw">-r</span><span class="kw">-A -B</span><span class="kw">-e</span><span class="kw">-E</span></div>
+<p><code>grep</code> reads text line by line and prints every line that matches your pattern. The name means "global regular expression print".</p>
+<pre><code>grep '^computer' /usr/share/dict/words
+<span class="c">computer
+computerese
+computerise
+...</span></code></pre>
+<p>With several files, grep puts the <b>file name and a colon</b> in front of every result:</p>
+<pre><code>grep apache /etc/passwd /etc/group
+<span class="c">/etc/passwd:apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin
+/etc/group:apache:x:48:</span></code></pre>
+
+<div class="callout good"><b class="t">Always use single quotes around the pattern</b>
+Characters like <code>$</code>, <code>*</code>, <code>{}</code> and <code>|</code> mean something to the shell. Single quotes hand the pattern to grep exactly as typed. Without quotes the shell may change it first.</div>
+
+<h3>grep on command output with a pipe</h3>
+<p>The pipe <code>|</code> sends the output of one command into grep as its input.</p>
+<figure class="fig">
+<svg viewBox="0 0 720 200" width="720" role="img" aria-label="Pipeline with grep">
+  <defs><marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="10" y="50" width="170" height="100" rx="12" class="b1"/>
+  <text x="95" y="75" text-anchor="middle" font-size="14" font-weight="700">ps aux</text>
+  <text x="95" y="98" text-anchor="middle" font-size="12">300 lines of</text>
+  <text x="95" y="114" text-anchor="middle" font-size="12">processes</text>
+  <line x1="180" y1="100" x2="250" y2="100" class="ln" marker-end="url(#m3)"/>
+  <text x="215" y="90" text-anchor="middle" font-size="18" font-weight="700">|</text>
+  <rect x="255" y="50" width="190" height="100" rx="12" class="b3"/>
+  <text x="350" y="75" text-anchor="middle" font-size="14" font-weight="700">grep chrony</text>
+  <text x="350" y="98" text-anchor="middle" font-size="12">keeps only lines</text>
+  <text x="350" y="114" text-anchor="middle" font-size="12">that match</text>
+  <line x1="445" y1="100" x2="515" y2="100" class="ln" marker-end="url(#m3)"/>
+  <rect x="520" y="50" width="190" height="100" rx="12" class="b2"/>
+  <text x="615" y="75" text-anchor="middle" font-size="14" font-weight="700">Result</text>
+  <text x="615" y="98" text-anchor="middle" font-size="12">2 lines on screen</text>
+  <text x="360" y="185" text-anchor="middle" font-size="13">Each command does one small job. The pipe joins them.</text>
+</svg>
+<figcaption>grep is a filter: lots of lines in, only matching lines out.</figcaption>
+</figure>
+<pre><code>ps aux | grep chrony
+<span class="c">chrony   915  0.0 ...  /usr/sbin/chronyd -F 2
+root    2297  0.0 ...  grep --color=auto chrony</span></code></pre>
+<div class="callout warn"><b class="t">grep finds itself!</b>
+The second line above is the <code>grep</code> command itself, because its own command line contains the word chrony. Trick: write <code>grep '[c]hrony'</code>. The pattern <code>[c]hrony</code> matches "chrony" but the text <code>[c]hrony</code> does not match itself, so grep disappears from the result. Or use <code>pgrep chronyd</code>.</div>
+
+<h3>Common grep options</h3>
+<table>
+<tr><th>Option</th><th>What it does</th><th>Example</th></tr>
+<tr><td><code>-i</code></td><td>ignore upper/lower case</td><td><code>grep -i serverroot httpd.conf</code></td></tr>
+<tr><td><code>-v</code></td><td>invert: show lines that do <b>NOT</b> match</td><td><code>grep -v '^#' file</code></td></tr>
+<tr><td><code>-r</code></td><td>search folders recursively</td><td><code>grep -r 'Listen' /etc/httpd</code></td></tr>
+<tr><td><code>-A N</code></td><td>show N lines <b>A</b>fter each match</td><td><code>grep -A 3 Active file</code></td></tr>
+<tr><td><code>-B N</code></td><td>show N lines <b>B</b>efore each match</td><td><code>grep -B 2 Active file</code></td></tr>
+<tr><td><code>-C N</code></td><td>N lines before <b>and</b> after (Context)</td><td><code>grep -C 3 error log</code></td></tr>
+<tr><td><code>-e</code></td><td>give a pattern; repeat it for several patterns joined with <b>OR</b></td><td><code>grep -e cat -e dog file</code></td></tr>
+<tr><td><code>-E</code></td><td>use extended regex</td><td><code>grep -E 'cat|dog' file</code></td></tr>
+</table>
+
+<h4>Example: ignore case with -i</h4>
+<pre><code>grep -i serverroot /etc/httpd/conf/httpd.conf
+<span class="c"># with "/", the value of ServerRoot is prepended ...
+ServerRoot "/etc/httpd"</span></code></pre>
+
+<h4>Example: reverse the match with -v</h4>
+<pre><code>grep -v -i server /etc/hosts      <span class="c"># lines WITHOUT "server" in any case</span></code></pre>
+
+<h4>Example: hide comments to read a config</h4>
+<pre><code>grep -v '^[#;]' /etc/systemd/system/multi-user.target.wants/rsyslog.service
+<span class="c">[Unit]
+Description=System Logging Service
+...
+[Install]
+WantedBy=multi-user.target</span></code></pre>
+<p><code>^[#;]</code> means "line that starts with # or ;". With <code>-v</code> those lines disappear. In that file # is a general comment and ; is a commented-out value.</p>
+
+<h4>Example: look for several things at once with -e</h4>
+<pre><code>grep -e 'pam_unix' -e 'user root' -e 'Accepted publickey' /var/log/secure | less</code></pre>
+<p>This finds lines that contain <b>any</b> of the three phrases. It is the same as <code>grep -E 'pam_unix|user root|Accepted publickey'</code>.</p>
+
+<h4>Example: show context with -A and -B</h4>
+<figure class="fig">
+<svg viewBox="0 0 720 270" width="720" role="img" aria-label="Context lines with A and B">
+  <g font-family="monospace" font-size="13">
+    <rect x="30" y="14" width="500" height="26" class="b1" opacity=".55"/><text x="40" y="32">1  (earlier line, not shown)</text>
+    <rect x="30" y="42" width="500" height="26" class="b1"/><text x="40" y="60">2  ● httpd.service - The Apache HTTP Server</text>
+    <rect x="30" y="70" width="500" height="26" class="b1"/><text x="40" y="88">3  Loaded: loaded (/usr/lib/systemd/system/httpd.service)</text>
+    <rect x="30" y="98" width="500" height="28" class="b3" stroke-width="3"/><text x="40" y="117" font-weight="700">4  Active: active (running) since Wed ...  ← MATCH</text>
+    <rect x="30" y="128" width="500" height="26" class="b2"/><text x="40" y="146">5  Invocation: c7f967ed86a4...</text>
+    <rect x="30" y="156" width="500" height="26" class="b2"/><text x="40" y="174">6  Docs: man:httpd.service(8)</text>
+    <rect x="30" y="184" width="500" height="26" class="b2"/><text x="40" y="202">7  Main PID: 1842 (httpd)</text>
+    <rect x="30" y="212" width="500" height="26" class="b1" opacity=".55"/><text x="40" y="230">8  (later line, not shown)</text>
+  </g>
+  <path d="M540 44 L550 44 L550 96 L540 96" class="ln"/>
+  <text x="560" y="74" font-size="13">-B 2</text><text x="560" y="90" font-size="12">2 before</text>
+  <path d="M540 130 L550 130 L550 208 L540 208" class="ln"/>
+  <text x="560" y="164" font-size="13">-A 3</text><text x="560" y="180" font-size="12">3 after</text>
+  <text x="360" y="262" text-anchor="middle" font-size="13">systemctl status httpd | grep Active -B 2 -A 3</text>
+</svg>
+<figcaption>Context options show the neighbours of a match.</figcaption>
+</figure>
+<pre><code>systemctl status httpd | grep Active -B 2 -A 3</code></pre>
+<p>The word is <code>Active</code> with a capital A. Regex is case-sensitive, so <code>active</code> would not match that line.</p>
+
+<h3>Searching inside less and vim</h3>
+<table>
+<tr><th>Key</th><th>Action (in <code>less</code> and <code>vim</code>)</th></tr>
+<tr><td><code>/pattern</code> then Enter</td><td>search forward for the pattern</td></tr>
+<tr><td><code>n</code></td><td>jump to the next match</td></tr>
+<tr><td><code>N</code></td><td>jump to the previous match</td></tr>
+<tr><td><code>?pattern</code> then Enter</td><td>search backward</td></tr>
+</table>
+<pre><code>sudo less /var/log/messages
+/usb              <span class="c"># find "usb"</span>
+
+vim /etc/chrony.conf
+/[Nn][Tt][Pp]     <span class="c"># find ntp, NTP, Ntp ...</span>
+/^ServerAdmin     <span class="c"># find a line that STARTS with ServerAdmin</span></code></pre>
+<p>In <code>vim</code> add <code>:set ignorecase</code> to ignore case, and <code>:set hlsearch</code> to highlight every match.</p>
+<p><b>Man pages to read:</b> <code>regex(7)</code> and <code>grep(1)</code>.</p>
+</section>
+
+<!-- ============ 2.2 ============ -->
+<section id="s22">
+<h2>2.2 Guided Exercise: Match Text with Regular Expressions</h2>
+<div class="keywords"><span class="kw">grep</span><span class="kw">-B -A</span><span class="kw">-i -e</span><span class="kw">redirect &gt;</span><span class="kw">ps ax | grep</span><span class="kw">vim /search</span></div>
+<p><b>You will:</b> search configuration files, command output and logs with grep and regular expressions.</p>
+<pre><code>lab start regexes-regex       <span class="c"># on workstation</span></code></pre>
+<ol class="steps">
+<li><b>Log in and become root:</b>
+<pre><code>ssh student@servera
+sudo -i</code></pre></li>
+<li><b>Find the ID of user and group <code>apache</code>:</b>
+<pre><code>grep apache /etc/passwd /etc/group
+<span class="c">/etc/passwd:apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin
+/etc/group:apache:x:48:</span></code></pre>
+Both UID and GID are 48. The path in front of each result tells you which file it came from.</li>
+<li><b>Check the status of httpd with context:</b>
+<pre><code>systemctl status httpd | grep Active -B 2 -A 3</code></pre>
+You see 2 lines before and 3 lines after the <code>Active:</code> line: service name, loaded state, running state, invocation ID, docs and main PID.</li>
+<li><b>Find ServerRoot and DocumentRoot:</b>
+<pre><code>grep -i -e ^serverroot -e ^documentroot /etc/httpd/conf/httpd.conf
+<span class="c">ServerRoot "/etc/httpd"
+DocumentRoot "/var/www/html"</span></code></pre>
+<code>^</code> keeps only real settings (lines that start with the word) and skips the comment lines that merely mention it. <code>-i</code> ignores case. Two <code>-e</code> patterns work as OR. Adding single quotes around each pattern is safer.</li>
+<li><b>Confirm httpd writes to the system log, and save the lines:</b>
+<pre><code>grep httpd /var/log/messages &gt; /tmp/httpd.log
+cat /tmp/httpd.log
+<span class="c">May 28 ... servera systemd[1]: Starting httpd.service - The Apache HTTP Server...
+May 28 ... servera httpd[1842]: Server configured, listening on: port 80
+May 28 ... servera systemd[1]: Started httpd.service - The Apache HTTP Server.</span></code></pre></li>
+<li><b>Check that httpd is running:</b>
+<pre><code>ps ax | grep httpd
+<span>1842 ?  Ss  0:00 /usr/sbin/httpd -DFOREGROUND
+...
+2548 pts/2 S+ 0:00 grep --color=auto httpd</span></code></pre>
+The last line is grep itself. The first line is the main process and the others are its workers.</li>
+<li><b>Find the administrator e-mail in the config file:</b>
+<pre><code>vim /etc/httpd/conf/httpd.conf
+/^ServerAdmin        <span class="c"># press Enter; the cursor jumps to: ServerAdmin root@localhost</span></code></pre></li>
+<li><b>Leave and finish:</b>
+<pre><code>exit
+exit
+lab finish regexes-regex</code></pre></li>
+</ol>
+<div class="callout"><b class="t">Modern note</b>
+If a system has no <code>/var/log/messages</code>, read the journal instead: <code>journalctl -u httpd | grep -i started</code>. The grep part is identical.</div>
+</section>
+
+<!-- ============ 2.3 ============ -->
+<section id="s23">
+<h2>2.3 Quiz Walkthrough: Matching Text with Regular Expressions</h2>
+<p>Work with this sample file called <code>words.txt</code>. Try each question before opening the answer.</p>
+<pre><code>bash      RedHat    systemd   init      kernel
+tty6      passwd    shadow    mount     lsmod
+12345     grep      cron      fstab     404
+<span class="c">(each word is on its own line)</span></code></pre>
+
+<details><summary>Q1. Which expression matches only lines that contain at least one digit?   a) [[:alpha:]]  b) [[:digit:]]  c) [a-z0-9]  d) [^[:digit:]]</summary>
+<p><b>Answer: b.</b> <code>[[:digit:]]</code> is any digit. Lines found: tty6, 12345, 404. Option a finds letters. Option c matches any letter or digit, so it matches almost every line. Option d means "not a digit" so it matches lines with at least one non-digit.</p></details>
+
+<details><summary>Q2. Which expression matches only the RedHat line?   a) ^[A-Z]  b) [A-Z]$  c) ^[a-z]  d) ^A-Z</summary>
+<p><b>Answer: a.</b> <code>^[A-Z]</code> = line starts with a capital letter. Only RedHat does. Option b needs a capital at the end (none). Option c matches every lowercase-start line. Option d is wrong because without brackets it looks for a literal "A-Z".</p></details>
+
+<details><summary>Q3. Which expression matches lines with at least three lowercase letters in a row?   a) [a-z][a-z][a-z]  b) [a-z]*3  c) [a-z][0-9][a-z]  d) [a-z]\{3,\}</summary>
+<p><b>Answer: d.</b> <code>\{3,\}</code> means "3 or more" of the previous item, in basic syntax. Option a also finds three letters in a row, but it is written for exactly that and gets long. The {3,} form says "at least three" clearly and scales to any number. Option b treats "3" as a literal character. Option c needs a digit in the middle.</p></details>
+
+<details><summary>Q4. Which lines match '^[[:digit:]]*$' ?   a) 12345, 404  b) tty6  c) tty6, 12345, 404  d) none</summary>
+<p><b>Answer: a.</b> Start, then only digits (zero or more), then end. That means "a line made only of digits". 12345 and 404 qualify. tty6 has letters. Warning: an <b>empty</b> line also matches because <code>*</code> allows zero digits.</p></details>
+
+<details><summary>Q5. Which command lists all lines that do not contain kernel, any case?   a) grep -v 'kernel'  b) grep -i 'kernel'  c) grep -iv 'kernel'  d) grep --exclude 'kernel'</summary>
+<p><b>Answer: c.</b> <code>-i</code> ignores case and <code>-v</code> inverts. Together they show lines without "kernel", "Kernel", "KERNEL" and so on. Option a is case-sensitive. Option b shows the matching lines instead. <code>--exclude</code> is for file names.</p></details>
+
+<details><summary>Q6. Which command shows three lines before and three lines after each match for cron?   a) grep -A3B3  b) grep -AB3  c) grep -C6  d) grep -A3 -B3</summary>
+<p><b>Answer: d.</b> <code>-A3</code> is 3 after, <code>-B3</code> is 3 before. The shorter <code>grep -C 3 cron words.txt</code> does the same. <code>-C6</code> would show six on each side. Options a and b are not valid syntax.</p></details>
+</section>
+
+<!-- ============ 2.4 ============ -->
+<section id="s24">
+<h2>2.4 Summary</h2>
+<ul>
+<li>A <span class="kw">regular expression</span> is a pattern for text. Plain letters match themselves.</li>
+<li><span class="kw">^</span> and <span class="kw">$</span> pin a match to the start or end of a line.</li>
+<li><span class="kw">.</span> is any one character. <span class="kw">[abc]</span> is one from a set. <span class="kw">[^abc]</span> is anything except the set.</li>
+<li>Multipliers <span class="kw">*</span> <span class="kw">+</span> <span class="kw">?</span> <span class="kw">{n,m}</span> say how many times the previous item repeats.</li>
+<li><span class="kw">Basic</span> (grep, sed, vim) needs a backslash for <code>+ ? ( ) { } |</code>. <span class="kw">Extended</span> (<code>grep -E</code>) does not.</li>
+<li><span class="kw">grep</span> filters files or piped output. Key options: <code>-i -v -r -A -B -e -E</code>.</li>
+<li>Always put patterns in <span class="kw">single quotes</span>.</li>
+<li>In <code>less</code> and <code>vim</code> press <code>/</code> to search, <code>n</code> for next and <code>N</code> for previous.</li>
+</ul>
+</section>
+
+<!-- ============ EXTRA ============ -->
+<section id="extra">
+<h2>Extra Must-Know Topics</h2>
+
+<h3>1. More grep options you will use every week</h3>
+<table>
+<tr><th>Option</th><th>Meaning</th><th>Example</th></tr>
+<tr><td><code>-n</code></td><td>show line numbers</td><td><code>grep -n error app.log</code></td></tr>
+<tr><td><code>-c</code></td><td>count matching lines (not print them)</td><td><code>grep -c 'Failed' /var/log/secure</code></td></tr>
+<tr><td><code>-o</code></td><td>print only the matching part</td><td><code>grep -oE '[0-9]+' file</code></td></tr>
+<tr><td><code>-w</code></td><td>match whole words only</td><td><code>grep -w cat file</code></td></tr>
+<tr><td><code>-x</code></td><td>the whole line must match</td><td><code>grep -x root file</code></td></tr>
+<tr><td><code>-l</code></td><td>list names of files that contain a match</td><td><code>grep -rl 'password' /etc</code></td></tr>
+<tr><td><code>-L</code></td><td>list files that do NOT contain a match</td><td><code>grep -L 'SELINUX' *.conf</code></td></tr>
+<tr><td><code>-h</code> / <code>-H</code></td><td>hide / show the file name</td><td><code>grep -H root /etc/passwd</code></td></tr>
+<tr><td><code>-q</code></td><td>quiet: no output, only exit code (0 = found)</td><td><code>grep -q root /etc/passwd &amp;&amp; echo yes</code></td></tr>
+<tr><td><code>-F</code></td><td>fixed text, no regex (fast, no escaping)</td><td><code>grep -F '1.2.3.4' file</code></td></tr>
+<tr><td><code>--include</code></td><td>limit <code>-r</code> to some file names</td><td><code>grep -r foo . --include='*.py'</code></td></tr>
+<tr><td><code>--color=auto</code></td><td>colour the matches</td><td>already on by default in many setups</td></tr>
+</table>
+
+<h3>2. Special characters and how to match them literally</h3>
+<p>These characters have a special job: <code>. * [ ] ^ $ \</code> and in extended mode also <code>+ ? ( ) { } |</code>. To search for the real character, put a backslash before it.</p>
+<pre><code>grep '192\.168\.1\.1' file        <span class="c"># literal dots</span>
+grep 'cost: \$5'       file        <span class="c"># literal dollar</span>
+grep -F '192.168.1.1'  file        <span class="c"># easiest: -F means "no regex at all"</span></code></pre>
+<div class="callout warn"><b class="t">The unescaped dot trap</b>
+<code>192.168.1.1</code> as a regex also matches <code>192x168y1z1</code>, because each dot is a wildcard. Escape the dots or use <code>-F</code>.</div>
+
+<h3>3. OR and groups (extended)</h3>
+<pre><code>grep -E 'cat|dog' file                     <span class="c"># cat OR dog</span>
+grep -E '^(error|warn|fail)' log           <span class="c"># lines starting with any of the three</span>
+grep -E '(ab)+' file                       <span class="c"># ab, abab, ababab ...</span>
+grep -E '^(Mon|Tue|Wed)day' file</code></pre>
+<p>In basic mode (GNU grep) you can write <code>\|</code> for OR and <code>\( \)</code> for groups.</p>
+
+<h3>4. Greedy matching: .* takes as much as it can</h3>
+<pre><code>echo '&lt;b&gt;hi&lt;/b&gt; and &lt;i&gt;you&lt;/i&gt;' | grep -oE '&lt;.*&gt;'
+<span class="c">&lt;b&gt;hi&lt;/b&gt; and &lt;i&gt;you&lt;/i&gt;          # one huge match: greedy</span>
+
+echo '&lt;b&gt;hi&lt;/b&gt; and &lt;i&gt;you&lt;/i&gt;' | grep -oE '&lt;[^&gt;]*&gt;'
+<span class="c">&lt;b&gt;
+&lt;/b&gt;
+&lt;i&gt;
+&lt;/i&gt;                                  # each tag on its own: better</span></code></pre>
+<p>Rule: when <code>.*</code> grabs too much, replace it with "anything except the end character", like <code>[^&gt;]*</code>.</p>
+
+<h3>5. Back-references: match the same text again</h3>
+<pre><code>grep -E '([a-z])\1' words      <span class="c"># a doubled letter, like oo and gg in boondoggle</span>
+grep -E '^(.+) \1$' file       <span class="c"># line made of the same text twice</span></code></pre>
+<p><code>\1</code> repeats whatever the first group matched.</p>
+
+<h3>6. grep -P (Perl style) for advanced work</h3>
+<pre><code>grep -oP '(?&lt;=user=)\w+' file    <span class="c"># print the word that follows "user="</span>
+grep -P '\d{3}-\d{4}' file         <span class="c"># \d is "digit" in Perl style</span></code></pre>
+<p><code>-P</code> adds <code>\d</code>, lazy matching (<code>.*?</code>) and look-around. It is not part of the standard POSIX set, so avoid it in portable scripts.</p>
+
+<h3>7. sed: search and replace with regex</h3>
+<pre><code>sed 's/old/new/'          file     <span class="c"># replace first "old" on each line</span>
+sed 's/old/new/g'         file     <span class="c"># replace every "old"</span>
+sed -E 's/[0-9]+/NUM/g'   file     <span class="c"># replace every number</span>
+sed -n '/error/p'         file     <span class="c"># print only matching lines (like grep)</span>
+sed '/^#/d'               file     <span class="c"># delete comment lines</span>
+sed -i 's/Listen 80/Listen 8080/' httpd.conf   <span class="c"># edit the file in place</span></code></pre>
+<div class="callout warn"><b class="t">Be careful with -i</b>
+<code>sed -i</code> changes the file for real. Make a backup first: <code>sed -i.bak 's/a/b/' file</code> keeps the original as <code>file.bak</code>.</div>
+
+<h3>8. Ready-to-use patterns</h3>
+<table>
+<tr><th>Goal</th><th>Pattern (use with <code>grep -E</code>)</th></tr>
+<tr><td>IPv4-like address</td><td><code>([0-9]{1,3}\.){3}[0-9]{1,3}</code></td></tr>
+<tr><td>Date like 2026-11-01</td><td><code>[0-9]{4}-[0-9]{2}-[0-9]{2}</code></td></tr>
+<tr><td>Time like 10:45:09</td><td><code>[0-9]{2}:[0-9]{2}:[0-9]{2}</code></td></tr>
+<tr><td>Simple e-mail</td><td><code>[[:alnum:]._-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}</code></td></tr>
+<tr><td>MAC address</td><td><code>([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}</code></td></tr>
+<tr><td>Blank line</td><td><code>^$</code></td></tr>
+<tr><td>Blank or only spaces</td><td><code>^[[:space:]]*$</code></td></tr>
+<tr><td>Comment line</td><td><code>^[[:space:]]*#</code></td></tr>
+<tr><td>A line that has a number only</td><td><code>^[0-9]+$</code></td></tr>
+<tr><td>HTTP error status 5xx</td><td><code>" 5[0-9]{2} </code></td></tr>
+</table>
+<p>The IP pattern is loose: it also accepts 999.999.999.999. For checking, you would test each number's range in a script.</p>
+
+<h3>9. Locale and ranges</h3>
+<p>In some language settings <code>[a-z]</code> can include capital letters. Classes like <code>[[:lower:]]</code> are always correct. For exact byte behaviour you can run <code>LC_ALL=C grep ...</code>.</p>
+
+<h3>10. Use the exit code in scripts</h3>
+<pre><code>if grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config; then
+    echo "Root login is ON" &gt;&amp;2
+fi</code></pre>
+<p>grep exits with <code>0</code> if there was a match, <code>1</code> if there was none, and <code>2</code> for an error such as a missing file.</p>
+
+<h3>11. Handy tools built on the same idea</h3>
+<ul>
+<li><code>pgrep name</code>: find processes by name without the "grep finds itself" problem.</li>
+<li><code>awk '/pattern/ {print $1}' file</code>: match lines and print chosen columns.</li>
+<li><code>find /etc -name '*.conf'</code>: glob style names, not regex.</li>
+<li><code>zgrep</code>: grep inside compressed <code>.gz</code> logs.</li>
+<li><code>journalctl -g 'pattern'</code>: regex search in the systemd journal.</li>
+</ul>
+</section>
+
+<!-- ============ REAL ============ -->
+<section id="real">
+<h2>Real-World Scenarios</h2>
+
+<div class="scenario"><span class="tag">SCENARIO 1</span>
+<h4>Who is attacking my SSH server?</h4>
+<p>You suspect password guessing on a server.</p>
+<pre><code>sudo grep 'Failed password' /var/log/secure \
+  | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' \
+  | sort | uniq -c | sort -rn | head</code></pre>
+<p><b>What happens:</b> grep keeps the failure lines, <code>-oE</code> cuts out only the IP addresses, <code>sort | uniq -c</code> counts each, and the top 10 attackers are shown. Add the worst IP to a firewall block.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 2</span>
+<h4>Read a config file without the noise</h4>
+<p>A 900-line config has 850 comment and blank lines. See the 50 real settings:</p>
+<pre><code>grep -Ev '^[[:space:]]*(#|$)' /etc/httpd/conf/httpd.conf</code></pre>
+<p><b>Reads as:</b> not (spaces, then a # or an end of line). That removes comments (even indented ones) and blank lines.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 3</span>
+<h4>Which config file sets this option?</h4>
+<p>Something listens on port 8080 and you do not know where it is set.</p>
+<pre><code>sudo grep -rn 'Listen' /etc/httpd --include='*.conf'</code></pre>
+<p><b>Result:</b> file name, line number and the line. You edit the right file the first time.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 4</span>
+<h4>Find the first error and what happened around it</h4>
+<pre><code>grep -n -B 5 -A 5 -m 1 'ERROR' app.log</code></pre>
+<p><b>Why:</b> the first error often causes all later errors. <code>-m 1</code> stops after the first match and the context lines show the events right before and after it.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 5</span>
+<h4>Count server errors per hour</h4>
+<pre><code>grep -E '" 5[0-9]{2} ' access.log | cut -d: -f2 | sort | uniq -c</code></pre>
+<p><b>Result:</b> a short table: hour and how many 5xx errors. Spikes show you when the problem started.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 6</span>
+<h4>Audit: find users who can log in</h4>
+<pre><code>grep -vE '(nologin|false)$' /etc/passwd | cut -d: -f1</code></pre>
+<p><b>Reads as:</b> lines that do NOT end with nologin or false. These accounts have a real shell. A quick security check.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 7</span>
+<h4>Clean a customer list</h4>
+<pre><code>grep -E '^[[:alnum:]._-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}$' emails.txt   <span class="c"># valid-looking</span>
+grep -vE '^[[:alnum:]._-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}$' emails.txt  <span class="c"># suspicious ones</span></code></pre>
+<p><b>Use:</b> with one pattern and one flag you split good-looking data from bad before importing into a database.</p></div>
+</section>
+
+<!-- ============ MISTAKES ============ -->
+<section id="mistakes">
+<h2>Common Mistakes and Fixes</h2>
+<table>
+<tr><th>Problem</th><th>Why</th><th>Fix</th></tr>
+<tr><td><code>grep 'a+' file</code> finds nothing useful</td><td>In basic mode, <code>+</code> is a literal plus</td><td><code>grep -E 'a+'</code> or <code>grep 'a\+'</code></td></tr>
+<tr><td><code>grep 'c.{2}t'</code> does not work</td><td>Braces are literal in basic mode</td><td><code>grep -E 'c.{2}t'</code></td></tr>
+<tr><td>Pattern changes before grep sees it</td><td>No quotes, shell expands <code>$ * {}</code></td><td>Use single quotes</td></tr>
+<tr><td>Match too many words</td><td>Pattern found inside longer words</td><td>Use <code>-w</code> or <code>\&lt; \&gt;</code> or anchors</td></tr>
+<tr><td>Nothing found but text is there</td><td>Case differs</td><td>Add <code>-i</code></td></tr>
+<tr><td><code>ps aux | grep x</code> shows grep itself</td><td>grep's command line contains x</td><td><code>grep '[x]'</code> or <code>pgrep</code></td></tr>
+<tr><td>Dot matches too much</td><td><code>.</code> is a wildcard</td><td>Escape: <code>\.</code> or use <code>-F</code></td></tr>
+<tr><td><code>.*</code> grabs too much</td><td>Greedy</td><td>Use <code>[^x]*</code></td></tr>
+<tr><td>Using <code>*</code> like a glob (<code>grep *.log</code>)</td><td>Shell expands it</td><td>Quote it and write a regex, or use <code>find</code></td></tr>
+<tr><td><code>[a-z]</code> picks capitals on some systems</td><td>Locale ordering</td><td>Use <code>[[:lower:]]</code></td></tr>
+<tr><td><code>^[[:digit:]]*$</code> matches empty lines</td><td><code>*</code> allows zero</td><td>Use <code>+</code> (extended) for at least one</td></tr>
+<tr><td>Permission denied on logs</td><td>Logs need root</td><td>Use <code>sudo grep ...</code></td></tr>
+<tr><td>Binary file matches message</td><td>File is not plain text</td><td><code>grep -a</code> or search the text version</td></tr>
+</table>
+</section>
+
+<!-- ============ CHEAT ============ -->
+<section id="cheat">
+<h2>Quick Cheat Sheet</h2>
+<pre><code><span class="c"># POSITION</span>
+^abc  line starts with abc          abc$  line ends with abc          ^$  empty line
+\&lt;abc  word starts with abc          abc\&gt;  word ends with abc        \bword\b  whole word
+
+<span class="c"># CHARACTERS</span>
+.      any one character            [abc]  a or b or c                [^abc] not a, b or c
+[a-z]  range                        [[:digit:]] [[:alpha:]] [[:space:]] [[:upper:]]
+\w word char   \W non-word   \s space   \S non-space
+
+<span class="c"># HOW MANY (extended | basic)</span>
+*  zero or more               +  \+  one or more          ?  \?  optional
+{n} \{n\}  exactly n          {n,} \{n,\}  n or more      {n,m} \{n,m\}  n to m
+a|b  a\|b   OR               (ab)  \(ab\)  group          \1  back-reference
+
+<span class="c"># GREP OPTIONS</span>
+-i ignore case   -v invert    -r recursive   -n line numbers   -c count   -o only match
+-w whole word    -x whole line   -l file names   -q quiet   -F fixed text   -E extended
+-A N after   -B N before   -C N around   -e pattern (repeat = OR)
+
+<span class="c"># SEARCH IN less / vim</span>
+/pattern  forward     ?pattern  backward     n next     N previous</code></pre>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz">
+<h2>Final Quiz: 25 MCQs</h2>
+<p>Click an answer. You see right or wrong at once, with a short reason. Your score updates at the bottom.</p>
+<div id="quizbox"></div>
+<div id="score"><span id="scoretext">Score: 0 / 25</span><button class="btn" id="resetq">Restart quiz</button></div>
+</section>
+
+</main>
+</div>
+
+<footer>Chapter 2 &middot; Using Regular Expressions for Practical Applications</footer>
+
+<script>
+/* copy buttons */
+document.querySelectorAll('pre').forEach(function(p){
+  var b=document.createElement('button');b.className='copy';b.textContent='Copy';
+  b.onclick=function(){
+    var t=p.querySelector('code')?p.querySelector('code').innerText:p.innerText;
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1200)})}
+  };
+  p.appendChild(b);
+});
+
+/* ===== Regex tester ===== */
+var DATA={
+ words:"cat\ndog\nconcatenate\ndogma\ncategory\neducated\nboondoggle\nvindication\nchilidog",
+ file:"bash\nRedHat\nsystemd\ninit\nkernel\ntty6\npasswd\nshadow\nmount\nlsmod\n12345\ngrep\ncron\nfstab\n404",
+ conf:"# Main server settings\nServerRoot \"/etc/httpd\"\n\n#Listen 12.34.56.78:80\nListen 80\n; old value\nServerAdmin root@localhost\n   # indented comment\nDocumentRoot \"/var/www/html\"",
+ log:"May 19 19:30:07 host sshd[5941]: Accepted publickey for devops from 10.80.0.254 port 50198\nMay 19 19:31:12 host sshd[6001]: Failed password for root from 203.0.113.45 port 40122\nMay 19 19:31:15 host sshd[6001]: Failed password for admin from 203.0.113.45 port 40130\nMay 19 19:35:53 host sudo[24067]: pam_unix(sudo:session): session closed for user root\nMay 19 19:40:02 host sshd[6120]: Failed password for invalid user test from 198.51.100.7 port 51000"
+};
+var PRESETS={
+ words:[["^cat","ere"],["cat$","ere"],["^cat$","ere"],["d.g","ere"],["c.*t","ere"],["c.{2}t","ere"],["c.\\{2\\}t","bre"],["cat|dog$","ere"]],
+ file:["^[A-Z]","[[:digit:]]","^[[:digit:]]*$","[a-z]{3,}","^[^[:digit:]]*$"].map(function(x){return [x,"ere"]}),
+ conf:[["^[#;]","ere"],["^$","ere"],["^[[:space:]]*(#|;|$)","ere"],["^(Listen|ServerRoot)","ere"],["[Ll]isten","ere"]],
+ log:[["Failed password","ere"],["([0-9]{1,3}\\.){3}[0-9]{1,3}","ere"],["from [0-9.]+ port","ere"],["for (root|admin)","ere"],["user (root|test)","ere"]]
+};
+var POSIX={'[:alnum:]':'0-9A-Za-z','[:alpha:]':'A-Za-z','[:blank:]':' \\t','[:cntrl:]':'\\x00-\\x1f\\x7f','[:digit:]':'0-9','[:graph:]':'\\x21-\\x7e','[:lower:]':'a-z','[:print:]':'\\x20-\\x7e','[:punct:]':'!-\\/:-@\\[-`{-~','[:space:]':'\\s','[:upper:]':'A-Z','[:xdigit:]':'0-9A-Fa-f'};
+function conv(p,basic){
+  var o='',i=0,n=p.length,SP='(){}|+?';
+  while(i<n){
+    var c=p[i];
+    if(c==='['){
+      var j=i+1;
+      if(p[j]==='^')j++;
+      if(p[j]===']')j++;
+      while(j<n&&p[j]!==']'){
+        if(p[j]==='['&&p[j+1]===':'){var k=p.indexOf(':]',j+2);if(k>0){j=k+2;continue}}
+        j++;
+      }
+      if(j>=n)throw new Error('missing closing ]');
+      var body=p.slice(i+1,j).replace(/\\/g,'\\\\');
+      Object.keys(POSIX).forEach(function(key){body=body.split(key).join(POSIX[key])});
+      o+='['+body+']';i=j+1;continue;
+    }
+    if(c==='\\'){
+      var d=p[i+1];i+=2;
+      if(d===undefined){o+='\\\\';continue}
+      if(basic&&SP.indexOf(d)>=0)o+=d;
+      else if(d==='<'||d==='>')o+='\\b';
+      else o+='\\'+d;
+      continue;
+    }
+    if(SP.indexOf(c)>=0){o+=basic?'\\'+c:c;i++;continue}
+    o+=c;i++;
+  }
+  return o;
+}
+var P=document.getElementById('pat'),T=document.getElementById('txt'),M=document.getElementById('mode'),
+    CI=document.getElementById('ci'),INV=document.getElementById('inv'),DS=document.getElementById('ds'),
+    RES=document.getElementById('res'),ERR=document.getElementById('err'),CMD=document.getElementById('cmd'),CH=document.getElementById('chips');
+function runTest(){
+  RES.innerHTML='';ERR.textContent='';
+  var basic=M.value==='bre',pat=P.value,re;
+  try{re=new RegExp(conv(pat,basic),CI.checked?'gi':'g')}catch(e){ERR.textContent='Pattern problem: '+e.message;return}
+  var cmd='grep '+(basic?'':'-E ')+(CI.checked?'-i ':'')+(INV.checked?'-v ':'')+"'"+pat+"' file";
+  var shown=0,lines=T.value.split('\n');
+  lines.forEach(function(L,idx){
+    var spans=[],m,hit=false;
+    re.lastIndex=0;
+    while((m=re.exec(L))!==null){
+      hit=true;
+      if(m[0].length===0){re.lastIndex++;if(re.lastIndex>L.length)break;continue}
+      spans.push([m.index,m[0].length]);
+    }
+    var show=INV.checked?!hit:hit;
+    var d=document.createElement('div');
+    if(!show)d.className='dim';else shown++;
+    var num=document.createElement('span');num.className='ln';num.textContent=(idx+1);d.appendChild(num);
+    if(show&&!INV.checked&&spans.length){
+      var last=0;
+      spans.forEach(function(s){
+        d.appendChild(document.createTextNode(L.slice(last,s[0])));
+        var mk=document.createElement('mark');mk.textContent=L.substr(s[0],s[1]);d.appendChild(mk);
+        last=s[0]+s[1];
+      });
+      d.appendChild(document.createTextNode(L.slice(last)));
+    }else{d.appendChild(document.createTextNode(L.length?L:'\u00a0'))}
+    RES.appendChild(d);
+  });
+  CMD.textContent='Same as:  '+cmd+'     ->  '+shown+' of '+lines.length+' lines shown as matches';
+}
+function loadDS(){
+  T.value=DATA[DS.value];
+  CH.innerHTML='';
+  PRESETS[DS.value].forEach(function(pr){
+    var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=pr[0];
+    b.onclick=function(){P.value=pr[0];M.value=pr[1];runTest()};
+    CH.appendChild(b);
+  });
+  P.value=PRESETS[DS.value][0][0];M.value=PRESETS[DS.value][0][1];
+  runTest();
+}
+[P,T,M,CI,INV].forEach(function(el){el.addEventListener('input',runTest);el.addEventListener('change',runTest)});
+DS.addEventListener('change',loadDS);
+loadDS();
+
+/* ===== Quiz ===== */
+var CATFILE="cat\ndog\nconcatenate\ndogma\ncategory\neducated\nboondoggle\nvindication\nchilidog";
+var Q=[
+{c:CATFILE,q:"Which line does NOT match the pattern cat ?",o:["concatenate","educated","dogma","vindication"],a:2,e:"dogma has no c-a-t in a row. educated (edu-cat-ed) and vindication (vindi-cat-ion) contain cat inside."},
+{c:CATFILE,q:"How many lines does ^cat match?",o:["2","1","3","5"],a:0,e:"Only cat and category start with cat."},
+{c:CATFILE,q:"Which lines match dog$ ?",o:["dog only","dogma and dog","dog, dogma and chilidog","dog and chilidog"],a:3,e:"$ means the line ends there. dog and chilidog end with dog. dogma has more letters after dog."},
+{q:"Which of these does NOT match the pattern c.t ?",o:["cat","cut","c9t","ct"],a:3,e:"The dot must match exactly one character. In ct there is nothing between c and t."},
+{q:"Which string does c[aou]t match?",o:["cit","cet","cyt","cot"],a:3,e:"The bracket allows only a, o or u in the middle."},
+{q:"You want lines with c, exactly two characters, then t (like coat or cart). Which command works?",o:["grep -E 'c.{2}t' file","grep 'c.{2}t' file","grep 'c.2t' file","grep c..{t} file"],a:0,e:"In basic mode braces are plain text. -E turns {2} into 'exactly two'. Basic form would be 'c.\\{2\\}t'."},
+{q:"In BASIC regular expression syntax, how do you write 'one or more a'?",o:["a+","a{+}","+a","a\\+"],a:3,e:"In basic syntax the plus must have a backslash to be special. Without it, + is a literal plus sign."},
+{q:"Which grep option reads the pattern as an EXTENDED regular expression?",o:["-e","-x","-E","-X"],a:2,e:"-E = extended. -e is used to give a pattern (and repeat for OR). -x requires the whole line to match."},
+{q:"In a regular expression, what does a* match?",o:["Exactly one a","One or more a","Zero or more a","The text a*"],a:2,e:"The star repeats the previous item zero or more times, so it can also match nothing."},
+{q:"Which regex matches an EMPTY line?",o:["^$","^.*","$^","^."],a:0,e:"Start of line immediately followed by end of line means nothing is between. ^.* matches every line."},
+{q:"Which command shows a file without comment lines and without blank lines?",o:["grep -E '^(#|$)' file","grep -c '#' file","grep -Ev '^(#|$)' file","grep -o '#' file"],a:2,e:"The pattern matches comment and blank lines. -v inverts, so those lines disappear."},
+{q:"Which option prints ONLY the part of the line that matched?",o:["-v","-c","-o","-q"],a:2,e:"-o prints each matching part on its own line. Great for pulling out IP addresses or numbers."},
+{q:"Which option prints how many lines matched instead of the lines?",o:["-n","-l","-w","-c"],a:3,e:"-c counts matching lines. -n adds line numbers. -l lists file names."},
+{c:"cat\ncategory\nconcatenate",q:"Which lines does   grep -w cat   print?",o:["cat only","cat and category","cat, category and concatenate","No lines"],a:0,e:"-w requires a whole word. In category and concatenate, cat is only part of a longer word."},
+{q:"Which option lists only the NAMES of files that contain a match?",o:["-L","-h","-l","-H"],a:2,e:"-l (lowercase L) lists files with a match. Capital -L lists files without a match."},
+{q:"ps aux | grep httpd shows one extra line. Why?",o:["httpd was restarted","grep's own command line contains httpd","ps shows every process twice","The pipe copies the line"],a:1,e:"The grep process is running too and its command line contains the pattern. Use grep '[h]ttpd' or pgrep to hide it."},
+{q:"Why should you put a regex in single quotes on the command line?",o:["It makes grep faster","It makes the search case-insensitive","It is needed only with -E","It stops the shell from changing characters like $ and *"],a:3,e:"Single quotes pass the pattern to grep exactly as typed."},
+{q:"You opened a log with less. How do you search forward for the word error?",o:["Type /error and press Enter, then n for the next match","Type grep error","Type ?error and press Enter","Press Ctrl+F then error"],a:0,e:"/ searches forward, n repeats it, N goes to the previous match. ? searches backward."},
+{q:"What does [^[:digit:]] match?",o:["Any digit","Any single character that is not a digit","A line that starts with a digit","A digit at the end of a line"],a:1,e:"The ^ right after the opening bracket means NOT."},
+{q:"What does   grep -e root -e admin file   do?",o:["Lines with root AND admin","Lines with root OR admin","Only lines with admin","An error"],a:1,e:"Several -e patterns are combined with OR."},
+{q:"What does \\<cat match?",o:["cat anywhere on the line","cat at the start of a word","cat at the end of a word","cat at the end of the line"],a:1,e:"\\< marks the start of a word, \\> the end. So \\<cat finds cat, category but not concatenate."},
+{q:"What does this print?   echo '<b>hi</b>' | grep -oE '<.*>'",o:["<b>","<b>hi</b>","hi","</b>"],a:1,e:".* is greedy: it takes as much as possible, so the match runs from the first < to the last >. Use <[^>]*> to get each tag."},
+{q:"Which command shows lines that do NOT contain 'server' in any letter case?",o:["grep -v server file","grep -iv server file","grep -i server file","grep -vc server file"],a:1,e:"-i ignores case and -v inverts the result."},
+{q:"What does   grep -B 2 -A 3 Active file   print for each match?",o:["2 lines after and 3 lines before","2 lines before and 3 lines after, plus the match","5 lines before the match","3 lines in total"],a:1,e:"-B is Before and -A is After."},
+{q:"Which pattern matches the exact text 192.168.1.1 and NOT something like 192x168y1z1?",o:["192.168.1.1","192\\.168\\.1\\.1","192*168*1*1","[192.168.1.1]"],a:1,e:"A plain dot is a wildcard. Escape each dot with a backslash, or use grep -F."}
+];
+var box=document.getElementById('quizbox'),score=0,done=0;
+function render(){
+  box.innerHTML='';score=0;done=0;upd();
+  Q.forEach(function(item,i){
+    var d=document.createElement('div');d.className='q';
+    var t=document.createElement('div');t.className='qt';t.textContent=(i+1)+'. '+item.q;d.appendChild(t);
+    if(item.c){var pr=document.createElement('pre');var cd=document.createElement('code');cd.textContent=item.c;pr.appendChild(cd);d.appendChild(pr)}
+    var ex=document.createElement('div');ex.className='exp';
+    item.o.forEach(function(txt,j){
+      var b=document.createElement('button');b.className='opt';b.textContent=String.fromCharCode(65+j)+'. '+txt;
+      b.onclick=function(){
+        var all=d.querySelectorAll('.opt');
+        all.forEach(function(x){x.disabled=true});
+        all[item.a].classList.add('right');
+        if(j===item.a){score++;ex.textContent='Correct. '+item.e}
+        else{b.classList.add('wrong');ex.textContent='Not quite. Correct answer: '+String.fromCharCode(65+item.a)+'. '+item.e}
+        ex.classList.add('show');done++;upd();
+      };
+      d.appendChild(b);
+    });
+    d.appendChild(ex);box.appendChild(d);
+  });
+}
+function upd(){
+  var s='Score: '+score+' / '+Q.length+'  (answered '+done+')';
+  if(done===Q.length){
+    var p=Math.round(score/Q.length*100);
+    s+=' - '+p+'% '+(p>=80?'Great job!':p>=60?'Good, review the missed topics.':'Re-read the sections and try again.');
+  }
+  document.getElementById('scoretext').textContent=s;
+}
+document.getElementById('resetq').onclick=function(){render();document.getElementById('quiz').scrollIntoView()};
+render();
+</script>
+</body>
+</html>

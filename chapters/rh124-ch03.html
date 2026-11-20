@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 3 — Getting Help from Local Documentation | RH124 Study Notes</title>
+<style>
+:root{
+  --bg:#0a0e17;--bg2:#111827;--bg3:#1a2236;--bg4:#232d44;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --red:#ee0000;--red2:#ff3333;--red-glow:rgba(238,0,0,.15);
+  --green:#22c55e;--blue:#3b82f6;--yellow:#eab308;--orange:#f97316;--purple:#a855f7;--cyan:#06b6d4;
+  --border:#1e293b;--radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px}
+::selection{background:var(--red);color:#fff}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* ── Progress Bar ── */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--red),var(--red2));z-index:10000;transition:width .15s}
+
+/* ── Nav ── */
+.top-nav{position:sticky;top:3px;z-index:999;background:rgba(10,14,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top-nav a,.top-nav button{color:var(--text2);text-decoration:none;font-size:.88rem;padding:6px 14px;border-radius:8px;transition:.2s;background:none;border:1px solid var(--border);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.top-nav a:hover,.top-nav button:hover{color:#fff;border-color:var(--red);background:var(--red-glow)}
+.nav-title{font-weight:700;color:var(--red);font-size:.95rem;white-space:nowrap}
+.nav-links{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── TOC Sidebar ── */
+.toc-toggle{position:fixed;bottom:80px;right:20px;z-index:998;width:44px;height:44px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.toc-toggle:hover{border-color:var(--red);color:var(--red)}
+.toc-sidebar{position:fixed;top:0;right:-340px;width:320px;height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:9999;padding:24px 20px;overflow-y:auto;transition:right .3s ease}
+.toc-sidebar.open{right:0}
+.toc-sidebar h3{color:var(--red);margin-bottom:16px;font-size:1rem}
+.toc-sidebar a{display:block;color:var(--text2);text-decoration:none;padding:6px 0;font-size:.85rem;border-bottom:1px solid var(--border);transition:.2s}
+.toc-sidebar a:hover{color:var(--red);padding-left:8px}
+.toc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:none}
+.toc-overlay.show{display:block}
+
+/* ── Container ── */
+.container{max-width:900px;margin:0 auto;padding:32px 20px 80px}
+
+/* ── Hero ── */
+.hero{text-align:center;padding:48px 20px 36px;margin-bottom:32px}
+.hero-badge{display:inline-block;background:var(--red-glow);color:var(--red);padding:4px 16px;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:12px;border:1px solid rgba(238,0,0,.25)}
+.hero h1{font-size:2rem;margin-bottom:8px;background:linear-gradient(135deg,#fff,var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--text2);font-size:1rem;max-width:600px;margin:0 auto}
+
+/* ── Section Card ── */
+.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:28px;overflow:hidden}
+.section-header{display:flex;align-items:center;gap:12px;padding:18px 24px;background:linear-gradient(135deg,var(--bg3),var(--bg2));border-bottom:1px solid var(--border)}
+.section-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.section-header h2{font-size:1.15rem;color:#fff}
+.section-body{padding:24px}
+.section-body h3{color:var(--red2);font-size:1.05rem;margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.section-body h3:first-child{margin-top:0}
+.section-body p{margin-bottom:12px;color:var(--text)}
+.section-body ul,.section-body ol{margin:8px 0 16px 20px;color:var(--text)}
+.section-body li{margin-bottom:6px}
+
+/* ── Info Boxes ── */
+.info-box{border-radius:10px;padding:16px 20px;margin:16px 0;border-left:4px solid;font-size:.93rem}
+.info-box .box-title{font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.info-box.note{background:rgba(59,130,246,.08);border-color:var(--blue);color:#93c5fd}
+.info-box.note .box-title{color:var(--blue)}
+.info-box.tip{background:rgba(34,197,94,.08);border-color:var(--green);color:#86efac}
+.info-box.tip .box-title{color:var(--green)}
+.info-box.warning{background:rgba(234,179,8,.08);border-color:var(--yellow);color:#fde047}
+.info-box.warning .box-title{color:var(--yellow)}
+.info-box.important{background:rgba(168,85,247,.08);border-color:var(--purple);color:#d8b4fe}
+.info-box.important .box-title{color:var(--purple)}
+.info-box.fix{background:rgba(249,115,22,.08);border-color:var(--orange);color:#fdba74}
+.info-box.fix .box-title{color:var(--orange)}
+
+/* ── Code Blocks ── */
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin:12px 0;overflow-x:auto;font-family:'Cascadia Code','Fira Code','JetBrains Mono',monospace;font-size:.88rem;line-height:1.7}
+.code-block .prompt{color:var(--green)}
+.code-block .command{color:#e2e8f0}
+.code-block .output{color:var(--text3)}
+.code-block .comment{color:#6a737d;font-style:italic}
+.code-block .string{color:#a5d6ff}
+.code-block .flag{color:var(--orange)}
+.code-block .path{color:var(--cyan)}
+.code-block .keyword{color:var(--purple)}
+.code-inline{background:var(--bg3);color:var(--red2);padding:2px 7px;border-radius:5px;font-family:'Cascadia Code','Fira Code',monospace;font-size:.87em}
+
+/* ── Tables ── */
+.table-wrapper{overflow-x:auto;margin:12px 0;border-radius:10px;border:1px solid var(--border)}
+.table-wrapper table{width:100%;border-collapse:collapse;font-size:.9rem}
+.table-wrapper th{background:var(--bg3);color:var(--red2);padding:12px 16px;text-align:left;font-weight:600;white-space:nowrap}
+.table-wrapper td{padding:10px 16px;border-top:1px solid var(--border);color:var(--text)}
+.table-wrapper tr:hover td{background:rgba(238,0,0,.04)}
+
+/* ── Shortcut Grid ── */
+.shortcut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:12px 0}
+.shortcut-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.shortcut-key{background:var(--bg);border:1px solid var(--text3);border-radius:5px;padding:3px 9px;font-family:monospace;font-size:.82rem;color:var(--yellow);white-space:nowrap;min-width:50px;text-align:center}
+.shortcut-desc{font-size:.83rem;color:var(--text2)}
+
+/* ── Key Term ── */
+.key-term{background:var(--red-glow);color:var(--red2);padding:2px 8px;border-radius:5px;font-weight:600;font-size:.9em;white-space:nowrap}
+
+/* ── Synopsis Breakdown ── */
+.synopsis-breakdown{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;margin:16px 0;font-family:monospace}
+.synopsis-breakdown .syn-line{font-size:1rem;color:#fff;margin-bottom:16px;letter-spacing:.5px}
+.syn-part{display:inline-block;text-align:center;margin:0 2px}
+.syn-part .syn-text{display:block;padding:4px 10px;border-radius:6px;font-weight:700}
+.syn-part .syn-label{display:block;font-size:.7rem;color:var(--text3);margin-top:4px;font-family:'Segoe UI',sans-serif}
+.syn-required .syn-text{background:rgba(238,0,0,.15);color:var(--red2);border:1px solid rgba(238,0,0,.3)}
+.syn-optional .syn-text{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.syn-repeat .syn-text{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.25)}
+
+/* ── Flow Diagram ── */
+.flow-diagram{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:16px 0}
+.flow-step{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 18px;text-align:center;min-width:120px}
+.flow-step .flow-label{font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.flow-step .flow-value{font-size:.95rem;color:#fff;font-weight:600;margin-top:4px}
+.flow-arrow{color:var(--red);font-size:1.4rem;padding:0 6px}
+
+/* ── VS Container ── */
+.vs-container{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.vs-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;position:relative}
+.vs-card h4{margin-bottom:10px;font-size:.95rem}
+.vs-card.vs-fast{border-color:rgba(34,197,94,.3)}
+.vs-card.vs-fast h4{color:var(--green)}
+.vs-card.vs-slow{border-color:rgba(234,179,8,.3)}
+.vs-card.vs-slow h4{color:var(--yellow)}
+.vs-badge{position:absolute;top:-10px;right:12px;background:var(--bg);padding:2px 10px;border-radius:10px;font-size:.75rem;font-weight:700}
+
+/* ── Checklist ── */
+.checklist-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:32px}
+.checklist-section h2{color:var(--red);margin-bottom:16px;font-size:1.1rem}
+.checklist-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item input[type="checkbox"]{appearance:none;width:20px;height:20px;border:2px solid var(--text3);border-radius:5px;cursor:pointer;flex-shrink:0;margin-top:2px;transition:.2s;position:relative}
+.checklist-item input[type="checkbox"]:checked{background:var(--green);border-color:var(--green)}
+.checklist-item input[type="checkbox"]:checked::after{content:'✓';position:absolute;top:-1px;left:3px;color:#fff;font-size:.8rem;font-weight:700}
+.checklist-item label{cursor:pointer;color:var(--text2);font-size:.93rem;transition:.2s}
+.checklist-item input:checked+label{color:var(--text3);text-decoration:line-through}
+.checklist-progress{margin-top:16px;font-size:.85rem;color:var(--text3)}
+.checklist-progress span{color:var(--green);font-weight:700}
+
+/* ── ASCII Box ── */
+.ascii-box{background:#0d1117;border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-family:monospace;font-size:.82rem;line-height:1.5;color:var(--text2);overflow-x:auto;margin:12px 0;white-space:pre}
+
+/* ── Scroll to Top ── */
+.scroll-top{position:fixed;bottom:24px;right:20px;width:44px;height:44px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:1.2rem;cursor:pointer;opacity:0;transition:.3s;z-index:997;display:flex;align-items:center;justify-content:center}
+.scroll-top.show{opacity:1}
+.scroll-top:hover{background:var(--red2);transform:scale(1.1)}
+
+/* ── Responsive ── */
+@media(max-width:700px){
+  .hero h1{font-size:1.5rem}
+  .vs-container{grid-template-columns:1fr}
+  .shortcut-grid{grid-template-columns:1fr}
+  .section-body{padding:16px}
+  .top-nav{padding:8px 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar" style="width:0%"></div>
+
+<!-- Top Nav -->
+<nav class="top-nav">
+  <a href="../index.html">← Dashboard</a>
+  <span class="nav-title">Chapter 3 · Getting Help from Local Documentation</span>
+  <div class="nav-links">
+    <a href="rh124-ch06-07.html">← Chapter 7</a>
+    <a href="rh124-ch08-09.html">Chapter 8 →</a>
+  </div>
+</nav>
+
+<!-- TOC Toggle -->
+<button class="toc-toggle" onclick="toggleTOC()" title="Table of Contents">☰</button>
+<div class="toc-overlay" id="tocOverlay" onclick="toggleTOC()"></div>
+<aside class="toc-sidebar" id="tocSidebar">
+  <h3>📑 Table of Contents</h3>
+  <a href="#s1" onclick="toggleTOC()">3.1 What are Man Pages?</a>
+  <a href="#s2" onclick="toggleTOC()">3.2 Manual Sections</a>
+  <a href="#s3" onclick="toggleTOC()">3.3 Navigating Man Pages</a>
+  <a href="#s4" onclick="toggleTOC()">3.4 Anatomy of a Man Page</a>
+  <a href="#s5" onclick="toggleTOC()">3.5 Searching for Man Pages</a>
+  <a href="#s6" onclick="toggleTOC()">3.6 Guided Exercise Summary</a>
+  <a href="#s7" onclick="toggleTOC()">3.7 Lab Walkthrough</a>
+  <a href="#s8" onclick="toggleTOC()">3.8 Cheat Sheet</a>
+  <a href="#s9" onclick="toggleTOC()">3.9 Key Takeaways</a>
+  <a href="#selftest" onclick="toggleTOC()">❓ Self-Test</a>
+  <a href="#revision" onclick="toggleTOC()">✅ Revision Checklist</a>
+</aside>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">RH124 · Chapter 3</div>
+  <h1>Getting Help from Local Documentation</h1>
+  <p>Learn to solve problems using the help systems already installed on your Linux machine — no internet required.</p>
+</div>
+
+<div class="container">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 1 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s1">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(59,130,246,.15)">📖</div>
+    <h2>3.1 What are Man Pages?</h2>
+  </div>
+  <div class="section-body">
+    <p>A <span class="key-term">man page</span> (short for <strong>manual page</strong>) is the built-in instruction manual for a command, file, or function on Linux.</p>
+
+    <ul>
+      <li>Software packages <strong>install their own man pages</strong> when you install them.</li>
+      <li>You read them from the terminal with the <code class="code-inline">man</code> command.</li>
+      <li>They are stored on disk in subfolders of <code class="code-inline">/usr/share/man</code>.</li>
+      <li>They need <strong>no internet</strong>. They work offline — the "local help system."</li>
+    </ul>
+
+    <div class="info-box tip">
+      <div class="box-title">💡 Beginner Analogy</div>
+      Think of man pages like the <strong>user manual that comes in the box</strong> with a gadget. Every command ships with its own manual.
+    </div>
+
+    <h3>Basic Usage</h3>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">man</span> <span class="flag">ls</span>        <span class="comment"># open the manual for the "ls" command</span>
+<span class="prompt">$ </span><span class="command">man</span> <span class="flag">passwd</span>    <span class="comment"># open the manual for "passwd"</span></div>
+
+    <div class="info-box note">
+      <div class="box-title">📘 History</div>
+      Man pages come from the old <strong>Linux Programmer's Manual</strong>. It was so big that it was split into numbered <strong>sections</strong>, each covering one topic area.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 2 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s2">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(168,85,247,.15)">📑</div>
+    <h2>3.2 Manual Sections</h2>
+  </div>
+  <div class="section-body">
+    <p>The manual is divided into <strong>9 sections</strong>:</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Section</th><th>Content Type</th><th>Plain English</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>1</strong></td><td>User commands</td><td>Programs and shell commands you run (<code class="code-inline">ls</code>, <code class="code-inline">cp</code>, <code class="code-inline">passwd</code>)</td></tr>
+          <tr><td><strong>2</strong></td><td>System calls</td><td>Low-level requests programs make to the kernel</td></tr>
+          <tr><td><strong>3</strong></td><td>Library functions</td><td>Functions provided by program libraries (for programmers)</td></tr>
+          <tr><td><strong>4</strong></td><td>Special files</td><td>Device files (like those in <code class="code-inline">/dev</code>)</td></tr>
+          <tr><td><strong>5</strong></td><td>File formats</td><td>How config files are structured (<code class="code-inline">/etc/passwd</code>)</td></tr>
+          <tr><td><strong>6</strong></td><td>Games &amp; screensavers</td><td>Historical fun programs</td></tr>
+          <tr><td><strong>7</strong></td><td>Conventions, standards, misc</td><td>Protocols, file systems, general info</td></tr>
+          <tr><td><strong>8</strong></td><td>System administration</td><td>Admin/maintenance commands (often need root)</td></tr>
+          <tr><td><strong>9</strong></td><td>Linux kernel API</td><td>Internal kernel functions</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box important">
+      <div class="box-title">🎯 Which Sections Matter Most for Sysadmins?</div>
+      <ul>
+        <li><strong>Section 1</strong> → user commands</li>
+        <li><strong>Section 5</strong> → file formats (config files)</li>
+        <li><strong>Section 8</strong> → admin commands</li>
+        <li><strong>Section 2</strong> → only if you use troubleshooting tools (e.g. tracing system calls)</li>
+        <li>Others → mostly for programmers or advanced admins</li>
+      </ul>
+    </div>
+
+    <h3>Same Name, Different Sections</h3>
+    <p>Some names exist in several sections. The <strong>section number is written in parentheses</strong> to tell them apart:</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Reference</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code class="code-inline">passwd(1)</code></td><td>The <strong>command</strong> to change passwords</td></tr>
+          <tr><td><code class="code-inline">passwd(5)</code></td><td>The <strong>file format</strong> of <code class="code-inline">/etc/passwd</code> (where local user accounts are stored)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Choosing a Section</h3>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">man</span> <span class="flag">passwd</span>      <span class="comment"># shows passwd(1) by default</span>
+<span class="prompt">$ </span><span class="command">man</span> <span class="flag">5</span> passwd    <span class="comment"># shows passwd(5), the file format</span>
+<span class="prompt">$ </span><span class="command">man</span> <span class="flag">1</span> su        <span class="comment"># explicitly the section 1 page for su</span></div>
+
+    <div class="info-box note">
+      <div class="box-title">📘 Why does <code>man passwd</code> show section 1?</div>
+      When you don't give a section, <code class="code-inline">man</code> searches the sections <strong>in order (1, 2, 3…)</strong> and shows the <strong>first match</strong>.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 3 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s3">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(6,182,212,.15)">🧭</div>
+    <h2>3.3 Navigating Man Pages</h2>
+  </div>
+  <div class="section-body">
+    <p>Man pages open in a <span class="key-term">pager</span> — a viewer that shows <strong>one screen at a time</strong>. You can't type commands into it. You use keys to move around.</p>
+
+    <h3>Navigation Keys</h3>
+    <div class="shortcut-grid">
+      <div class="shortcut-item"><span class="shortcut-key">Space</span><span class="shortcut-desc">Scroll down one screen</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">PgDn</span><span class="shortcut-desc">Scroll down one screen</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">PgUp</span><span class="shortcut-desc">Scroll up one screen</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">↓</span><span class="shortcut-desc">Scroll down one line</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">↑</span><span class="shortcut-desc">Scroll up one line</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">d</span><span class="shortcut-desc">Down half a screen</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">u</span><span class="shortcut-desc">Up half a screen</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">/text</span><span class="shortcut-desc">Search forward</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">n</span><span class="shortcut-desc">Next match</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">Shift+n</span><span class="shortcut-desc">Previous match</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">g</span><span class="shortcut-desc">Go to start</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">Shift+g</span><span class="shortcut-desc">Go to end</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">q</span><span class="shortcut-desc">Quit to shell</span></div>
+    </div>
+
+    <div class="info-box tip">
+      <div class="box-title">💡 Example: Searching Inside a Page</div>
+      <ol>
+        <li>Type <code class="code-inline">man passwd</code></li>
+        <li>Type <code class="code-inline">/expire</code> and press Enter → jumps to the first "expire"</li>
+        <li>Press <code class="code-inline">n</code> to go to the next one</li>
+        <li>Press <code class="code-inline">q</code> to quit</li>
+      </ol>
+    </div>
+
+    <div class="info-box warning">
+      <div class="box-title">⚠️ Regular Expressions in Search</div>
+      Searches inside man pages use <strong>regular expressions (regex)</strong>. Some characters have special meaning: <code class="code-inline">$</code> <code class="code-inline">*</code> <code class="code-inline">.</code> <code class="code-inline">^</code><br><br>
+      Plain words like <code class="code-inline">passwd</code> work normally. But a search like <code class="code-inline">make $$$</code> may give <strong>unexpected results</strong> because <code class="code-inline">$</code> is a metacharacter.<br>
+      More info: <code class="code-inline">man 7 regex</code>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 4 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s4">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(249,115,22,.15)">🧬</div>
+    <h2>3.4 Anatomy of a Man Page</h2>
+  </div>
+  <div class="section-body">
+    <p>Most man pages use the <strong>same headings in the same order</strong>. Not every page has every heading.</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Heading</th><th>What It Contains</th></tr></thead>
+        <tbody>
+          <tr><td><strong>NAME</strong></td><td>Name of the command/file plus a one-line description</td></tr>
+          <tr><td><strong>SYNOPSIS</strong></td><td>Quick summary of the <strong>syntax</strong> (how to type the command)</td></tr>
+          <tr><td><strong>DESCRIPTION</strong></td><td>Basic explanation of what it does</td></tr>
+          <tr><td><strong>OPTIONS</strong></td><td>The flags/switches and what each does</td></tr>
+          <tr><td><strong>EXAMPLES</strong></td><td>Real examples of usage</td></tr>
+          <tr><td><strong>FILES</strong></td><td>Related files and directories</td></tr>
+          <tr><td><strong>SEE ALSO</strong></td><td>Related man pages to read next</td></tr>
+          <tr><td><strong>BUGS</strong></td><td>Known problems</td></tr>
+          <tr><td><strong>AUTHOR</strong></td><td>Who developed it</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Reading the SYNOPSIS (Beginner Decoder)</h3>
+    <p>Example from the <code class="code-inline">su</code> page:</p>
+
+    <div class="synopsis-breakdown">
+      <div class="syn-line">su <span style="color:var(--blue)">[options]</span> <span style="color:var(--blue)">[-]</span> <span style="color:var(--blue)">[user <span style="color:var(--purple)">[argument...]</span>]</span></div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:12px;font-family:'Segoe UI',sans-serif;font-size:.85rem">
+        <div><span style="color:var(--blue)">■</span> <code class="code-inline">[ ]</code> square brackets → <strong style="color:var(--blue)">optional</strong> part</div>
+        <div><span style="color:var(--purple)">■</span> <code class="code-inline">...</code> → can be <strong style="color:var(--purple)">repeated</strong></div>
+        <div><span style="color:var(--red2)">■</span> Words without brackets → <strong style="color:var(--red2)">required</strong></div>
+      </div>
+    </div>
+
+    <p>So <code class="code-inline">su</code> alone is valid. All the parts shown are optional.</p>
+
+    <div class="info-box tip">
+      <div class="box-title">💡 Reading Strategy</div>
+      <ol>
+        <li>Read <strong>NAME</strong> (what is this?)</li>
+        <li>Skim <strong>SYNOPSIS</strong> (how do I type it?)</li>
+        <li>Jump to <strong>EXAMPLES</strong> if there is one</li>
+        <li>Use <code class="code-inline">/</code> to search <strong>OPTIONS</strong> for the flag you need</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 5 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s5">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(34,197,94,.15)">🔍</div>
+    <h2>3.5 Searching for Man Pages</h2>
+  </div>
+  <div class="section-body">
+    <p>What if you don't know the command name? Search by <strong>keyword</strong>.</p>
+
+    <h3>5.1 <code>man -k</code> — Keyword Search</h3>
+    <ul>
+      <li><code class="code-inline">-k</code> searches only the <strong>titles and descriptions</strong> of man pages.</li>
+      <li>It is <strong>equivalent to the <code class="code-inline">apropos</code> command</strong>.</li>
+      <li>Output shows the <strong>page name + section number + short description</strong>.</li>
+    </ul>
+
+    <div class="code-block"><span class="prompt">$ </span><span class="command">man</span> <span class="flag">-k</span> passwd
+<span class="output">chpasswd (8)   - update passwords in batch mode</span>
+<span class="output">passwd (1)     - update user's authentication tokens</span>
+<span class="output">passwd (5)     - password file</span></div>
+
+    <div class="info-box tip">
+      <div class="box-title">💡 Multiple Words</div>
+      <code class="code-inline">man -k postscript viewer</code> matches pages containing <strong>either</strong> word ("postscript" <strong>or</strong> "viewer").
+    </div>
+
+    <h3>5.2 <code>man -K</code> — Full-Text Search (Capital K)</h3>
+    <ul>
+      <li>Searches the <strong>entire text</strong> of all man pages, not just titles.</li>
+      <li><strong>Slower</strong> and uses <strong>more system resources</strong>.</li>
+      <li>It opens the <strong>first page</strong> with a match. Then:</li>
+    </ul>
+
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Key</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><code class="code-inline">Enter</code></td><td><strong>View</strong> this page</td></tr>
+          <tr><td><code class="code-inline">Ctrl+D</code></td><td><strong>Skip</strong> to the next match</td></tr>
+          <tr><td><code class="code-inline">Ctrl+C</code></td><td><strong>Quit</strong> the search</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.5.3 Quick Comparison</h3>
+    <div class="vs-container">
+      <div class="vs-card vs-fast">
+        <div class="vs-badge" style="color:var(--green)">⚡ Fast</div>
+        <h4><code>man -k</code> (lowercase)</h4>
+        <p style="font-size:.9rem;color:var(--text2)">Searches <strong>titles + descriptions</strong> only. Uses the pre-built index database.</p>
+      </div>
+      <div class="vs-card vs-slow">
+        <div class="vs-badge" style="color:var(--yellow)">🐢 Slow</div>
+        <h4><code>man -K</code> (UPPERCASE)</h4>
+        <p style="font-size:.9rem;color:var(--text2)">Searches <strong>full text</strong> of every man page. Scans all files on disk.</p>
+      </div>
+    </div>
+
+    <div class="info-box note">
+      <div class="box-title">📘 How does <code>-k</code> work internally?</div>
+      It reads an <strong>index database</strong> built by the <code class="code-inline">mandb(8)</code> command.
+      <ul>
+        <li><code class="code-inline">mandb</code> must be run as <strong>root</strong></li>
+        <li>The <code class="code-inline">man-db-cache-update</code> service runs it <strong>automatically</strong> whenever you install a package that has man pages</li>
+        <li>So the index stays up to date without you doing anything</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 6 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s6">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(234,179,8,.15)">🏋️</div>
+    <h2>3.6 Guided Exercise Summary</h2>
+  </div>
+  <div class="section-body">
+    <p><strong>Goal:</strong> Practice finding information with <code class="code-inline">man</code>.<br>
+    <strong>Setup:</strong> <code class="code-inline">lab start help-manual</code> (as <code class="code-inline">student</code> on <code class="code-inline">workstation</code>)</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>#</th><th>Task</th><th>Command</th><th>What You Learn</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Open a file in gedit at the end</td><td><code class="code-inline">gedit + manual</code></td><td>In gedit, <code class="code-inline">+LINE</code> jumps to a line. With <strong>no number</strong>, it goes to the <strong>last line</strong></td></tr>
+          <tr><td>2</td><td>Read the <code>su</code> page</td><td><code class="code-inline">man 1 su</code></td><td><code class="code-inline">su</code> with no user = <strong>root</strong>. <code class="code-inline">su -</code> starts a <strong>login shell</strong></td></tr>
+          <tr><td>3</td><td>Read the man page for <code>man</code></td><td><code class="code-inline">man man</code></td><td><code class="code-inline">man</code> has its own manual</td></tr>
+          <tr><td>4</td><td>Find where <code>passwd</code> files live</td><td><code class="code-inline">whereis passwd</code></td><td>Shows binary, config, and man page locations</td></tr>
+          <tr><td>5</td><td>Find a ZIP info tool</td><td><code class="code-inline">man -k zip</code></td><td>Found <code class="code-inline">zipinfo(1)</code></td></tr>
+          <tr><td>6</td><td>Find kernel boot parameters</td><td><code class="code-inline">man -k boot</code></td><td>Found <code class="code-inline">bootparam(7)</code></td></tr>
+          <tr><td>7</td><td>Find a tool to tune ext4</td><td><code class="code-inline">man -k ext4</code></td><td>Found <code class="code-inline">tune2fs(8)</code> (also <code class="code-inline">resize2fs(8)</code>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Finish:</strong> <code class="code-inline">lab finish help-manual</code></p>
+
+    <div class="info-box note">
+      <div class="box-title">📘 Details Worth Remembering</div>
+      <p><strong><code>su</code> login vs non-login shell:</strong></p>
+      <ul>
+        <li><code class="code-inline">su</code> → non-login child shell that keeps your <strong>current environment</strong></li>
+        <li><code class="code-inline">su -</code> → <strong>login shell</strong> with the target user's <strong>full environment</strong></li>
+        <li><code class="code-inline">-</code>, <code class="code-inline">-l</code>, and <code class="code-inline">--login</code> are <strong>all the same option</strong></li>
+      </ul>
+      <p style="margin-top:12px"><strong><code>whereis passwd</code> output:</strong></p>
+      <div class="code-block"><span class="output">passwd: </span><span class="path">/usr/bin/passwd</span> <span class="path">/etc/passwd</span> <span class="path">/usr/share/man/man1/passwd.1.gz</span> <span class="path">/usr/share/man/man5/passwd.5.gz</span> <span class="output">...</span></div>
+      <ul>
+        <li><code class="code-inline">/usr/bin/passwd</code> → the program</li>
+        <li><code class="code-inline">/etc/passwd</code> → the data file</li>
+        <li><code class="code-inline">/usr/share/man/man1/...</code> and <code class="code-inline">man5/...</code> → the man pages (the <code class="code-inline">man1</code>, <code class="code-inline">man5</code> folders match the section numbers)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 7 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s7">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(238,0,0,.12)">🖨️</div>
+    <h2>3.7 Lab Walkthrough: Printing and Viewing Docs</h2>
+  </div>
+  <div class="section-body">
+    <p><strong>Goal:</strong> Find, format, view, and "print" documentation using only man pages.<br>
+    <strong>Setup:</strong> <code class="code-inline">lab start help-review</code></p>
+
+    <h3>Step 1: How Do I Prepare a Man Page for Printing?</h3>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">man</span> man      <span class="comment"># then look for the "-t" option</span></div>
+    <ul>
+      <li><code class="code-inline">man -t</code> formats a page for printing.</li>
+      <li>The default output is <strong>PostScript</strong> (a page-description format used for printing).</li>
+      <li>Example from the manual: <code class="code-inline">man -t bash | lpr -Pps</code></li>
+    </ul>
+
+    <div class="info-box note">
+      <div class="box-title">📘 What is <code>groff</code>?</div>
+      <code class="code-inline">groff</code> is the text-formatting tool behind man pages. Its default output is PostScript.
+    </div>
+
+    <h3>Step 2: Create a PostScript File from the <code>passwd</code> Man Page</h3>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">man</span> <span class="flag">-t</span> passwd <span class="output">&gt;</span> <span class="path">passwd.ps</span>     <span class="comment"># save the formatted page to a file</span>
+<span class="prompt">$ </span><span class="command">ls</span> <span class="flag">-al</span>                        <span class="comment"># confirm the file exists</span>
+<span class="prompt">$ </span><span class="command">file</span> <span class="path">/home/student/passwd.ps</span>  <span class="comment"># identify the file type</span>
+<span class="output">PostScript document text conforming DSC level 3.0</span>
+<span class="prompt">$ </span><span class="command">less</span> <span class="path">/home/student/passwd.ps</span>  <span class="comment"># peek inside (press q to quit)</span></div>
+
+    <ul>
+      <li><code class="code-inline">&gt;</code> is <strong>redirection</strong>. It sends output into a file instead of the screen (covered in a later chapter).</li>
+      <li>Inside the file you will see headers like <code class="code-inline">%!PS-Adobe-3.0</code>, which confirms it is PostScript.</li>
+    </ul>
+
+    <h3>Step 3: Find Tools to View/Print PostScript</h3>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">man</span> <span class="flag">-k</span> postscript viewer</div>
+    <p>Found: <strong><code class="code-inline">evince(1)</code></strong>, the GNOME document viewer (it handles PostScript and PDF).</p>
+
+    <h3>Step 4: Use <code>evince</code></h3>
+    <p>Options learned from <code class="code-inline">man evince</code>:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Option</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code class="code-inline">-w</code> / <code class="code-inline">--preview</code></td><td>Open in <strong>preview mode</strong> (good for quick browsing and printing)</td></tr>
+          <tr><td><code class="code-inline">-i NUMBER</code> / <code class="code-inline">--page-index=NUMBER</code></td><td>Open at a <strong>specific page</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">evince</span> <span class="path">/home/student/passwd.ps</span>         <span class="comment"># normal mode</span>
+<span class="prompt">$ </span><span class="command">evince</span> <span class="flag">-w</span> <span class="path">/home/student/passwd.ps</span>      <span class="comment"># preview mode</span>
+<span class="prompt">$ </span><span class="command">evince</span> <span class="flag">-i</span> 3 <span class="path">/home/student/passwd.ps</span>    <span class="comment"># start at page 3</span></div>
+
+    <h3>Step 5: Print Only Pages 2 and 3 (Theory Only)</h3>
+    <p>From <code class="code-inline">man lp</code>:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Option</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code class="code-inline">-P page-list</code></td><td>Which pages to print, e.g. <code class="code-inline">1,3-5,16</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">lp</span> <span class="path">passwd.ps</span> <span class="flag">-P</span> 2-3</div>
+
+    <div class="info-box warning">
+      <div class="box-title">⚠️ Page Numbers</div>
+      The numbers refer to <strong>output pages</strong>, not the document's original pages. Options like "number-up" can change the numbering.
+    </div>
+
+    <h3>Step 6: Browse Local Docs in Firefox</h3>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">firefox</span> <span class="path">/usr/share/doc</span></div>
+    <ul>
+      <li>Open the <code class="code-inline">man-db</code> folder and view the manuals.</li>
+      <li>Open the <code class="code-inline">kexec-tools</code> folder and read <code class="code-inline">kexec-kdump-howto.txt</code>. It explains config options stored in <code class="code-inline">/etc/sysconfig</code>.</li>
+    </ul>
+
+    <div class="info-box tip">
+      <div class="box-title">💡 Tip</div>
+      <code class="code-inline">/usr/share/doc</code> holds <strong>extra documentation</strong> that packages install (separate from man pages).
+    </div>
+
+    <h3>Evaluation</h3>
+    <div class="code-block"><span class="prompt">$ </span><span class="command">lab grade</span> help-review     <span class="comment"># fix any failures and rerun</span>
+<span class="prompt">$ </span><span class="command">lab finish</span> help-review    <span class="comment"># clean up</span></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 8 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s8">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(34,197,94,.15)">📋</div>
+    <h2>3.8 Cheat Sheet</h2>
+  </div>
+  <div class="section-body">
+    <div class="code-block"><span class="comment"># ── Opening Man Pages ──</span>
+<span class="prompt">$ </span><span class="command">man</span> &lt;topic&gt;              <span class="comment"># open a man page</span>
+<span class="prompt">$ </span><span class="command">man</span> &lt;section&gt; &lt;topic&gt;    <span class="comment"># open from a specific section</span>
+
+<span class="comment"># ── Searching ──</span>
+<span class="prompt">$ </span><span class="command">man</span> <span class="flag">-k</span> &lt;keyword&gt;         <span class="comment"># search titles/descriptions (= apropos)</span>
+<span class="prompt">$ </span><span class="command">man</span> <span class="flag">-K</span> &lt;keyword&gt;         <span class="comment"># full-text search (slow)</span>
+
+<span class="comment"># ── Formatting &amp; Printing ──</span>
+<span class="prompt">$ </span><span class="command">man</span> <span class="flag">-t</span> &lt;topic&gt; &gt; f.ps    <span class="comment"># make a printable PostScript file</span>
+
+<span class="comment"># ── Finding Files ──</span>
+<span class="prompt">$ </span><span class="command">whereis</span> &lt;command&gt;        <span class="comment"># find binary, config, and man page locations</span>
+<span class="prompt">$ </span><span class="command">file</span> &lt;filename&gt;          <span class="comment"># identify a file's type</span>
+
+<span class="comment"># ── Viewing &amp; Printing ──</span>
+<span class="prompt">$ </span><span class="command">evince</span> <span class="flag">-w</span> &lt;file&gt;         <span class="comment"># preview mode</span>
+<span class="prompt">$ </span><span class="command">evince</span> <span class="flag">-i</span> 3 &lt;file&gt;       <span class="comment"># open at page 3</span>
+<span class="prompt">$ </span><span class="command">lp</span> &lt;file&gt; <span class="flag">-P</span> 2-3         <span class="comment"># print pages 2 to 3</span></div>
+
+    <div class="info-box tip">
+      <div class="box-title">💡 Inside a Man Page</div>
+      <code class="code-inline">/text</code> search · <code class="code-inline">n</code> next · <code class="code-inline">Shift+n</code> previous · <code class="code-inline">g</code> top · <code class="code-inline">Shift+g</code> bottom · <code class="code-inline">q</code> quit
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 9 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" id="s9">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(238,0,0,.12)">🎯</div>
+    <h2>3.9 Key Takeaways</h2>
+  </div>
+  <div class="section-body">
+    <div class="info-box tip">
+      <div class="box-title">✅ Summary</div>
+      <ul>
+        <li>Use <code class="code-inline">man</code> to read man pages, the <strong>built-in offline documentation</strong> for files, commands, and functions.</li>
+        <li>Reference a page by <strong>name + section number</strong>, like <code class="code-inline">passwd(5)</code>.</li>
+        <li>Sections <strong>1, 5, and 8</strong> matter most for sysadmins.</li>
+        <li>Use <code class="code-inline">/string</code> to search within a page, and <code class="code-inline">q</code> to quit.</li>
+        <li>Use <code class="code-inline">man -k</code> to find pages by <strong>keyword</strong> when you don't know the command name.</li>
+        <li>The keyword index is built by <code class="code-inline">mandb</code> and updated automatically.</li>
+        <li>Regular expressions work in page searches, so special characters like <code class="code-inline">$</code> can behave unexpectedly.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SELF-TEST -->
+<!-- ════════════════════════════════════════════ -->
+<div class="checklist-section" id="selftest">
+  <h2>❓ Self-Test Questions</h2>
+  <div class="checklist-item"><input type="checkbox" id="st1"><label for="st1">What is the difference between <code class="code-inline">passwd(1)</code> and <code class="code-inline">passwd(5)</code>?</label></div>
+  <div class="checklist-item"><input type="checkbox" id="st2"><label for="st2">Which command shows the <code class="code-inline">/etc/passwd</code> file format page?</label></div>
+  <div class="checklist-item"><input type="checkbox" id="st3"><label for="st3">What is the difference between <code class="code-inline">man -k</code> and <code class="code-inline">man -K</code>?</label></div>
+  <div class="checklist-item"><input type="checkbox" id="st4"><label for="st4">Which command builds the index used by <code class="code-inline">man -k</code>?</label></div>
+  <div class="checklist-item"><input type="checkbox" id="st5"><label for="st5">How do you jump to the end of a man page?</label></div>
+  <div class="checklist-item"><input type="checkbox" id="st6"><label for="st6">What does <code class="code-inline">man -t</code> do, and what format does it produce by default?</label></div>
+  <div class="checklist-item"><input type="checkbox" id="st7"><label for="st7">How do you open a document at page 3 in <code class="code-inline">evince</code>?</label></div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- RELATED MAN PAGES -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section-card" style="margin-top:28px">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(6,182,212,.15)">🔗</div>
+    <h2>Related Man Pages</h2>
+  </div>
+  <div class="section-body">
+    <p style="display:flex;flex-wrap:wrap;gap:8px">
+      <code class="code-inline">man(1)</code>
+      <code class="code-inline">mandb(8)</code>
+      <code class="code-inline">man-pages(7)</code>
+      <code class="code-inline">less(1)</code>
+      <code class="code-inline">intro(1)</code>
+      <code class="code-inline">regex(7)</code>
+      <code class="code-inline">evince(1)</code>
+      <code class="code-inline">lp(1)</code>
+    </p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- REVISION CHECKLIST -->
+<!-- ════════════════════════════════════════════ -->
+<div class="checklist-section" id="revision">
+  <h2>✅ Chapter 3 Revision Checklist</h2>
+  <div class="checklist-item"><input type="checkbox" id="r1"><label for="r1">I can explain what a man page is and where they are stored (<code class="code-inline">/usr/share/man</code>)</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r2"><label for="r2">I know the 9 manual sections and which ones matter for sysadmins (1, 5, 8)</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r3"><label for="r3">I understand <code class="code-inline">passwd(1)</code> vs <code class="code-inline">passwd(5)</code> — same name, different sections</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r4"><label for="r4">I can open a specific section: <code class="code-inline">man 5 passwd</code></label></div>
+  <div class="checklist-item"><input type="checkbox" id="r5"><label for="r5">I can navigate a man page: <code class="code-inline">Space</code>, <code class="code-inline">/search</code>, <code class="code-inline">n</code>, <code class="code-inline">g</code>, <code class="code-inline">G</code>, <code class="code-inline">q</code></label></div>
+  <div class="checklist-item"><input type="checkbox" id="r6"><label for="r6">I can read a SYNOPSIS line — <code class="code-inline">[ ]</code> = optional, <code class="code-inline">...</code> = repeatable</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r7"><label for="r7">I know the standard man page headings: NAME → SYNOPSIS → DESCRIPTION → OPTIONS → EXAMPLES → FILES → SEE ALSO</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r8"><label for="r8">I can search by keyword: <code class="code-inline">man -k</code> (fast, titles) vs <code class="code-inline">man -K</code> (slow, full text)</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r9"><label for="r9">I know that <code class="code-inline">mandb(8)</code> builds the keyword index and runs automatically</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r10"><label for="r10">I can format a man page for printing: <code class="code-inline">man -t topic &gt; file.ps</code> (PostScript)</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r11"><label for="r11">I know <code class="code-inline">whereis</code> finds binary, config, and man page locations</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r12"><label for="r12">I can use <code class="code-inline">evince -w</code> (preview) and <code class="code-inline">evince -i N</code> (page number)</label></div>
+  <div class="checklist-item"><input type="checkbox" id="r13"><label for="r13">I know <code class="code-inline">/usr/share/doc</code> holds extra package documentation</label></div>
+  <div class="checklist-progress">Progress: <span id="revCount">0</span> / 13 completed</div>
+</div>
+
+</div><!-- /container -->
+
+<!-- Scroll to Top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ── Reading Progress Bar ──
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  const pct=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('scrollTop').classList.toggle('show',h.scrollTop>400);
+});
+
+// ── TOC Sidebar ──
+function toggleTOC(){
+  document.getElementById('tocSidebar').classList.toggle('open');
+  document.getElementById('tocOverlay').classList.toggle('show');
+}
+
+// ── Revision Checklist Persistence ──
+const STORAGE_KEY='rhel_ch04_checklist';
+function loadChecklist(){
+  const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+  document.querySelectorAll('#revision input[type="checkbox"]').forEach(cb=>{
+    if(saved[cb.id]) cb.checked=true;
+  });
+  updateCount();
+}
+function saveChecklist(){
+  const data={};
+  document.querySelectorAll('#revision input[type="checkbox"]').forEach(cb=>{
+    data[cb.id]=cb.checked;
+  });
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  updateCount();
+}
+function updateCount(){
+  const all=document.querySelectorAll('#revision input[type="checkbox"]');
+  const done=[...all].filter(c=>c.checked).length;
+  document.getElementById('revCount').textContent=done;
+}
+document.querySelectorAll('#revision input[type="checkbox"]').forEach(cb=>{
+  cb.addEventListener('change',saveChecklist);
+});
+loadChecklist();
+</script>
+</body>
+</html>

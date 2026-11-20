@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapters 17–18 – Introduction to Networking</title>
+<style>:root{--bg:#0a0e17;--card:#1a2234;--tx:#e2e8f0;--tx2:#94a3b8;--red:#ee0000;--grn:#22c55e;--yel:#eab308;--blu:#3b82f6;--pur:#a855f7;--cyn:#06b6d4;--org:#f97316;--bd:#1e293b;--bd2:#334155;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.7}
+.top{position:sticky;top:0;z-index:9;background:rgba(10,14,23,.94);border-bottom:1px solid var(--bd);padding:9px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.top a{color:var(--tx2);text-decoration:none;font-size:.78rem;padding:3px 10px;border:1px solid var(--bd2);border-radius:20px}
+.top a:hover,.top .b{color:var(--red);border-color:var(--red)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:2rem;margin:14px 0 6px}h2{font-size:1.45rem;margin:44px 0 12px;padding-left:12px;border-left:4px solid var(--red)}
+h3{font-size:1.05rem;margin:20px 0 6px;color:var(--cyn)}p{margin:7px 0}
+.card,.q{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.kw{background:rgba(238,0,0,.14);color:#ff9a9a;border-radius:6px;padding:0 7px;font-weight:600}
+code{font-family:Consolas,monospace;background:#0d1423;color:#7dd3fc;padding:1px 6px;border-radius:5px;font-size:.9em}
+pre{background:#0d1423;border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin:10px 0;overflow-x:auto;font:.84rem/1.6 Consolas,monospace;color:#cbd5e1}
+.c{color:#64748b}.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem}
+th,td{border:1px solid var(--bd2);padding:7px 9px;text-align:left}th{background:#111b2e;color:var(--tx2)}
+.note,.warn,.tip,.where,.sc{border-radius:var(--r);padding:12px 15px;margin:14px 0;border-left:4px solid}
+.note{background:rgba(59,130,246,.09);border-color:var(--blu)}.warn{background:rgba(249,115,22,.09);border-color:var(--org)}
+.tip{background:rgba(34,197,94,.09);border-color:var(--grn)}.where{background:rgba(238,0,0,.07);border-color:var(--red)}
+.sc{background:rgba(168,85,247,.09);border-color:var(--pur)}.where h4{color:#ff9a9a}.sc h4{color:#d8b4fe}
+.r{color:var(--grn);font-weight:700}.w{color:var(--yel);font-weight:700}.x{color:var(--red);font-weight:700}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center;align-items:stretch}
+.flow div{background:var(--card);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 12px;text-align:center;font-size:.85rem}
+.flow .ar{border:0;background:none;color:var(--red);font-size:1.4rem;align-self:center;padding:0}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.st div{background:var(--card);border:2px solid;border-radius:var(--r);padding:10px;text-align:center;font-size:.85rem}
+.st b{display:block;font:700 1.8rem Consolas,monospace}
+.nice{height:34px;border-radius:8px;background:linear-gradient(90deg,#ee0000,#eab308,#22c55e);margin:8px 0 2px}
+.nl{display:flex;justify-content:space-between;font:.78rem Consolas,monospace;color:var(--tx2)}
+.tree{font:.9rem/1.5 Consolas,monospace}
+.q{margin:12px 0}.q label{display:block;padding:6px 8px;border-radius:8px;cursor:pointer}.q label:hover{background:#111b2e}
+.ex{display:none;margin-top:8px;font-size:.9rem}.q.ok{border-color:var(--grn)}.q.bad{border-color:var(--red)}
+.out{text-align:center;font:700 1.2rem Consolas,monospace;margin-top:8px}
+input[type=text]{background:#0d1423;border:1px solid var(--bd2);color:var(--tx);border-radius:8px;padding:6px;font:1rem Consolas,monospace;width:70px;text-align:center}
+button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px 22px;font-size:1rem;cursor:pointer}
+
+.lay{border:2px solid;border-radius:var(--r);padding:8px 12px;margin:6px 0;font-size:.88rem}
+.opt{display:block;width:100%;text-align:left;background:#0d1423;color:var(--tx);border:1px solid var(--bd2);border-radius:8px;padding:8px 12px;margin:6px 0;cursor:pointer;font-size:.95rem}
+.opt:hover:not(:disabled){border-color:var(--cyn)}.opt.good{border-color:var(--grn);background:rgba(34,197,94,.18)}.opt.bad{border-color:var(--red);background:rgba(238,0,0,.18)}
+.sev{display:flex;gap:3px;margin:10px 0;flex-wrap:wrap}.sev div{flex:1;min-width:78px;text-align:center;padding:6px 2px;border-radius:8px;font-size:.78rem;color:#0a0e17;font-weight:700}
+select{background:#0d1423;color:var(--tx);border:1px solid var(--bd2);border-radius:8px;padding:6px;font-size:.95rem}
+</style></head><body>
+<div class="top"><a class="b" href="../Index.html">← Dashboard</a><a href="#a">Models</a><a href="#b">Names</a><a href="#c">IPv4</a><a href="#d">IPv6</a><a href="#e">Validate</a><a href="#f">nmcli</a><a href="#g">Key file</a><a href="#h">Hostname + DNS</a><a href="#lab">Lab</a><a href="#quiz">Quiz</a></div>
+<div class="wrap">
+<small style="color:var(--red);font-weight:700">CHAPTER 15</small>
+<h1>🌐 Introduction to Networking</h1>
+<p>Networking is how your server <b>talks to other computers</b>. Every monitoring or support job starts with the question: <i>"Can the server reach the network?"</i> In this chapter you learn to <span class="kw">check</span> the network, <span class="kw">configure</span> it with <code>nmcli</code>, and set the <span class="kw">hostname</span> and <span class="kw">DNS</span>.</p>
+<div class="flow"><div>🖥️ Your server<br><code>192.168.1.100</code></div><div class="ar">→</div><div>🔀 Gateway (router)<br><code>192.168.1.1</code></div><div class="ar">→</div><div>🌍 Internet<br><code>google.com</code></div></div>
+
+<h2 id="a">1. TCP/IP Model and OSI Model</h2>
+<p>These are <b>maps</b> that show how data travels. OSI has 7 layers (theory). TCP/IP has 4 layers (real world, used by RHEL).</p>
+<div class="grid"><div>
+<div class="lay" style="border-color:var(--red)"><b>4. Application</b> — SSH, HTTPS, DNS, SMTP</div>
+<div class="lay" style="border-color:var(--org)"><b>3. Transport</b> — TCP, UDP + <b>ports</b></div>
+<div class="lay" style="border-color:var(--yel)"><b>2. Internet</b> — IP address, routers, ICMP (ping)</div>
+<div class="lay" style="border-color:var(--grn)"><b>1. Link</b> — Ethernet, Wi-Fi, <b>MAC address</b></div></div>
+<div>
+<div class="lay" style="border-color:var(--red)"><b>OSI 7, 6, 5</b> — Application, Presentation, Session</div>
+<div class="lay" style="border-color:var(--org)"><b>OSI 4</b> — Transport</div>
+<div class="lay" style="border-color:var(--yel)"><b>OSI 3</b> — Network</div>
+<div class="lay" style="border-color:var(--grn)"><b>OSI 2, 1</b> — Data Link, Physical</div></div></div>
+<div class="tw"><table><tr><th>Word</th><th>Simple meaning</th></tr>
+<tr><td><span class="kw">TCP</span></td><td>Reliable. Checks that data arrived. Used by SSH, web, email</td></tr>
+<tr><td><span class="kw">UDP</span></td><td>Fast, no checking. Used by DNS, video, syslog</td></tr>
+<tr><td><span class="kw">Port</span></td><td>A door number on a server. SSH = 22, HTTP = 80, HTTPS = 443, DNS = 53</td></tr>
+<tr><td><span class="kw">Socket</span></td><td>IP address + port, like <code>192.168.1.100:22</code></td></tr>
+<tr><td><span class="kw">MAC address</span></td><td>Hardware ID of a network card, like <code>52:54:00:00:fa:0a</code>. Works only on the local network</td></tr></table></div>
+<pre>$ grep -w ssh /etc/services          <span class="c"># list of port numbers and names</span>
+ssh             22/tcp</pre>
+
+<h2 id="b">2. Network Interface Names</h2>
+<p>Old Linux used <code>eth0</code>, <code>eth1</code>. The order could change after a reboot. New RHEL gives <b>fixed names</b> based on the hardware.</p>
+<div class="st"><div style="border-color:var(--grn)"><b style="color:var(--grn)">en</b>Ethernet (cable)</div><div style="border-color:var(--blu)"><b style="color:var(--blu)">wl</b>WLAN (Wi-Fi)</div><div style="border-color:var(--pur)"><b style="color:var(--pur)">ww</b>WWAN (mobile data)</div></div>
+<div class="tw"><table><tr><th>Name</th><th>How to read it</th></tr>
+<tr><td><code>eno1</code></td><td>en + <b>o</b>n-board number 1</td></tr>
+<tr><td><code>ens160</code></td><td>en + PCI <b>s</b>lot 160 (common in <b>VMware</b>)</td></tr>
+<tr><td><code>enp0s3</code></td><td>en + PCI bus <b>p</b>0 + slot <b>s</b>3 (common in VirtualBox)</td></tr>
+<tr><td><code>wlp4s0</code></td><td>Wi-Fi on PCI bus 4, slot 0</td></tr>
+<tr><td><code>lo</code></td><td><b>Loopback</b>: the server talking to itself (<code>127.0.0.1</code>)</td></tr></table></div>
+<div class="note">On your VMware VM the name is likely <code>ens160</code>. In the book labs it is <code>eth0</code> or <code>enX</code>. <b>Always check your own name</b> with <code>ip link</code> and use it in commands.</div>
+
+<h2 id="c">3. IPv4 Addresses</h2>
+<p>An IPv4 address has <b>32 bits</b>, written as <b>4 numbers (0-255)</b>: <code>192.168.1.107</code>. It has two parts: the <span class="kw">network part</span> (which street) and the <span class="kw">host part</span> (which house).</p>
+<div class="flow"><div><code>192.168.1</code><br>Network part</div><div class="ar">+</div><div><code>.107</code><br>Host part</div><div class="ar">=</div><div><code>192.168.1.107/24</code><br>/24 = first 24 bits are network</div></div>
+<div class="tw"><table><tr><th>Special address</th><th>Rule</th><th>Example in 192.168.1.0/24</th></tr>
+<tr><td>Network address</td><td>Host bits all 0. Cannot be given to a host</td><td><code>192.168.1.0</code></td></tr>
+<tr><td>Broadcast</td><td>Host bits all 1. Reaches every host</td><td><code>192.168.1.255</code></td></tr>
+<tr><td>Usable hosts</td><td>Between the two. Formula: <b>2<sup>host bits</sup> − 2</b></td><td><code>.1</code> to <code>.254</code> = <b>254</b></td></tr>
+<tr><td>Gateway</td><td>Router. Often <code>.1</code> or <code>.254</code></td><td><code>192.168.1.1</code></td></tr></table></div>
+<div class="tw"><table><tr><th>CIDR</th><th>Netmask</th><th>Usable hosts</th></tr><tr><td>/8</td><td>255.0.0.0</td><td>16,777,214</td></tr><tr><td>/16</td><td>255.255.0.0</td><td>65,534</td></tr><tr><td>/24</td><td>255.255.255.0</td><td>254</td></tr><tr><td>/25</td><td>255.255.255.128</td><td>126</td></tr><tr><td>/26</td><td>255.255.255.192</td><td>62</td></tr><tr><td>/27</td><td>255.255.255.224</td><td>30</td></tr><tr><td>/30</td><td>255.255.255.252</td><td>2</td></tr></table></div>
+<div class="tip"><b>Quick method:</b> block size = 256 − mask number. For <code>/26</code> (mask 192): 256 − 192 = <b>64</b>. Networks start at 0, 64, 128, 192. So <code>192.168.10.77/26</code> is in the block <code>.64</code> to <code>.127</code>. Network = <code>.64</code>, broadcast = <code>.127</code>.</div>
+<h3>🧮 Try it: subnet calculator</h3>
+<div class="card">IP: <input type="text" id="ip" value="192.168.10.77" style="width:150px"> / <input type="text" id="cd" value="26" style="width:50px"> <button onclick="calc()" style="padding:5px 14px">Calculate</button><pre id="cr" style="margin-top:10px"></pre></div>
+<h3>Private IP ranges (not used on the Internet)</h3>
+<p><code>10.0.0.0/8</code> · <code>172.16.0.0/12</code> · <code>192.168.0.0/16</code> · <code>127.0.0.0/8</code> = loopback. Also <code>169.254.x.x</code> = the address a PC gives itself when <b>DHCP fails</b>.</p>
+<h3>Routing: how a packet finds its way</h3>
+<p>Every server has a <span class="kw">routing table</span>. The <b>most specific match wins</b>. If nothing matches, the packet goes to the <span class="kw">default route</span> (the gateway).</p>
+<div class="flow"><div>Packet for<br><code>192.168.1.50</code></div><div class="ar">→</div><div>Same network?<br><b class="r">Yes</b>: send directly</div><div class="ar">or</div><div>Different network?<br><b class="w">Send to gateway</b></div></div>
+<div class="tw"><table><tr><th>Method</th><th>Meaning</th></tr><tr><td><span class="kw">DHCP</span> (automatic)</td><td>A DHCP server gives IP, gateway and DNS for a time (lease). Used for laptops and most VMs</td></tr><tr><td><span class="kw">Static</span> (manual)</td><td>You set the IP yourself. Used for servers, so the IP never changes</td></tr></table></div>
+
+<h2 id="d">4. IPv6 (Short Version)</h2>
+<p>IPv6 has <b>128 bits</b>, written in hex with colons: <code>2001:db8:0:10::1</code>. RHEL runs <b>IPv4 and IPv6 together</b> (dual-stack).</p>
+<div class="grid"><div class="card"><b>✂️ How to shorten</b><br>Full: <code>2001:0db8:0000:0010:0000:0000:0000:0001</code><br>1. Drop leading zeros: <code>2001:db8:0:10:0:0:0:1</code><br>2. Replace one run of zeros with <code>::</code> → <code>2001:db8:0:10::1</code><br><b class="x">:: only ONCE per address</b></div>
+<div class="card"><b>📋 Special addresses</b><br><code>::1</code> loopback (like 127.0.0.1)<br><code>fe80::/10</code> link-local (every interface has one)<br><code>2000::/3</code> global (Internet)<br><code>fd00::/8</code> private (unique local)<br><code>ff02::1</code> all nodes on the link</div></div>
+<ul style="margin-left:22px"><li>Standard subnet is <b>/64</b>: 64 bits network + 64 bits interface ID.</li><li>IPv6 has <b>no broadcast</b>. It uses <b>multicast</b>.</li><li>With a port, use brackets: <code>[2001:db8::1]:80</code>.</li><li>Link-local ping needs the interface: <code>ping -6 fe80::1%ens160</code>. Without <code>%ens160</code> you get <i>Invalid argument</i>.</li></ul>
+
+<h2 id="e">5. Validate the Network (Check Before You Change)</h2>
+<div class="sc"><h4>🏢 The troubleshooting ladder (always go bottom to top)</h4><div class="flow"><div>1. <code>ip link</code><br>NIC up?</div><div class="ar">→</div><div>2. <code>ip -br addr</code><br>Right IP?</div><div class="ar">→</div><div>3. <code>ping</code> gateway<br>Local OK?</div><div class="ar">→</div><div>4. <code>ping 8.8.8.8</code><br>Routing OK?</div><div class="ar">→</div><div>5. <code>ping google.com</code><br>DNS OK?</div><div class="ar">→</div><div>6. <code>ss -tulpn</code><br>Service listening?</div></div></div>
+<h3>5.1 Interfaces and IP addresses</h3>
+<pre>$ ip link show
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN
+    link/loopback 00:00:00:00:00:00
+2: ens160: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP
+    link/ether 00:0c:29:ab:cd:ef brd ff:ff:ff:ff:ff:ff
+
+$ ip addr show ens160
+2: ens160: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 state UP
+    inet 192.168.1.100/24 brd 192.168.1.255 scope global ens160
+    inet6 fe80::20c:29ff:feab:cdef/64 scope link
+
+$ ip -br addr                  <span class="c"># brief table: best for a quick look</span>
+lo      UNKNOWN  127.0.0.1/8 ::1/128
+ens160  UP       192.168.1.100/24 fe80::20c:29ff:feab:cdef/64</pre>
+<div class="tw"><table><tr><th>Output</th><th>Meaning</th></tr><tr><td><code>UP, LOWER_UP</code></td><td>Interface is on and the cable/virtual link is connected</td></tr><tr><td><code>link/ether</code></td><td>MAC address</td></tr><tr><td><code>inet</code></td><td>IPv4 address / prefix</td></tr><tr><td><code>inet6 ... scope link</code></td><td>IPv6 link-local (local network only)</td></tr></table></div>
+<p><code>ip -s link show ens160</code> adds counters. Growing <b>errors</b> or <b>dropped</b> numbers mean a network problem.</p>
+<div class="warn"><code>ifconfig</code> is <b>old</b> and not installed by default. Use <code>ip a</code> instead. Same for <code>netstat</code> (use <code>ss</code>) and <code>route -n</code> (use <code>ip route</code>).</div>
+<h3>5.2 Routing table</h3>
+<pre>$ ip route
+default via 192.168.1.1 dev ens160 proto static metric 100
+192.168.1.0/24 dev ens160 proto kernel scope link src 192.168.1.100 metric 100
+$ ip -6 route                  <span class="c"># IPv6 table</span>
+$ ip route get 8.8.8.8         <span class="c"># which way will this destination go?</span></pre>
+<p><code>default via 192.168.1.1</code> = the <b>gateway</b>. Everything not on your own network goes there. <b class="x">No default line = no Internet.</b></p>
+<h3>5.3 Ping and trace the path</h3>
+<pre>$ ping -c 4 192.168.1.1        <span class="c"># -c 4 = stop after 4. Without -c it runs forever (Ctrl+C)</span>
+64 bytes from 192.168.1.1: icmp_seq=1 ttl=64 time=1.20 ms
+4 packets transmitted, 4 received, <b>0% packet loss</b>, time 3005ms
+rtt min/avg/max/mdev = 0.9/1.2/1.6/0.2 ms
+
+$ tracepath google.com         <span class="c"># installed by default. Each line = one router (hop)</span>
+ 1?: [LOCALHOST]                      pmtu 1500
+ 1:  _gateway                         1.211ms
+ 2:  10.10.0.1                        4.502ms
+ 3:  no reply
+$ sudo dnf install traceroute  <span class="c"># traceroute is NOT installed by default</span>
+$ traceroute google.com</pre>
+<p><b>0% packet loss</b> and a low time = healthy. <code>no reply</code> on a hop is often normal: many routers block these probes.</p>
+<h3>5.4 Ports and sockets with <code>ss</code></h3>
+<pre>$ ss -tulpn                    <span class="c"># the most useful form</span>
+Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:Port Process
+tcp   LISTEN 0      128    0.0.0.0:22          0.0.0.0:*         users:(("sshd",pid=812))
+tcp   LISTEN 0      100    127.0.0.1:25        0.0.0.0:*         users:(("master",pid=1020))
+tcp   LISTEN 0      128    [::]:22             [::]:*
+udp   UNCONN 0      0      127.0.0.1:323       0.0.0.0:*</pre>
+<div class="tw"><table><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>-t</code> / <code>-u</code></td><td>TCP / UDP</td></tr><tr><td><code>-l</code></td><td>Listening only (servers waiting for clients)</td></tr><tr><td><code>-a</code></td><td>All sockets (listening + connected)</td></tr><tr><td><code>-n</code></td><td>Show numbers, not names (<code>22</code> not <code>ssh</code>)</td></tr><tr><td><code>-p</code></td><td>Show the program name (use <code>sudo</code> to see all)</td></tr></table></div>
+<div class="tw"><table><tr><th>Local address</th><th>Meaning</th></tr><tr><td><code>0.0.0.0:22</code> or <code>*:22</code></td><td>Open on <b>all IPv4</b> addresses. Reachable from outside</td></tr><tr><td><code>127.0.0.1:25</code></td><td>Only <b>this server itself</b>. NOT reachable from outside</td></tr><tr><td><code>[::]:22</code></td><td>Open on all IPv6 addresses</td></tr></table></div>
+<div class="note"><b>Correction to your notes:</b> <code>nmap -p- IP</code> <i>scans</i> a host from outside (all 65535 ports). It is not the normal way to see your own open ports. Use <code>ss -tulpn</code> on the server. Use <code>nmap</code> only when you have permission to scan, and install it first (<code>dnf install nmap</code>).</div>
+
+<h2 id="f">6. NetworkManager and <code>nmcli</code></h2>
+<p><span class="kw">NetworkManager</span> is the service that manages the network on RHEL. You control it with:</p>
+<div class="grid"><div class="card"><b>⌨️ nmcli</b><br>Command line. Best for scripts and exams.</div><div class="card"><b>🖥️ nmtui</b><br>Menu screen in the terminal. Easy for beginners. Can set IP, activate connection and <b>hostname</b>.</div><div class="card"><b>📝 Edit file</b><br>Edit <code>.nmconnection</code> by hand, then reload.</div></div>
+<h3>Two words you must know</h3>
+<div class="flow"><div><b>Device</b><br>The network card<br><code>ens160</code></div><div class="ar">⇄</div><div><b>Connection</b><br>A saved set of settings (profile)<br><code>System ens160</code></div></div>
+<p>A device can have many saved connections, but <b>only one is active at a time</b>. The connection name is often <b>different</b> from the device name.</p>
+<h3>6.1 View information</h3>
+<pre>$ nmcli device status
+DEVICE  TYPE      STATE      CONNECTION
+ens160  ethernet  connected  ens160
+lo      loopback  unmanaged  --
+$ nmcli connection show               <span class="c"># all saved connections</span>
+$ nmcli connection show --active      <span class="c"># only active ones</span>
+$ nmcli connection show "ens160"      <span class="c"># all settings (quote names with spaces)</span>
+$ nmcli device show ens160            <span class="c"># live info: IP, gateway, DNS</span></pre>
+<div class="tip">In <code>nmcli con show NAME</code>: <b>lowercase</b> keys (<code>ipv4.method</code>) are the saved settings you can change. <b>UPPERCASE</b> keys (<code>IP4.ADDRESS</code>) are the live values right now. You can shorten words: <code>nmcli con mod</code>, <code>nmcli dev stat</code>.</div>
+<h3>6.2 Add a new connection</h3>
+<pre># DHCP (automatic)
+$ sudo nmcli connection add con-name testing type ethernet ifname ens160
+# Static IP
+$ sudo nmcli connection add con-name static-ens160 type ethernet ifname ens160 \
+    ipv4.method manual ipv4.addresses 192.168.1.100/24 \
+    ipv4.gateway 192.168.1.1 ipv4.dns 8.8.8.8
+$ sudo nmcli connection up static-ens160      <span class="c"># turn it on</span></pre>
+<div class="tw"><table><tr><th>Part</th><th>Meaning</th></tr><tr><td><code>con-name</code></td><td>Name of the profile (you choose)</td></tr><tr><td><code>type ethernet</code></td><td>Kind of connection</td></tr><tr><td><code>ifname</code></td><td>The <b>device</b> it belongs to</td></tr><tr><td><code>ipv4.method manual</code></td><td>Use the static values (not DHCP)</td></tr></table></div>
+<div class="warn"><b>Backslash rule:</b> in the multi-line command, <code>\</code> must be the <b>very last character</b> on the line. A space after it breaks the command. In your pasted notes some lines have spaces after <code>\</code>. Remove them.</div>
+<h3>6.3 Change an existing connection (DHCP to static)</h3>
+<pre>$ nmcli con show                                       <span class="c"># find the exact name, e.g. "System eth0"</span>
+$ sudo nmcli con mod "System eth0" ipv4.method manual \
+    ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1
+$ sudo nmcli con mod "System eth0" ipv4.dns "8.8.8.8"        <span class="c"># replaces the DNS list</span>
+$ sudo nmcli con mod "System eth0" +ipv4.dns 1.1.1.1         <span class="c"># + adds one more</span>
+$ sudo nmcli con mod "System eth0" -ipv4.dns 1.1.1.1         <span class="c"># - removes one</span>
+$ sudo nmcli con mod "System eth0" +ipv4.addresses 10.0.1.1/24   <span class="c"># second IP</span>
+$ sudo nmcli con up "System eth0"                      <span class="c"># REQUIRED to apply</span></pre>
+<div class="warn"><b>Important:</b> <code>nmcli con mod</code> saves to the file at once, but the running network does not change until you run <code>nmcli con up NAME</code>. Always set <code>ipv4.method manual</code> when going static. If you forget, it may hang or still take a DHCP address.</div>
+<h3>6.4 Manage connections</h3>
+<div class="tw"><table><tr><th>Command</th><th>Use</th></tr>
+<tr><td><code>nmcli con up NAME</code></td><td>Activate. Uses the <b>connection</b> name</td></tr>
+<tr><td><code>nmcli dev disconnect ens160</code></td><td>Turn the <b>device</b> off and keep it off</td></tr>
+<tr><td><code>nmcli dev connect ens160</code></td><td>Turn the device on again</td></tr>
+<tr><td><code>nmcli con down NAME</code></td><td>Deactivate, but <b>autoconnect may bring it back</b></td></tr>
+<tr><td><code>nmcli con delete NAME</code></td><td>Delete the profile and its file</td></tr>
+<tr><td><code>nmcli con mod NAME connection.autoconnect no</code></td><td>Do not start at boot</td></tr>
+<tr><td><code>nmcli con reload</code></td><td>Re-read files after manual editing</td></tr>
+<tr><td><code>nmcli general permissions</code></td><td>What the current user is allowed to change</td></tr></table></div>
+<div class="note">Over <b>SSH</b> use <code>sudo</code> for changes. You can lose your own connection if you set a wrong IP on the interface you are logged in through. In a VM, keep the console open.</div>
+<div class="sc"><h4>🏢 Scenario: server got a new IP from DHCP, but it must be fixed</h4>Manager says: "Make <code>app01</code> always use <code>192.168.1.50</code>."<pre>$ nmcli -g NAME,DEVICE con show --active
+System eth0:eth0
+$ sudo nmcli con mod "System eth0" ipv4.method manual ipv4.addresses 192.168.1.50/24 ipv4.gateway 192.168.1.1 ipv4.dns 192.168.1.1
+$ sudo nmcli con up "System eth0"
+$ ip -br addr show eth0
+eth0   UP   192.168.1.50/24
+$ ping -c2 192.168.1.1</pre></div>
+
+<h2 id="g">7. Edit the Connection File by Hand</h2>
+<div class="where"><h4>📍 Where are the files?</h4>Folder: <code>/etc/NetworkManager/system-connections/</code> (note the <b>s</b>: <code>system-connections</code>, not <i>system-connection</i>). One file per connection: <code>NAME.nmconnection</code>.<pre>$ sudo ls /etc/NetworkManager/system-connections/
+ens160.nmconnection  static-ens160.nmconnection</pre></div>
+<div class="where"><h4>📍 What to edit: add a second IP address</h4>Open the file: <code>sudo vim "/etc/NetworkManager/system-connections/static-ens160.nmconnection"</code>. In the <code>[ipv4]</code> section, add the <code>address2</code> line <b>under address1</b>:<pre>[connection]
+id=static-ens160
+type=ethernet
+autoconnect=true
+interface-name=ens160
+
+[ipv4]
+method=manual
+address1=192.168.1.100/24,192.168.1.1        <span class="c"># IP/prefix,gateway</span>
+<b>address2=10.0.1.1/24</b>                           <span class="c"># &lt;-- NEW LINE</span>
+dns=8.8.8.8;                                 <span class="c"># lists end with ;</span>
+
+[ipv6]
+method=auto</pre>Then run:<pre>$ sudo chown root:root /etc/NetworkManager/system-connections/static-ens160.nmconnection
+$ sudo chmod 600 /etc/NetworkManager/system-connections/static-ens160.nmconnection
+$ sudo nmcli con reload
+$ sudo nmcli con up static-ens160
+$ ip -br addr show ens160
+ens160  UP  192.168.1.100/24 10.0.1.1/24 fe80::.../64</pre></div>
+<div class="warn"><b>Permission rule:</b> NetworkManager <b>ignores</b> a key file that is not owned by root or can be read by others. Always <code>chown root:root</code> and <code>chmod 600</code>.</div>
+<div class="tw"><table><tr><th><code>nmcli</code> setting</th><th>File line</th></tr>
+<tr><td><code>ipv4.method manual</code></td><td><code>[ipv4]</code> <code>method=manual</code></td></tr>
+<tr><td><code>ipv4.addresses IP/24</code></td><td><code>address1=IP/24,GATEWAY</code></td></tr>
+<tr><td><code>ipv4.dns 8.8.8.8</code></td><td><code>dns=8.8.8.8;</code></td></tr>
+<tr><td><code>connection.autoconnect yes</code></td><td><code>[connection]</code> <code>autoconnect=true</code></td></tr>
+<tr><td><code>connection.interface-name ens160</code></td><td><code>interface-name=ens160</code></td></tr></table></div>
+<div class="note">Old <code>ifcfg-*</code> files in <code>/etc/sysconfig/network-scripts/</code> are <b>legacy</b>. They still work on RHEL 9 but are <b>removed in RHEL 10</b>. Use only <code>.nmconnection</code> files.</div>
+
+<h2 id="h">8. Hostname and Name Resolution</h2>
+<h3>8.1 Hostname</h3>
+<p>The hostname is the <b>name of the server</b>. Use a full name (FQDN) like <code>server1.lab.example.com</code>.</p>
+<pre>$ hostname                                    <span class="c"># show current name</span>
+$ sudo hostnamectl set-hostname server1.lab.example.com    <span class="c"># PERMANENT</span>
+$ hostnamectl
+ Static hostname: server1.lab.example.com
+Operating System: Red Hat Enterprise Linux 10
+$ cat /etc/hostname
+server1.lab.example.com
+$ sudo hostname testname                      <span class="c"># TEMPORARY, lost after reboot</span></pre>
+<div class="tw"><table><tr><th>Type</th><th>Meaning</th></tr><tr><td><b>Static</b></td><td>Saved in <code>/etc/hostname</code>. Survives reboot</td></tr><tr><td><b>Transient</b></td><td>Given by DHCP or kernel while running</td></tr><tr><td><b>Pretty</b></td><td>Free text, human friendly</td></tr></table></div>
+<h3>8.2 How a name becomes an IP</h3>
+<div class="flow"><div>You type<br><code>ping web1</code></div><div class="ar">→</div><div>1. <code>/etc/hosts</code><br>local list</div><div class="ar">→</div><div>2. DNS server<br>from <code>/etc/resolv.conf</code></div><div class="ar">→</div><div>IP found<br><code>192.168.1.10</code></div></div>
+<p>The order comes from <code>/etc/nsswitch.conf</code>: <code>hosts: files dns</code> (files first, then DNS).</p>
+<div class="where"><h4>📍 /etc/hosts: local names (no DNS needed)</h4>Edit as root: <code>sudo vim /etc/hosts</code>. Add a new line at the bottom. Format: <code>IP  full-name  nickname</code><pre>127.0.0.1   localhost localhost.localdomain
+::1         localhost localhost.localdomain
+<b>192.168.1.10   web1.lab.example.com   web1</b>      <span class="c"># &lt;-- NEW LINE</span></pre>Or add a line fast (use <b>&gt;&gt;</b>, one <b>&gt;</b> would erase the file!):<pre>$ echo "192.168.1.10 web1.lab.example.com web1" | sudo tee -a /etc/hosts
+$ getent hosts web1
+192.168.1.10    web1.lab.example.com web1</pre></div>
+<div class="where"><h4>📍 /etc/resolv.conf: which DNS server to ask</h4><pre>$ cat /etc/resolv.conf
+# Generated by NetworkManager
+search lab.example.com
+nameserver 192.168.1.1
+nameserver 8.8.8.8</pre><b>Correction:</b> the line is <code>nameserver 8.8.8.8</code> (a space, not <code>=</code>). Up to <b>3</b> nameservers; they are tried in order. <code>search</code> adds a domain to short names (<code>ssh web1</code> tries <code>web1.lab.example.com</code>).<br><b class="x">Do not edit this file by hand.</b> NetworkManager overwrites it. Set DNS in the connection:<pre>$ sudo nmcli con mod "System eth0" ipv4.dns "192.168.1.1 8.8.8.8"
+$ sudo nmcli con mod "System eth0" ipv4.dns-search lab.example.com
+$ sudo nmcli con up "System eth0"
+$ cat /etc/resolv.conf</pre></div>
+<h3>8.3 Test DNS: which tool sees what?</h3>
+<div class="tw"><table><tr><th>Command</th><th>Reads /etc/hosts?</th><th>Note</th></tr>
+<tr><td><code>getent hosts NAME</code></td><td class="r">Yes</td><td>Same path as real applications</td></tr>
+<tr><td><code>ping NAME</code></td><td class="r">Yes</td><td>Full chain, then ping</td></tr>
+<tr><td><code>dig NAME</code></td><td class="x">No</td><td>DNS only. Detailed. <code>dig +short NAME</code> = just the IP</td></tr>
+<tr><td><code>host NAME</code></td><td class="x">No</td><td>DNS only. Short output</td></tr>
+<tr><td><code>nslookup NAME</code></td><td class="x">No</td><td>DNS only. Older tool, still common. Part of <code>bind-utils</code></td></tr></table></div>
+<pre>$ dig +short redhat.com
+52.200.142.250
+$ host 8.8.8.8                          <span class="c"># reverse lookup (IP to name)</span>
+8.8.8.8.in-addr.arpa domain name pointer dns.google.
+$ dig @8.8.8.8 redhat.com               <span class="c"># ask one specific DNS server</span>
+$ host web1                             <span class="c"># web1 is only in /etc/hosts</span>
+Host web1 not found: 3(NXDOMAIN)        <span class="c"># host ignores /etc/hosts</span>
+$ curl -I http://example.com            <span class="c"># test a web request (headers only)</span>
+HTTP/1.1 200 OK</pre>
+<p>If <code>dnf install bind-utils</code> is needed: it gives <code>dig</code>, <code>host</code>, <code>nslookup</code>.</p>
+
+<h2>Real-World Scenarios</h2>
+<div class="sc"><h4>🏢 "I can ping 8.8.8.8 but google.com fails"</h4><b>Meaning:</b> network and routing are fine. <b>DNS is broken.</b><pre>$ cat /etc/resolv.conf                                  <span class="c"># is there a nameserver line?</span>
+$ nmcli -f ipv4.dns con show "System eth0"              <span class="c"># is DNS set in the connection?</span>
+$ dig @8.8.8.8 google.com                               <span class="c"># does another DNS answer?</span>
+$ sudo nmcli con mod "System eth0" ipv4.dns 8.8.8.8 &amp;&amp; sudo nmcli con up "System eth0"</pre></div>
+<div class="sc"><h4>🏢 "Users cannot reach the web app on port 8080"</h4><pre>$ ss -tulpn | grep 8080
+tcp LISTEN 0 128 127.0.0.1:8080 ...   <span class="c"># only on localhost! Must listen on 0.0.0.0</span>
+$ sudo firewall-cmd --list-all         <span class="c"># is port 8080/tcp allowed? (next chapters)</span></pre>Not listening = start the service. Listening on <code>127.0.0.1</code> only = change the app config. Listening but still blocked = check the <b>firewall</b> and <b>SELinux</b>.</div>
+<div class="sc"><h4>🏢 "Server has no IP after reboot"</h4><pre>$ nmcli device status          <span class="c"># STATE disconnected?</span>
+$ nmcli con show               <span class="c"># is there a profile for the device?</span>
+$ nmcli con show "NAME" | grep autoconnect    <span class="c"># autoconnect: yes ?</span>
+$ sudo nmcli con mod "NAME" connection.autoconnect yes
+$ sudo nmcli con up "NAME"</pre></div>
+
+<h2>Corrections and Additions to Your Notes</h2>
+<div class="tw"><table><tr><th>In your notes</th><th>Better / correct</th></tr>
+<tr><td><code>namserver=DNS</code></td><td><code>nameserver 8.8.8.8</code> in <code>/etc/resolv.conf</code>. No <code>=</code>, and fix spelling</td></tr>
+<tr><td><code>/etc/NetworkManager/system-connection/</code></td><td><code>system-connections/</code> (with <b>s</b>), files named <code>NAME.nmconnection</code></td></tr>
+<tr><td><code>ifconfig</code></td><td>Legacy. Use <code>ip a</code></td></tr>
+<tr><td><code>nmap -p- IP</code> for open ports</td><td><code>ss -tulpn</code> on your own server</td></tr>
+<tr><td><code>nmcli con down name</code> to turn off</td><td>Autoconnect may restart it. Use <code>nmcli dev disconnect DEVICE</code></td></tr>
+<tr><td><code>nmcli con delete name</code></td><td>Correct (<code>del</code> also works)</td></tr>
+<tr><td><code>sudo nano /etc/hosts</code></td><td>Works if installed, but <code>vim</code> is always present on RHEL. Learn <code>vim</code> for the exam</td></tr>
+<tr><td>Missing: <code>ipv4.method manual</code> in some examples</td><td>Always include it for static IP</td></tr>
+<tr><td>Missing: reload / <code>con up</code> after file edit</td><td>File edit, then <code>nmcli con reload</code>, then <code>nmcli con up NAME</code></td></tr>
+<tr><td>Missing: <code>getent hosts</code></td><td>The right test for <code>/etc/hosts</code> names</td></tr></table></div>
+<div class="tip"><b>Extra tools worth knowing:</b> <code>ip neigh</code> (IP to MAC table, like old <code>arp</code>) · <code>ipcalc 192.168.1.107/24</code> (subnet maths) · <code>nc -zv HOST 22</code> (test one port) · <code>mtr HOST</code> (live traceroute) · <code>nmcli con mod NAME ipv4.routes "10.20.0.0/16 192.168.1.254"</code> (add a static route) · temporary change that is lost at reboot: <code>sudo ip addr add 10.9.9.9/24 dev ens160</code>.</div>
+
+<h2 id="lab">Practice Lab (on your RHEL VM)</h2>
+<div class="sc"><h4>Task: add a static profile, a second IP, a hostname and a hosts entry</h4><pre>$ ip -br addr                                  <span class="c"># 1. note your device name, e.g. ens160</span>
+$ nmcli con show --active                      <span class="c"># 2. note the current connection name</span>
+$ sudo nmcli con add con-name lab type ethernet ifname ens160 \
+    ipv4.method manual ipv4.addresses 192.168.1.100/24 \
+    ipv4.gateway 192.168.1.1 ipv4.dns 192.168.1.1
+$ sudo nmcli con mod lab +ipv4.addresses 10.0.1.1/24
+$ sudo nmcli con mod lab connection.autoconnect yes
+$ sudo nmcli con mod "System ens160" connection.autoconnect no   <span class="c"># old profile must not start</span>
+$ sudo nmcli con up lab
+$ sudo hostnamectl set-hostname server1.lab.example.com
+$ echo "10.0.1.1 private" | sudo tee -a /etc/hosts
+$ sudo reboot
+<span class="c"># after reboot, verify:</span>
+$ nmcli con show --active
+$ ip -br addr show ens160                      <span class="c"># both IPs visible?</span>
+$ getent hosts private                         <span class="c"># 10.0.1.1 private</span>
+$ ping -c2 192.168.1.1</pre>Use <b>your own</b> device and connection names. Do this on the VM console, not over SSH, in case you lock yourself out.</div>
+<h2>Common Mistakes</h2>
+<div class="warn">Forgetting <code>ipv4.method manual</code> · changing settings but not running <code>nmcli con up</code> · using the device name where the connection name is needed · missing quotes around names with spaces · space after <code>\</code> · wrong <code>chmod</code> (must be <code>600</code>) on the key file · editing <code>/etc/resolv.conf</code> by hand · using <code>&gt;</code> instead of <code>&gt;&gt;</code> on <code>/etc/hosts</code> · testing <code>/etc/hosts</code> with <code>dig</code> or <code>host</code> · expecting <code>hostname NAME</code> to survive a reboot · saying a /24 has 256 usable hosts (it is <b>254</b>) · using <code>::</code> twice in IPv6 · pinging link-local IPv6 without <code>%interface</code> · typos: <code>system-connection</code>, <code>namserver</code>, <code>nmcli con dwon</code>.</div>
+<pre>ip -br addr | ip route | ping -c3 GATEWAY | ss -tulpn | tracepath HOST
+nmcli dev status | nmcli con show --active | sudo nmcli con up NAME | sudo nmcli con reload
+sudo hostnamectl set-hostname NAME | getent hosts NAME | dig +short NAME</pre>
+
+<h2 id="quiz">📝 Quiz <small style="font-size:.8rem;color:var(--tx2)">(click an answer, you see the result instantly)</small></h2>
+<div class="card" style="position:sticky;top:48px;z-index:5;text-align:center;font-weight:700" id="sc">Score: 0 / 0 answered</div>
+<div id="qbox"></div><p style="text-align:center"><button onclick="build()">Try again</button></p>
+</div>
+<script>
+function calc(){var r=document.getElementById('cr'),ip=document.getElementById('ip').value.trim().split('.').map(Number),c=parseInt(document.getElementById('cd').value);
+if(ip.length!=4||ip.some(function(x){return isNaN(x)||x<0||x>255})||isNaN(c)||c<0||c>32){r.textContent='Enter a valid IPv4 address and a prefix from 0 to 32.';return}
+var a=((ip[0]<<24)|(ip[1]<<16)|(ip[2]<<8)|ip[3])>>>0,m=c==0?0:(0xFFFFFFFF<<(32-c))>>>0,n=(a&m)>>>0,b=(n|(~m>>>0))>>>0;
+function s(x){return [x>>>24,(x>>>16)&255,(x>>>8)&255,x&255].join('.')}
+var h=c>=31?(c==32?1:2):Math.pow(2,32-c)-2;
+r.textContent='Netmask   : '+s(m)+'\nNetwork   : '+s(n)+'\nBroadcast : '+s(b)+'\nFirst host: '+s(c>=31?n:n+1)+'\nLast host : '+s(c>=31?b:b-1)+'\nUsable    : '+h}
+calc();
+var Q=[
+["How many bits are in an IPv4 address?",["8","16","32","128"],2,"4 numbers x 8 bits = 32 bits."],
+["Which interface name usually means Ethernet in VMware?",["wlp4s0","ens160","lo","ww0"],1,"en = Ethernet. ens160 = PCI slot 160."],
+["What does the prefix <code>wl</code> mean in an interface name?",["Wired LAN","WLAN (Wi-Fi)","WAN link","Wireless loop"],1,"wl = WLAN, ww = mobile broadband."],
+["How many usable hosts are in a /24 network?",["256","255","254","253"],2,"2^8 - 2 = 254. Network and broadcast are not usable."],
+["Network address of <code>192.168.10.77/26</code>?",["192.168.10.0","192.168.10.64","192.168.10.77","192.168.10.128"],1,"Block size 64. 77 is in the block that starts at 64."],
+["Which is the broadcast address of 192.168.1.0/24?",["192.168.1.0","192.168.1.1","192.168.1.254","192.168.1.255"],3,"Host bits all 1 = .255."],
+["Which IPv6 address is NOT valid?",["2001:db8::1","::1","2001:db8::7::2","fe80::1"],2,"The :: may be used only once."],
+["Which IPv6 address is the loopback?",["::","::1","fe80::1","ff02::1"],1,"::1 is the same as 127.0.0.1."],
+["Which command shows the routing table?",["ip route","ip link","ss -tulpn","hostname"],0,"ip route. The default line shows the gateway."],
+["Which command replaces the old <code>netstat</code>?",["ifconfig","ss","route","arp"],1,"ss shows sockets and ports."],
+["What does <code>ss -tulpn</code> show?",["Only routes","Listening TCP/UDP sockets with numbers and process names","Only DNS","Disk use"],1,"t=TCP, u=UDP, l=listening, p=process, n=numbers."],
+["<code>127.0.0.1:25</code> in ss means the service is:",["Open to the whole network","Reachable only from the server itself","Closed","Using IPv6"],1,"127.0.0.1 is loopback, so only local access."],
+["Which command makes the network change take effect after <code>nmcli con mod</code>?",["nmcli con reload","nmcli con up NAME","hostname NAME","ip route"],1,"con mod saves it. con up applies it."],
+["What must you set when changing a connection from DHCP to static?",["ipv4.method manual","connection.id","ipv6.method auto","nothing"],0,"Without manual, it may hang or still use DHCP."],
+["Which command keeps a device down, even with autoconnect?",["nmcli con down NAME","nmcli dev disconnect DEV","ip link show","nmcli con reload"],1,"con down can be undone by autoconnect."],
+["Where are NetworkManager connection files stored?",["/etc/sysconfig/network","/etc/NetworkManager/system-connections/","/var/log/network","/etc/network/"],1,"One NAME.nmconnection file per connection."],
+["Required owner and mode for a .nmconnection file?",["user:user 644","root:root 600","root:root 777","any, any"],1,"Otherwise NetworkManager ignores it."],
+["Which command sets the hostname permanently?",["hostname NAME","hostnamectl set-hostname NAME","echo NAME > /dev/null","nmcli hostname NAME"],1,"It writes /etc/hostname. hostname NAME is temporary."],
+["Which command tests a name that exists ONLY in /etc/hosts?",["dig web1","host web1","getent hosts web1","nslookup web1"],2,"dig, host and nslookup query DNS only."],
+["Correct line in /etc/resolv.conf?",["namserver=8.8.8.8","nameserver 8.8.8.8","dns: 8.8.8.8","server = 8.8.8.8"],1,"nameserver, a space, then the IP."]];
+var ans,right,done;
+function build(){ans={};right=0;done=0;var qb=document.getElementById('qbox');qb.innerHTML='';
+Q.forEach(function(q,i){var h='<div class="q" id="q'+i+'"><b>'+(i+1)+'. '+q[0]+'</b>';q[1].forEach(function(o,j){h+='<button class="opt" onclick="pick('+i+','+j+')">'+o+'</button>'});qb.innerHTML+=h+'<div class="ex"></div></div>'});
+document.getElementById('sc').textContent='Score: 0 / 0 answered'}
+function pick(i,j){if(ans[i]!==undefined)return;ans[i]=j;var q=Q[i],bs=document.querySelectorAll('#q'+i+' .opt');
+for(var k=0;k<bs.length;k++){bs[k].disabled=true;if(k==q[2])bs[k].className='opt good';else if(k==j)bs[k].className='opt bad'}
+var b=document.getElementById('q'+i),e=b.querySelector('.ex');e.style.display='block';
+e.innerHTML=(j==q[2]?'✅ Correct! ':'❌ Wrong. Right answer: '+q[1][q[2]]+'. ')+q[3];
+done++;if(j==q[2])right++;
+document.getElementById('sc').textContent='Score: '+right+' / '+done+' answered'+(done==Q.length?'  ·  Final: '+Math.round(right/Q.length*100)+'%':'')}
+build();
+</script>
+</body></html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 5 – Analyzing and Storing Logs</title>
+<style>:root{--bg:#0a0e17;--card:#1a2234;--tx:#e2e8f0;--tx2:#94a3b8;--red:#ee0000;--grn:#22c55e;--yel:#eab308;--blu:#3b82f6;--pur:#a855f7;--cyn:#06b6d4;--org:#f97316;--bd:#1e293b;--bd2:#334155;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.7}
+.top{position:sticky;top:0;z-index:9;background:rgba(10,14,23,.94);border-bottom:1px solid var(--bd);padding:9px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.top a{color:var(--tx2);text-decoration:none;font-size:.78rem;padding:3px 10px;border:1px solid var(--bd2);border-radius:20px}
+.top a:hover,.top .b{color:var(--red);border-color:var(--red)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:2rem;margin:14px 0 6px}h2{font-size:1.45rem;margin:44px 0 12px;padding-left:12px;border-left:4px solid var(--red)}
+h3{font-size:1.05rem;margin:20px 0 6px;color:var(--cyn)}p{margin:7px 0}
+.card,.q{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.kw{background:rgba(238,0,0,.14);color:#ff9a9a;border-radius:6px;padding:0 7px;font-weight:600}
+code{font-family:Consolas,monospace;background:#0d1423;color:#7dd3fc;padding:1px 6px;border-radius:5px;font-size:.9em}
+pre{background:#0d1423;border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin:10px 0;overflow-x:auto;font:.84rem/1.6 Consolas,monospace;color:#cbd5e1}
+.c{color:#64748b}.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem}
+th,td{border:1px solid var(--bd2);padding:7px 9px;text-align:left}th{background:#111b2e;color:var(--tx2)}
+.note,.warn,.tip,.where,.sc{border-radius:var(--r);padding:12px 15px;margin:14px 0;border-left:4px solid}
+.note{background:rgba(59,130,246,.09);border-color:var(--blu)}.warn{background:rgba(249,115,22,.09);border-color:var(--org)}
+.tip{background:rgba(34,197,94,.09);border-color:var(--grn)}.where{background:rgba(238,0,0,.07);border-color:var(--red)}
+.sc{background:rgba(168,85,247,.09);border-color:var(--pur)}.where h4{color:#ff9a9a}.sc h4{color:#d8b4fe}
+.r{color:var(--grn);font-weight:700}.w{color:var(--yel);font-weight:700}.x{color:var(--red);font-weight:700}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center;align-items:stretch}
+.flow div{background:var(--card);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 12px;text-align:center;font-size:.85rem}
+.flow .ar{border:0;background:none;color:var(--red);font-size:1.4rem;align-self:center;padding:0}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.st div{background:var(--card);border:2px solid;border-radius:var(--r);padding:10px;text-align:center;font-size:.85rem}
+.st b{display:block;font:700 1.8rem Consolas,monospace}
+.nice{height:34px;border-radius:8px;background:linear-gradient(90deg,#ee0000,#eab308,#22c55e);margin:8px 0 2px}
+.nl{display:flex;justify-content:space-between;font:.78rem Consolas,monospace;color:var(--tx2)}
+.tree{font:.9rem/1.5 Consolas,monospace}
+.q{margin:12px 0}.q label{display:block;padding:6px 8px;border-radius:8px;cursor:pointer}.q label:hover{background:#111b2e}
+.ex{display:none;margin-top:8px;font-size:.9rem}.q.ok{border-color:var(--grn)}.q.bad{border-color:var(--red)}
+.out{text-align:center;font:700 1.2rem Consolas,monospace;margin-top:8px}
+input[type=text]{background:#0d1423;border:1px solid var(--bd2);color:var(--tx);border-radius:8px;padding:6px;font:1rem Consolas,monospace;width:70px;text-align:center}
+button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px 22px;font-size:1rem;cursor:pointer}
+
+.lay{border:2px solid;border-radius:var(--r);padding:8px 12px;margin:6px 0;font-size:.88rem}
+.opt{display:block;width:100%;text-align:left;background:#0d1423;color:var(--tx);border:1px solid var(--bd2);border-radius:8px;padding:8px 12px;margin:6px 0;cursor:pointer;font-size:.95rem}
+.opt:hover:not(:disabled){border-color:var(--cyn)}.opt.good{border-color:var(--grn);background:rgba(34,197,94,.18)}.opt.bad{border-color:var(--red);background:rgba(238,0,0,.18)}
+.sev{display:flex;gap:3px;margin:10px 0;flex-wrap:wrap}.sev div{flex:1;min-width:78px;text-align:center;padding:6px 2px;border-radius:8px;font-size:.78rem;color:#0a0e17;font-weight:700}
+select{background:#0d1423;color:var(--tx);border:1px solid var(--bd2);border-radius:8px;padding:6px;font-size:.95rem}
+</style></head><body>
+<div class="top"><a class="b" href="../Index.html">← Dashboard</a><a href="#a">Architecture</a><a href="#b">Syslog</a><a href="#c">Central log</a><a href="#d">Journal</a><a href="#e">Persistent</a><a href="#f">Time</a><a href="#lab">Lab</a><a href="#quiz">Quiz</a></div>
+<div class="wrap">
+<small style="color:var(--red);font-weight:700">CHAPTER 14</small>
+<h1>📜 Analyzing and Storing Logs</h1>
+<p>A <span class="kw">log</span> is the diary of a server. It records who logged in, what started or stopped, and every error. When something breaks, the log tells you <b>what, when and why</b>. Reading logs is the number one skill of a support or monitoring engineer.</p>
+
+<h2 id="a">1. How Logging Works</h2>
+<p>RHEL has <b>two logging systems working together</b>.</p>
+<div class="grid"><div class="card"><b>📝 rsyslog</b><br>The traditional one. Writes <b>plain text files</b> in <code>/var/log</code>. Read with <code>less</code>, <code>tail</code>, <code>grep</code>. Survives reboot.</div><div class="card"><b>📦 systemd-journald</b><br>The modern one. Stores logs in a <b>binary journal</b> with extra details. Read with <code>journalctl</code>. By default it is lost at reboot.</div></div>
+<div class="flow"><div>Kernel, boot, services, apps</div><div class="ar">→</div><div><b>systemd-journald</b><br>collects everything<br>(journal in RAM)</div><div class="ar">→</div><div><b>rsyslog</b><br>sorts by facility + priority</div><div class="ar">→</div><div>Text files in <code>/var/log</code><br>or sent to another server</div></div>
+<div class="note"><b>"Are all logs stored in text files?"</b> No. rsyslog logs are text. The journal is <b>binary</b>, so <code>cat</code> shows garbage. Use <code>journalctl</code>. Some apps (Apache) write their own files in <code>/var/log/httpd/</code>.</div>
+<div class="tw"><table><tr><th>Where</th><th>What is inside</th><th>Lasts after reboot?</th></tr>
+<tr><td><code>/var/log/messages</code></td><td>General system messages (not login, mail or cron)</td><td class="r">Yes</td></tr>
+<tr><td><code>/var/log/secure</code></td><td><b>Login and security</b>: ssh, sudo, su, failed passwords</td><td class="r">Yes</td></tr>
+<tr><td><code>/var/log/cron</code></td><td>Scheduled job runs</td><td class="r">Yes</td></tr>
+<tr><td><code>/var/log/maillog</code></td><td>Mail server</td><td class="r">Yes</td></tr>
+<tr><td><code>/var/log/boot.log</code></td><td>Messages shown while booting</td><td class="r">Yes</td></tr>
+<tr><td><code>/var/log/audit/audit.log</code></td><td>Audit and SELinux denials</td><td class="r">Yes</td></tr>
+<tr><td><code>/var/log/dnf.log</code></td><td>Package installs</td><td class="r">Yes</td></tr>
+<tr><td><code>/run/log/journal/</code></td><td>Journal in RAM (temporary)</td><td class="x">No</td></tr>
+<tr><td><code>/var/log/journal/</code></td><td>Journal on disk (permanent), only if enabled</td><td class="r">Yes</td></tr></table></div>
+<div class="sc"><h4>🏢 "Where do I look?"</h4>Someone cannot log in → <code>/var/log/secure</code>. A service crashed → <code>journalctl -u name</code>. Cron job did not run → <code>/var/log/cron</code>. Problem before the last reboot → <code>journalctl -b -1</code>. Server clock looks wrong → <code>timedatectl</code>.</div>
+<pre>$ systemctl status rsyslog | grep Active
+     Active: active (running) since Sun 2026-11-01 09:10:11 IST; 2h ago
+$ ls /var/log | head
+audit  boot.log  cron  dnf.log  messages  secure  maillog</pre>
+
+<h2 id="b">2. Syslog Files and rsyslog</h2>
+<h3>Reading one log line</h3>
+<pre>Nov  1 11:12:48 server1 sshd[1433]: Failed password for student from 192.168.1.50 port 59344 ssh2
+└─ time ─────┘ └host──┘ └program[PID]┘ └──────────────── message ─────────────────────────┘</pre>
+<p>Oldest line is at the <b>top</b>, newest at the <b>bottom</b>. The time is the server's local time, so a wrong clock means confusing logs (section 6).</p>
+<h3>Facility and priority: two labels on every message</h3>
+<p><span class="kw">Facility</span> = <b>who</b> sent it (kern, mail, auth, authpriv, cron, daemon, user, local0 to local7). <span class="kw">Priority</span> = <b>how serious</b>:</p>
+<div class="sev"><div style="background:#ef4444">0 emerg</div><div style="background:#f97316">1 alert</div><div style="background:#fb923c">2 crit</div><div style="background:#eab308">3 err</div><div style="background:#facc15">4 warning</div><div style="background:#a3e635">5 notice</div><div style="background:#4ade80">6 info</div><div style="background:#67e8f9">7 debug</div></div>
+<p style="text-align:center;color:var(--tx2)">◀ most serious &nbsp;&nbsp;·&nbsp;&nbsp; least serious ▶ &nbsp; (memory trick: <b>E</b>very <b>A</b>dmin <b>C</b>an <b>E</b>ventually <b>W</b>rite <b>N</b>ice <b>I</b>nstructions <b>D</b>aily)</p>
+<div class="note"><code>*.info</code> means <b>info AND everything more serious</b> (notice, warning, err, crit, alert, emerg). A lower number is more serious.</div>
+<h3>rsyslog rules</h3>
+<p>Config file: <code>/etc/rsyslog.conf</code>. Your own rules go in <code>/etc/rsyslog.d/*.conf</code>. A rule has two parts:</p>
+<pre>facility.priority       destination
+authpriv.*              /var/log/secure          <span class="c"># all auth messages go to secure</span>
+*.info;mail.none;authpriv.none;cron.none   /var/log/messages   <span class="c"># everything info+, EXCEPT mail, auth, cron</span>
+mail.*                  -/var/log/maillog        <span class="c"># the dash = faster buffered writes</span>
+*.emerg                 :omusrmsg:*              <span class="c"># emergencies shown on every logged-in terminal</span>
+local7.*                /var/log/boot.log</pre>
+<div class="tw"><table><tr><th>Symbol</th><th>Meaning</th></tr><tr><td><code>*</code></td><td>Any facility or any priority</td></tr><tr><td><code>;</code></td><td>Separates several selectors</td></tr><tr><td><code>none</code></td><td>Exclude that facility</td></tr><tr><td><code>,</code></td><td>List facilities: <code>uucp,news.crit</code></td></tr></table></div>
+<h3>🎮 Try it: where does my message go?</h3>
+<div class="card" style="text-align:center">Facility <select id="fac"><option>kern</option><option>user</option><option>mail</option><option>daemon</option><option>authpriv</option><option>cron</option><option>local7</option></select>
+Priority <select id="pri"><option>emerg</option><option>alert</option><option>crit</option><option>err</option><option>warning</option><option>notice</option><option selected>info</option><option>debug</option></select>
+<div class="out" id="dest" style="font-size:1rem;color:var(--cyn)"></div></div>
+<div class="where"><h4>📍 Where to Add What: your own rule</h4>Create the file <code>/etc/rsyslog.d/custom.conf</code> (as root) with this line:
+<pre>local5.*     /var/log/myapp.log</pre>
+<pre>$ sudo systemctl restart rsyslog               <span class="c"># REQUIRED to load new rules</span>
+$ sudo rsyslogd -N1                            <span class="c"># optional: checks the config for typos</span>
+$ logger -p local5.info "myapp started"        <span class="c"># send a test message</span>
+$ tail -1 /var/log/myapp.log
+Nov  1 11:20:05 server1 student[3320]: myapp started</pre>An app writes to <code>local0</code> to <code>local7</code> when it has no official facility. Pick one and give it its own file like this.</div>
+<h3>Test and watch logs</h3>
+<pre>$ logger "hello world"                         <span class="c"># default: user.notice, lands in /var/log/messages</span>
+$ sudo tail -1 /var/log/messages
+Nov  1 11:22:01 server1 student[3401]: hello world
+$ logger -p authpriv.notice "hey guys"         <span class="c"># auth message</span>
+$ sudo tail -1 /var/log/secure
+Nov  1 11:22:30 server1 student[3410]: hey guys
+$ sudo tail -f /var/log/secure                 <span class="c"># live view. Ctrl+C to stop. Try a login in another terminal</span>
+$ sudo grep -c "Failed password" /var/log/secure   <span class="c"># how many failed logins?</span>
+$ sudo less /var/log/messages                  <span class="c"># G = end, /text = search, q = quit</span></pre>
+<h3>Log rotation: logs cannot grow forever</h3>
+<p><span class="kw">logrotate</span> runs daily. It renames the old log (<code>messages-20261101</code>), creates a new empty one, and deletes the oldest after about <b>4 weeks</b> (default <code>weekly</code> + <code>rotate 4</code>).</p>
+<pre>$ ls /var/log/messages*
+/var/log/messages  /var/log/messages-20261025  /var/log/messages-20261018
+$ cat /etc/logrotate.conf | grep -E 'weekly|rotate|create|compress'
+$ sudo logrotate -d /etc/logrotate.conf        <span class="c"># -d = dry run, changes nothing</span></pre>
+<div class="where"><h4>📍 Where to Add What: rotate your own log</h4>Create <code>/etc/logrotate.d/myapp</code>:<pre>/var/log/myapp.log {
+    weekly
+    rotate 4
+    compress
+    missingok
+}</pre></div>
+
+<h2 id="c">3. Central Log Server (send logs to another machine)</h2>
+<p>With many servers, you collect all logs on <b>one</b> machine. The standard rsyslog port is <span class="kw">514</span>. <code>@@</code> = TCP (reliable), <code>@</code> = UDP (faster, can lose messages).</p>
+<div class="flow"><div>Client 1<br><code>*.* @@192.168.2.200:514</code></div><div class="ar">→</div><div><b>Log server</b> 192.168.2.200<br>listens on TCP 514</div><div class="ar">←</div><div>Client 2<br><code>*.* @@192.168.2.200:514</code></div></div>
+<div class="note">Your notes mention port 515. Use the <b>same port number on both sides</b>. The standard is 514. If you pick another, you must open it in the firewall and allow it in SELinux.</div>
+<div class="where"><h4>📍 Step 1: On the LOG SERVER (192.168.2.200)</h4>Edit <code>/etc/rsyslog.conf</code>. Find these two lines, and remove the <code>#</code> in front:
+<pre>module(load="imtcp")
+input(type="imtcp" port="514")</pre>
+<pre>$ sudo firewall-cmd --permanent --add-port=514/tcp ; sudo firewall-cmd --reload
+$ sudo systemctl restart rsyslog
+$ sudo ss -tlnp | grep 514
+LISTEN 0 25 0.0.0.0:514 0.0.0.0:* users:(("rsyslogd",pid=912,fd=7))   <span class="c"># it is listening</span></pre></div>
+<div class="where"><h4>📍 Step 2: On each CLIENT</h4>Create <code>/etc/rsyslog.d/remote.conf</code> with one line:
+<pre>*.*   @@192.168.2.200:514</pre>
+<pre>$ sudo systemctl restart rsyslog
+$ logger "hello central server"</pre></div>
+<div class="where"><h4>📍 Step 3: Check on the SERVER</h4><pre>$ sudo grep "hello central" /var/log/messages
+Nov  1 11:30:14 client1 student[2211]: hello central server        <span class="c"># host name shows the client</span></pre></div>
+
+<h2 id="d">4. The Journal: <code>journalctl</code></h2>
+<p>The journal is binary, indexed and rich in details. <b>Root</b> sees everything. A normal user sees only some entries (add them to the <code>systemd-journal</code> group or use <code>sudo</code>). The skill is <b>limiting the output</b>. Colours: red = error or worse, bold = notice/warning.</p>
+<div class="tw"><table><tr><th>Command</th><th>Shows</th></tr>
+<tr><td><code>journalctl</code></td><td>Everything, oldest first (<code>q</code> quits)</td></tr>
+<tr><td><code>journalctl -n 10</code></td><td>Last 10 entries</td></tr>
+<tr><td><code>journalctl -f</code></td><td>Follow live (like <code>tail -f</code>)</td></tr>
+<tr><td><code>journalctl -r</code></td><td>Newest first</td></tr>
+<tr><td><code>journalctl -p err</code></td><td>Priority <b>err and worse</b> (also <code>warning</code>, <code>crit</code> or numbers 0 to 7)</td></tr>
+<tr><td><code>journalctl -u sshd.service</code></td><td>One service</td></tr>
+<tr><td><code>journalctl -k</code></td><td>Kernel messages only</td></tr>
+<tr><td><code>journalctl --since "-1 hour"</code></td><td>Last hour</td></tr>
+<tr><td><code>journalctl -b</code></td><td>This boot only</td></tr>
+<tr><td><code>journalctl -o verbose -n 1</code></td><td>All fields of an entry</td></tr></table></div>
+<pre>$ sudo journalctl -u sshd.service -n 3
+Nov 01 09:10:11 server1 sshd[850]: Server listening on 0.0.0.0 port 22.
+Nov 01 10:58:02 server1 sshd[1796]: Accepted publickey for student from 192.168.1.20 port 43876 ssh2
+Nov 01 10:58:02 server1 sshd[1796]: pam_unix(sshd:session): session opened for user student(uid=1000)
+$ sudo journalctl -p warning -n 2 --no-pager
+$ sudo journalctl -u sshd -p err --since today     <span class="c"># options combine</span></pre>
+<h3>Filter by time</h3>
+<pre>$ sudo journalctl --since today
+$ sudo journalctl --since yesterday --until today
+$ sudo journalctl --since "2026-11-01 09:00:00" --until "2026-11-01 10:00:00"   <span class="c"># quotes needed (there is a space)</span>
+$ sudo journalctl --since 9:00:00                  <span class="c"># today at 9:00</span>
+$ sudo journalctl --since "-10min"                 <span class="c"># last 10 minutes</span></pre>
+<div class="note">Times use the <b>server's</b> time zone. A server in UTC and you in India (UTC+5:30): adjust, or show UTC with <code>--utc</code>.</div>
+<h3>Filter by field</h3>
+<pre>$ sudo journalctl -o verbose -n 1                  <span class="c"># find field names</span>
+    PRIORITY=6
+    _UID=0
+    _PID=1
+    _COMM=systemd
+    _SYSTEMD_UNIT=init.scope
+    MESSAGE=Removed slice User Slice of UID 1000.
+$ sudo journalctl _PID=1                           <span class="c"># everything systemd itself logged</span>
+$ sudo journalctl _UID=81                          <span class="c"># entries from user ID 81 (dbus)</span>
+$ sudo journalctl _SYSTEMD_UNIT=sshd.service _PID=1796    <span class="c"># different fields = AND</span></pre>
+<div class="tw"><table><tr><th>Field</th><th>Meaning</th></tr><tr><td><code>_PID</code></td><td>Process ID</td></tr><tr><td><code>_UID</code></td><td>User ID that ran the process</td></tr><tr><td><code>_COMM</code></td><td>Command name</td></tr><tr><td><code>_EXE</code></td><td>Path of the program</td></tr><tr><td><code>_SYSTEMD_UNIT</code></td><td>Service (unit) that started it</td></tr></table></div>
+<div class="sc"><h4>🏢 Scenario: users say "SSH was failing at 10 AM"</h4><pre>$ sudo journalctl -u sshd --since "10:00" --until "10:30" -p warning
+$ sudo grep "Failed password" /var/log/secure | tail -3
+Nov  1 10:12:03 server1 sshd[2210]: Failed password for invalid user admin from 203.0.113.9 port 51022 ssh2</pre>A stranger is guessing the username "admin". Next step: block that IP and harden SSH (Chapter 19).</div>
+
+<h2 id="e">5. Keep the Journal After Reboot</h2>
+<p>By default the journal lives in RAM (<code>/run/log/journal</code>) and <b>disappears at reboot</b>, so you cannot read why the server crashed. Fix it by making it <b>persistent</b> (<code>/var/log/journal</code>).</p>
+<div class="tw"><table><tr><th><code>Storage=</code></th><th>Meaning</th></tr><tr><td><code>persistent</code></td><td>Always on disk. Creates <code>/var/log/journal</code> if missing</td></tr><tr><td><code>volatile</code></td><td>RAM only. Lost at reboot</td></tr><tr><td><code>auto</code> (default)</td><td>On disk <b>only if</b> <code>/var/log/journal</code> already exists</td></tr><tr><td><code>none</code></td><td>Store nothing</td></tr></table></div>
+<div class="where"><h4>📍 Method A: edit the config file</h4>Edit <code>/etc/systemd/journald.conf</code> (as root). Find <code>#Storage=auto</code>, <b>remove the #</b> and change it:
+<pre>[Journal]
+Storage=persistent</pre>
+<pre>$ sudo systemctl restart systemd-journald
+$ ls /var/log/journal
+4ec03abd2f7b40118b1b357f479b3112                 <span class="c"># folder named with the machine ID</span>
+$ ls /var/log/journal/4ec03abd2f7b40118b1b357f479b3112
+system.journal  user-1000.journal</pre></div>
+<div class="where"><h4>📍 Method B (your notes): keep <code>auto</code> and create the folder</h4>With <code>Storage=auto</code>, just creating the folder is enough:
+<pre>$ sudo mkdir /var/log/journal
+$ sudo chgrp systemd-journal /var/log/journal
+$ sudo chmod 2755 /var/log/journal           <span class="c"># 2 = setgid: new files get the systemd-journal group</span>
+$ sudo systemctl restart systemd-journald    <span class="c"># NOT rsyslog. No reboot or daemon-reload needed</span>
+$ ls /var/log/journal</pre>Correct file name: <code>/etc/systemd/journald.conf</code> (not <code>/usr/lib/...</code>).</div>
+<h3>Read older boots</h3>
+<pre>$ journalctl --list-boots
+-2 27de... Fri 2026-10-30 09:02:11 IST—Fri 2026-10-30 21:44:52 IST
+-1 e754... Sat 2026-10-31 09:15:08 IST—Sat 2026-10-31 22:10:03 IST
+ 0 ee2c... Sun 2026-11-01 09:10:01 IST—Sun 2026-11-01 11:40:20 IST      <span class="c"># current boot</span>
+$ sudo journalctl -b -1 -p err        <span class="c"># errors from the PREVIOUS boot: great after a crash</span></pre>
+<div class="note">Negative numbers count back from now (<code>-1</code> = previous boot). Positive numbers count from the oldest boot.</div>
+<pre>$ journalctl --disk-usage
+Archived and active journals take up 112.0M in the file system.
+$ sudo journalctl --vacuum-size=500M      <span class="c"># shrink to 500 MB</span>
+$ sudo journalctl --vacuum-time=2weeks    <span class="c"># delete older than 2 weeks</span></pre>
+
+<h2 id="f">6. Accurate Time: NTP and chrony</h2>
+<p><b>Why:</b> log lines carry a time. If servers have different times, you cannot match events. Certificates, Kerberos and cron also break when the clock is wrong.</p>
+<div class="grid"><div class="card"><b>🌐 NTP</b><br><b>Network Time Protocol</b>. A way for a computer to ask another computer for the exact time.</div><div class="card"><b>🖥️ NTP server</b><br>A machine that gives out accurate time. Examples: <code>pool.ntp.org</code> on the Internet, or <code>192.168.1.200</code> inside your company.</div><div class="card"><b>⏱️ chronyd</b><br>The RHEL service that talks to NTP servers and keeps your clock correct. Client tool: <code>chronyc</code>.</div></div>
+<h3>Stratum: how close to the real clock</h3>
+<div class="flow"><div>Stratum 0<br>atomic or GPS clock</div><div class="ar">→</div><div>Stratum 1<br>server attached to it</div><div class="ar">→</div><div>Stratum 2<br>syncs from stratum 1</div><div class="ar">→</div><div>Stratum 3 …<br>your server</div></div>
+<p>Lower stratum = closer to the real clock = better.</p>
+<h3><code>timedatectl</code>: view and change</h3>
+<pre>$ timedatectl
+               Local time: Sun 2026-11-01 11:45:05 IST
+           Universal time: Sun 2026-11-01 06:15:05 UTC
+                 RTC time: Sun 2026-11-01 06:15:05
+                Time zone: Asia/Kolkata (IST, +0530)
+System clock synchronized: yes          <span class="c"># synced with NTP</span>
+              NTP service: active       <span class="c"># chronyd is on</span>
+          RTC in local TZ: no           <span class="c"># hardware clock kept in UTC (correct for Linux)</span></pre>
+<pre>$ timedatectl list-timezones | grep -i kolkata
+Asia/Kolkata
+$ sudo timedatectl set-timezone America/New_York       <span class="c"># format: Continent/City</span>
+$ tzselect                                            <span class="c"># interactive helper. It only PRINTS a name, it changes nothing</span></pre>
+<h3>Set the time by hand (3 steps)</h3>
+<pre>$ sudo timedatectl set-ntp false          <span class="c"># 1. switch off automatic sync, otherwise you get an error</span>
+$ sudo timedatectl set-time "2026-11-01 12:00:00"   <span class="c"># 2. set it (time only also works: 12:00:00)</span>
+$ sudo timedatectl set-ntp true           <span class="c"># 3. switch auto sync back on</span></pre>
+<div class="warn">On a real server do not set time by hand. Fix the NTP source instead. Wrong clocks break logs, certificates and cron.</div>
+<div class="where"><h4>📍 Where to Add What: use your own NTP server</h4>Edit <code>/etc/chrony.conf</code> (as root). <b>Comment out</b> the default <code>pool</code> line and add yours:
+<pre>#pool 2.rhel.pool.ntp.org iburst
+server 192.168.1.200 iburst</pre>
+<pre>$ sudo systemctl restart chronyd
+$ chronyc sources -v
+MS Name/IP address         Stratum Poll Reach LastRx Last sample
+===============================================================================
+^* 192.168.1.200                3    6   377    14   +2957ns[+2244ns] +/- 25ms
+$ chronyc tracking | head -3
+Reference ID    : C0A801C8 (192.168.1.200)
+Stratum         : 4</pre></div>
+<div class="tw"><table><tr><th>Directive</th><th>Meaning</th></tr><tr><td><code>server</code></td><td>One NTP server (one stratum above you)</td></tr><tr><td><code>pool</code></td><td>A name that resolves to many servers</td></tr><tr><td><code>peer</code></td><td>A server at the same stratum</td></tr><tr><td><code>iburst</code></td><td>Four quick samples at start: faster first sync</td></tr></table></div>
+<div class="tw"><table><tr><th>In <code>chronyc sources</code></th><th>Meaning</th></tr><tr><td class="r"><code>^*</code></td><td><b>Synchronized</b> to this server. This is the success sign</td></tr><tr><td><code>^+</code></td><td>Good backup source</td></tr><tr><td><code>^?</code></td><td>Cannot be used</td></tr><tr><td>Reach <code>377</code></td><td>Last 8 checks all worked</td></tr></table></div>
+
+<h2 id="lab">Practice Lab (on a lab VM)</h2>
+<div class="sc"><h4>Task: send authpriv alert messages to their own file</h4><pre>$ sudo vim /etc/rsyslog.d/auth-errors.conf     <span class="c"># one line: authpriv.alert    /var/log/auth-errors</span>
+$ sudo systemctl restart rsyslog
+$ logger -p authpriv.alert "Logging test authpriv.alert"
+$ sudo tail -1 /var/log/auth-errors
+Nov  1 12:05:10 server1 student[4120]: Logging test authpriv.alert</pre>Test with <code>alert</code>, not <code>notice</code>. The rule matches only alert and worse.</div>
+<h2>Common Mistakes</h2>
+<div class="warn">Forgetting to restart rsyslog after a rule change · editing a commented line and not removing the <code>#</code> · restarting <code>rsyslog</code> when you meant <code>systemd-journald</code> · reading old logs from a volatile journal after a reboot · no quotes around <code>--since "2026-11-01 09:00"</code> · different ports on client and server · comparing logs from servers with unsynced clocks · thinking <code>tzselect</code> sets the zone · setting time by hand while NTP is on · using <code>cat</code> on a <code>.journal</code> file · typos like <code>/var/log/message</code>, <code>persistant</code>, <code>timedate</code>.</div>
+<pre>tail -f /var/log/secure | logger -p local5.info "x" | journalctl -u NAME -p err --since today | journalctl -b -1
+sudo timedatectl set-timezone Asia/Kolkata | chronyc sources -v | sudo systemctl restart rsyslog</pre>
+
+<h2 id="quiz">📝 Quiz <small style="font-size:.8rem;color:var(--tx2)">(click an answer, you see the result instantly)</small></h2>
+<div class="card" style="position:sticky;top:48px;z-index:5;text-align:center;font-weight:700" id="sc">Score: 0 / 0 answered</div>
+<div id="qbox"></div><p style="text-align:center"><button onclick="build()">Try again</button></p>
+</div>
+<script>
+var RUL={authpriv:'/var/log/secure',cron:'/var/log/cron',mail:'/var/log/maillog',local7:'/var/log/boot.log'},P=['emerg','alert','crit','err','warning','notice','info','debug'];
+function dest(){var f=document.getElementById('fac').value,p=document.getElementById('pri').value,n=P.indexOf(p),o=[];
+if(RUL[f])o.push(RUL[f]);if(n<=6&&!RUL[f]||(n<=6&&f=='local7'))o.push('/var/log/messages');
+if(f=='uucp'&&n<=2)o.push('/var/log/spooler');if(n==0)o.push('every logged-in terminal');
+if(f=='local7'&&n<=6&&o.indexOf('/var/log/messages')<0)o.push('/var/log/messages');
+document.getElementById('dest').textContent=f+'.'+p+'  →  '+(o.length?o.join('  +  '):'not saved by default rules (debug is below info)')}
+document.getElementById('fac').onchange=dest;document.getElementById('pri').onchange=dest;dest();
+var Q=[
+["Which logging system writes plain text files in /var/log?",["systemd-journald","rsyslog","chronyd","auditd"],1,"rsyslog writes text files. journald keeps a binary journal."],
+["Which file records SSH logins, sudo use and failed passwords?",["/var/log/messages","/var/log/cron","/var/log/secure","/var/log/boot.log"],2,"/var/log/secure holds authentication and security events."],
+["Is the default journal on RHEL still there after a reboot?",["Yes","No, it is in RAM (/run/log/journal)","Only for root","Only errors"],1,"By default it is volatile. You must make it persistent."],
+["Which is MORE serious?",["warning","notice","err","info"],2,"err is 3, warning is 4. Lower number is more serious."],
+["What does <code>*.info</code> match?",["Only info","Info and everything more serious","Only errors","Everything including debug"],1,"A priority also matches all more serious levels."],
+["Which port does rsyslog use for remote logging by default?",["22","80","514","443"],2,"514, TCP or UDP."],
+["In rsyslog, what does <code>@@</code> mean in <code>*.* @@192.168.2.200:514</code>?",["UDP","TCP","Local file","Mail"],1,"@@ is TCP, a single @ is UDP."],
+["After adding a new file in /etc/rsyslog.d/ you must:",["Reboot only","systemctl restart rsyslog","chmod 777 it","Nothing"],1,"rsyslog reads its rules only when it starts."],
+["Which command sends a test message to the authpriv facility?",["logger -p authpriv.notice \"hi\"","echo hi > secure","journalctl hi","tail hi"],0,"logger -p facility.priority \"text\"."],
+["Which command shows only error and worse messages of the SSH service?",["journalctl -u sshd -p err","journalctl sshd err","cat sshd","journalctl -f sshd"],0,"-u picks the unit, -p err picks the priority."],
+["Why does <code>--since \"2026-11-01 09:00\"</code> need quotes?",["It is a number","It contains a space","It is a path","It does not"],1,"The space would split it into two arguments."],
+["Which setting keeps the journal after reboot?",["Storage=volatile","Storage=none","Storage=persistent","Storage=ram"],2,"persistent writes to /var/log/journal."],
+["Which file do you edit to change journald storage?",["/etc/systemd/journald.conf","/etc/rsyslog.conf","/var/log/journal","/etc/chrony.conf"],0,"/etc/systemd/journald.conf, then restart systemd-journald."],
+["You want errors from BEFORE the last reboot. Use:",["journalctl -b","journalctl -b -1 -p err","journalctl -b 0","journalctl -k"],1,"-b -1 is the previous boot (needs a persistent journal)."],
+["What does NTP do?",["Encrypts traffic","Synchronizes clocks over the network","Rotates logs","Starts services"],1,"Network Time Protocol keeps clocks accurate."],
+["Which command changes the system time zone?",["tzselect","timedatectl set-timezone Asia/Kolkata","date -z","chronyc zone"],1,"tzselect only prints a name and changes nothing."],
+["timedatectl set-time fails with 'Automatic time synchronization is enabled'. Fix:",["Reboot","timedatectl set-ntp false first","Delete chrony","Use root"],1,"Turn NTP off, set the time, turn it back on."],
+["In chronyc sources, what does <code>^*</code> mean?",["Server unreachable","Synchronized to this server","Peer","Local clock"],1,"The star marks the current best source: success."],
+["Which file lists the NTP servers for chronyd?",["/etc/chrony.conf","/etc/ntp.log","/etc/hosts","/etc/timezone"],0,"Edit /etc/chrony.conf, then restart chronyd."],
+["What does <code>iburst</code> do?",["Encrypts time","Takes four quick samples at start for faster sync","Bans a server","Rotates logs"],1,"It speeds up the first synchronization."]];
+var ans,right,done;
+function build(){ans={};right=0;done=0;var qb=document.getElementById('qbox');qb.innerHTML='';
+Q.forEach(function(q,i){var h='<div class="q" id="q'+i+'"><b>'+(i+1)+'. '+q[0]+'</b>';q[1].forEach(function(o,j){h+='<button class="opt" onclick="pick('+i+','+j+')">'+o+'</button>'});qb.innerHTML+=h+'<div class="ex"></div></div>'});
+document.getElementById('sc').textContent='Score: 0 / 0 answered'}
+function pick(i,j){if(ans[i]!==undefined)return;ans[i]=j;var q=Q[i],bs=document.querySelectorAll('#q'+i+' .opt');
+for(var k=0;k<bs.length;k++){bs[k].disabled=true;if(k==q[2])bs[k].className='opt good';else if(k==j)bs[k].className='opt bad'}
+var b=document.getElementById('q'+i),e=b.querySelector('.ex');e.style.display='block';
+e.innerHTML=(j==q[2]?'✅ Correct! ':'❌ Wrong. Right answer: '+q[1][q[2]]+'. ')+q[3];
+done++;if(j==q[2])right++;
+document.getElementById('sc').textContent='Score: '+right+' / '+done+' answered'+(done==Q.length?'  ·  Final: '+Math.round(right/Q.length*100)+'%':'')}
+build();
+</script>
+</body></html>

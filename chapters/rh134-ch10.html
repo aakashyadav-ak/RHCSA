@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 10: Managing Basic Storage</title>
+<style>
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#2f6fd6;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+</style></head><body><div class="wrap">
+
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+
+<header class="hero">
+ <small>RH134 &middot; CHAPTER 10 &middot; RHEL 10</small>
+ <h1>Managing Basic Storage</h1>
+ <p>Add a disk, cut it into partitions, put a file system on it, mount it forever, and create swap space. Every step comes in the exact order you type it.</p>
+</header>
+
+<nav class="toc" aria-label="Chapter sections">
+ <a href="#flow">Why and big picture</a>
+ <a href="#words">Words and full forms</a>
+ <a href="#disk">New disk</a>
+ <a href="#mbrgpt">MBR vs GPT</a>
+ <a href="#fdisk">fdisk</a>
+ <a href="#settle">udevadm settle</a>
+ <a href="#fs">File system and mount</a>
+ <a href="#fstab">Permanent mount</a>
+ <a href="#remove">Remove partition</a>
+ <a href="#swap">Swap</a>
+ <a href="#swap2">Swap priority</a>
+ <a class="ex" href="#parted">Extra: parted</a>
+ <a href="#cheat">Commands list</a>
+ <a href="#quiz">Quiz</a>
+</nav>
+
+<!-- ================= 1 ================= -->
+<section id="flow">
+ <h2><span class="n">1</span>Why storage steps? The 4 steps</h2>
+ <div class="why"><b>Why?</b> A new disk is empty and Linux cannot use it. These 4 steps make it ready to store files.</div>
+
+ <svg class="dg" viewBox="0 0 900 200" role="img" aria-label="Four steps: partition, file system, mount, use">
+  <defs><marker id="m1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+  <rect class="bx" x="10" y="25" width="185" height="95" rx="12"/>
+  <rect class="bx" x="240" y="25" width="185" height="95" rx="12"/>
+  <rect class="bx" x="470" y="25" width="185" height="95" rx="12"/>
+  <rect class="ok" x="700" y="25" width="185" height="95" rx="12"/>
+  <text class="bd" x="102" y="58" text-anchor="middle">1. Partition</text>
+  <text x="102" y="84" text-anchor="middle">fdisk</text>
+  <text class="sm" x="102" y="106" text-anchor="middle">cut the disk in parts</text>
+  <text class="bd" x="332" y="58" text-anchor="middle">2. File system</text>
+  <text x="332" y="84" text-anchor="middle">mkfs.xfs</text>
+  <text class="sm" x="332" y="106" text-anchor="middle">format the part</text>
+  <text class="bd" x="562" y="58" text-anchor="middle">3. Mount</text>
+  <text x="562" y="84" text-anchor="middle">mount + /etc/fstab</text>
+  <text class="sm" x="562" y="106" text-anchor="middle">attach to a folder</text>
+  <text class="bd" x="792" y="58" text-anchor="middle">4. Use</text>
+  <text x="792" y="84" text-anchor="middle">df -hT</text>
+  <text class="sm" x="792" y="106" text-anchor="middle">save files, check space</text>
+  <line class="ar" x1="197" y1="72" x2="236" y2="72" marker-end="url(#m1)"/>
+  <line class="ar" x1="427" y1="72" x2="466" y2="72" marker-end="url(#m1)"/>
+  <line class="ar" x1="657" y1="72" x2="696" y2="72" marker-end="url(#m1)"/>
+  <text class="sm" x="450" y="165" text-anchor="middle">After step 1 run  udevadm settle  (explained in section 6)</text>
+ </svg>
+
+ <ul>
+  <li><b>Partition</b>: one disk is split into parts, so data stays separate (backup, logs, swap).</li>
+  <li><b>File system</b>: a raw partition is just empty space. The file system adds files and folders on it.</li>
+  <li><b>Mount</b>: Linux has no drive letters like C:. A file system is reached only through a folder.</li>
+  <li><b>/etc/fstab</b>: a normal mount is forgotten after reboot. fstab makes it permanent.</li>
+ </ul>
+ <div class="note"><b>Remember</b>A partition with no file system cannot store files. A file system that is not mounted cannot be reached. Skip one step and it fails.</div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="words">
+ <h2><span class="n">2</span>Words and full forms</h2>
+ <p class="lead">One line for each keyword and command of this chapter.</p>
+
+ <h3>Storage words</h3>
+ <div class="tblwrap"><table class="gl">
+  <tr><th>Word</th><th>Full form</th><th>One-line meaning</th></tr>
+  <tr><td>Disk</td><td>Hard disk</td><td>The place where all data is kept (a virtual disk in a VM).</td></tr>
+  <tr><td>Partition</td><td>-</td><td>One separate part of a disk. It works like its own small disk.</td></tr>
+  <tr><td>Label</td><td>Partition table</td><td>A map at the start of the disk that says where each partition starts and ends.</td></tr>
+  <tr><td>MBR</td><td>Master Boot Record</td><td>Old label type. Max 4 primary partitions, max 2 TB disk.</td></tr>
+  <tr><td>GPT</td><td>GUID Partition Table</td><td>New label type. 128 partitions, huge disks. (GUID = Globally Unique Identifier.)</td></tr>
+  <tr><td>BIOS</td><td>Basic Input/Output System</td><td>Old start-up firmware of a computer. Goes with MBR.</td></tr>
+  <tr><td>UEFI</td><td>Unified Extensible Firmware Interface</td><td>New start-up firmware. Goes with GPT.</td></tr>
+  <tr><td>Primary / Extended / Logical</td><td>-</td><td>MBR only. Primary = normal partition. Extended = a box. Logical = partition inside the box.</td></tr>
+  <tr><td>File system</td><td>-</td><td>The method that stores files and folders on a partition.</td></tr>
+  <tr><td>XFS</td><td>just a name</td><td>The default RHEL file system. Fast, good for big files.</td></tr>
+  <tr><td>Mount point</td><td>-</td><td>An empty folder where a file system is attached.</td></tr>
+  <tr><td>UUID</td><td>Universally Unique Identifier</td><td>A unique ID of a file system. It never changes, even if the disk name changes.</td></tr>
+  <tr><td>RAM</td><td>Random Access Memory</td><td>Fast, temporary memory of the computer.</td></tr>
+  <tr><td>Swap</td><td>-</td><td>Disk space used as extra memory when RAM is full.</td></tr>
+ </table></div>
+
+ <h3>Command names</h3>
+ <div class="tblwrap"><table class="gl">
+  <tr><th>Command</th><th>Full form</th><th>One-line meaning</th></tr>
+  <tr><td>fdisk</td><td>Fixed disk</td><td>Menu tool to create and delete partitions.</td></tr>
+  <tr><td>udevadm</td><td>udev administration</td><td>Controls udev, the part of Linux that creates device files in /dev.</td></tr>
+  <tr><td>lsblk</td><td>List block devices</td><td>Shows disks and partitions as a tree.</td></tr>
+  <tr><td>blkid</td><td>Block device ID</td><td>Shows the UUID and type of a partition.</td></tr>
+  <tr><td>mkfs.xfs</td><td>Make file system (xfs)</td><td>Formats a partition with XFS.</td></tr>
+  <tr><td>mount / umount</td><td>Mount / unmount</td><td>Attach / detach a file system.</td></tr>
+  <tr><td>fstab</td><td>File systems table</td><td>The file <code>/etc/fstab</code> that lists what to mount at boot.</td></tr>
+  <tr><td>df -hT</td><td>Disk free</td><td><code>-h</code> = human-readable sizes, <code>-T</code> = show file-system type.</td></tr>
+  <tr><td>mkswap</td><td>Make swap</td><td>Formats a partition as swap.</td></tr>
+  <tr><td>swapon / swapoff</td><td>Swap on / swap off</td><td>Turn swap on / off.</td></tr>
+  <tr><td>free -h</td><td>Free memory</td><td>Shows RAM and swap in human-readable sizes.</td></tr>
+  <tr><td>init 6</td><td>Run level 6</td><td>Another way to reboot (same as <code>reboot</code>).</td></tr>
+ </table></div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="disk">
+ <h2><span class="n">3</span>Adding a new disk to the VM</h2>
+ <div class="why"><b>Why?</b> We need empty disks to practice partitioning without touching the disk where Linux is installed.</div>
+ <div class="tblwrap"><table>
+  <tr><th>Disk</th><th>Size</th><th>Type</th></tr>
+  <tr><td>Disk 1</td><td>20 GB</td><td>SATA</td></tr>
+  <tr><td>Disk 2</td><td>10 GB</td><td>SATA</td></tr>
+  <tr><td>Disk 3</td><td>5 GB</td><td>SATA</td></tr>
+ </table></div>
+
+ <p>Check what Linux sees with <code>lsblk</code>. New disks have no partitions and no mount point.</p>
+<pre class="term"><span class="p">[root@server ~]#</span> lsblk
+<span class="o">NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda      8:0    0   10G  0 disk
+├─sda1   8:1    0    1M  0 part
+├─sda2   8:2    0  200M  0 part /boot/efi
+└─sda3   8:3    0  9.8G  0 part /
+sdb      8:16   0    5G  0 disk
+sdc      8:32   0    5G  0 disk
+sdd      8:48   0    5G  0 disk
+sr0     11:0    1  514K  0 rom</span></pre>
+
+ <h3>How to read a device name</h3>
+ <div class="chips">
+  <div class="chip"><b>sd</b> = SATA / SCSI disk</div>
+  <div class="chip"><b>b</b> = second disk (a, b, c ...)</div>
+  <div class="chip"><b>1</b> = partition number</div>
+  <div class="chip">so <code>/dev/sdb1</code> = first partition of the second disk</div>
+ </div>
+ <div class="tip"><b>Tip</b><code>sda</code> is the disk where Linux is installed. Never format it by mistake. In these notes: <code>sdb</code> is used for a normal partition, <code>sdc</code> for swap, <code>sdd</code> for the parted extra.</div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="mbrgpt">
+ <h2><span class="n">4</span>MBR vs GPT</h2>
+ <div class="why"><b>Why?</b> A disk needs a <mark>label</mark> (a partition map) before you can make partitions. MBR and GPT are the two kinds of label.</div>
+
+ <svg class="dg" viewBox="0 0 900 270" role="img" aria-label="MBR layout with 4 primary or extended partitions, GPT layout with 128 partitions">
+  <text class="bd" x="10" y="24">MBR (dos)</text>
+  <rect class="bs" x="10" y="36" width="130" height="50" rx="6"/><text x="75" y="66" text-anchor="middle">sdb1</text>
+  <rect class="bs" x="150" y="36" width="130" height="50" rx="6"/><text x="215" y="66" text-anchor="middle">sdb2</text>
+  <rect class="bs" x="290" y="36" width="130" height="50" rx="6"/><text x="355" y="66" text-anchor="middle">sdb3</text>
+  <rect class="wn" x="430" y="30" width="455" height="62" rx="8"/>
+  <text class="sm" x="440" y="46">sdb4 = Extended (a box, cannot store files itself)</text>
+  <rect class="bs" x="440" y="54" width="100" height="32" rx="5"/><text class="sm" x="490" y="75" text-anchor="middle">sdb5 logical</text>
+  <rect class="bs" x="548" y="54" width="100" height="32" rx="5"/><text class="sm" x="598" y="75" text-anchor="middle">sdb6 logical</text>
+  <text x="680" y="76">...</text>
+  <rect class="bs" x="725" y="54" width="150" height="32" rx="5"/><text class="sm" x="800" y="75" text-anchor="middle">sdb15 logical</text>
+  <text class="sm" x="10" y="112">Max 4 primary (or 3 primary + 1 extended with logical drives inside). Total usable numbers: 15. Max disk size: 2 TB.</text>
+
+  <text class="bd" x="10" y="160">GPT</text>
+  <rect class="ok" x="10" y="172" width="120" height="50" rx="6"/><text x="70" y="202" text-anchor="middle">sdb1</text>
+  <rect class="ok" x="138" y="172" width="120" height="50" rx="6"/><text x="198" y="202" text-anchor="middle">sdb2</text>
+  <rect class="ok" x="266" y="172" width="120" height="50" rx="6"/><text x="326" y="202" text-anchor="middle">sdb3</text>
+  <rect class="ok" x="394" y="172" width="120" height="50" rx="6"/><text x="454" y="202" text-anchor="middle">sdb4</text>
+  <text x="545" y="204">...</text>
+  <rect class="ok" x="600" y="172" width="285" height="50" rx="6"/><text x="742" y="202" text-anchor="middle">sdb128</text>
+  <text class="sm" x="10" y="246">Up to 128 partitions, all the same kind. No extended / logical. Disk size up to 8 ZiB. Modern and preferred.</text>
+ </svg>
+
+ <div class="tblwrap"><table>
+  <tr><th></th><th>MBR (dos)</th><th>GPT</th></tr>
+  <tr><td>Full form</td><td>Master Boot Record</td><td>GUID Partition Table</td></tr>
+  <tr><td>Partitions</td><td>4 primary, or 3 primary + extended (11 logical inside)</td><td>128</td></tr>
+  <tr><td>Total partitions possible</td><td>15</td><td>128</td></tr>
+  <tr><td>Max disk size</td><td>2 TB</td><td>8 ZiB</td></tr>
+  <tr><td>Used with</td><td>BIOS firmware</td><td>UEFI firmware</td></tr>
+  <tr><td>fdisk key to create</td><td><code>o</code></td><td><code>g</code></td></tr>
+ </table></div>
+
+ <div class="note"><b>Question: max size of one partition in GPT?</b>A GPT partition can be as large as the disk itself, so the limit is the GPT disk limit of about <mark>8 ZiB</mark>. In MBR one partition cannot go above 2 TB.</div>
+ <div class="tip"><b>Exam</b>In the exam you will mostly use <mark>GPT</mark>. In fdisk, press <code>g</code> first.</div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="fdisk">
+ <h2><span class="n">5</span>fdisk: create a partition</h2>
+ <div class="why"><b>Why fdisk?</b> <code>fdisk</code> (fixed disk) is the standard tool to make the label and the partitions. It is the main tool we use. Changes are saved only when you press <code>w</code>, so it is safe to practice: <code>q</code> quits without saving.</div>
+
+ <h3>fdisk keys you need</h3>
+ <div class="tblwrap"><table class="cmdtable">
+  <tr><th>Key</th><th>Meaning</th></tr>
+  <tr><td><code>m</code></td><td>help menu</td></tr>
+  <tr><td><code>p</code></td><td>print the partition table</td></tr>
+  <tr><td><code>g</code> / <code>o</code></td><td>new empty GPT label / new empty MBR (dos) label</td></tr>
+  <tr><td><code>n</code></td><td>new partition</td></tr>
+  <tr><td><code>d</code></td><td>delete a partition</td></tr>
+  <tr><td><code>t</code></td><td>change partition type (for example swap)</td></tr>
+  <tr><td><code>w</code></td><td>write changes to disk and exit</td></tr>
+  <tr><td><code>q</code></td><td>quit without saving</td></tr>
+ </table></div>
+ <p>To only view tables, no changes: <code>fdisk -l /dev/sda</code></p>
+
+ <h3>Example: a 1 GB partition on /dev/sdb with GPT</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> fdisk /dev/sdb
+<span class="o">Welcome to fdisk (util-linux 2.40).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+Device does not contain a recognized partition table.
+Created a new DOS (MBR) disklabel with disk identifier 0x1a2b3c4d.</span>
+
+Command (m for help): <span class="c">g</span>
+<span class="o">Created a new GPT disklabel (GUID: 5C3B...).</span>
+
+Command (m for help): <span class="c">n</span>
+Partition number (1-128, default 1): <span class="c">1</span>
+First sector (2048-10485726, default 2048): <span class="c">[press Enter]</span>
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (2048-10485726, default 10485726): <span class="c">+1G</span>
+
+<span class="o">Created a new partition 1 of type 'Linux filesystem' and of size 1 GiB.</span>
+
+Command (m for help): <span class="c">p</span>
+<span class="o">Disk /dev/sdb: 5 GiB, 5368709120 bytes, 10485760 sectors
+Disklabel type: gpt
+
+Device     Start     End Sectors Size Type
+/dev/sdb1   2048 2099199 2097152   1G Linux filesystem</span>
+
+Command (m for help): <span class="c">w</span>
+<span class="o">The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.</span></pre>
+
+ <h3>What each question means</h3>
+ <ul>
+  <li><b>Partition number</b>: press Enter for the default (next free number).</li>
+  <li><b>First sector</b>: press Enter. The default <code>2048</code> is the correct, aligned start.</li>
+  <li><b>Last sector</b>: this sets the size. Type <code>+512M</code>, <code>+1G</code> or <code>+1T</code>. Pressing Enter uses all remaining space.</li>
+ </ul>
+
+ <h3>Using MBR instead</h3>
+ <p>On a blank disk fdisk already starts with MBR, so skip <code>g</code> (or press <code>o</code> for a fresh MBR label). The <code>n</code> command then asks one extra question:</p>
+<pre class="term"><span class="o">Select (default p): </span><span class="c">p</span>
+<span class="o">Partition number (1-4, default 1): </span><span class="c">1</span></pre>
+ <p><code>p</code> = primary, <code>e</code> = extended.</p>
+
+ <div class="warn"><b>Careful</b>The command is <code>fdisk /dev/sdb</code> (the whole disk), not <code>fdisk /dev/sdb1</code> (a partition).</div>
+ <p><b>Next:</b> run <code>udevadm settle</code> (section 6), then format and mount (section 7).</p>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="settle">
+ <h2><span class="n">6</span>udevadm settle: what and why</h2>
+ <div class="why"><b>Why?</b> After you press <code>w</code> in fdisk, Linux needs a moment to create the device file <code>/dev/sdb1</code>. <code>udevadm settle</code> makes you wait until that work is finished.</div>
+
+ <svg class="dg" viewBox="0 0 900 170" role="img" aria-label="fdisk writes table, kernel tells udev, udev creates /dev/sdb1, settle waits">
+  <defs><marker id="m4" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+  <rect class="bx" x="10" y="25" width="200" height="75" rx="12"/><text class="bd" x="110" y="56" text-anchor="middle">fdisk  w</text><text class="sm" x="110" y="80" text-anchor="middle">table is written</text>
+  <rect class="bx" x="250" y="25" width="200" height="75" rx="12"/><text class="bd" x="350" y="56" text-anchor="middle">Kernel</text><text class="sm" x="350" y="80" text-anchor="middle">sees new partition</text>
+  <rect class="bx" x="490" y="25" width="200" height="75" rx="12"/><text class="bd" x="590" y="56" text-anchor="middle">udev (background)</text><text class="sm" x="590" y="80" text-anchor="middle">creates /dev/sdb1</text>
+  <rect class="ok" x="730" y="25" width="160" height="75" rx="12"/><text class="bd" x="810" y="56" text-anchor="middle">settle</text><text class="sm" x="810" y="80" text-anchor="middle">waits until done</text>
+  <line class="ar" x1="212" y1="62" x2="246" y2="62" marker-end="url(#m4)"/>
+  <line class="ar" x1="452" y1="62" x2="486" y2="62" marker-end="url(#m4)"/>
+  <line class="ar" x1="692" y1="62" x2="726" y2="62" marker-end="url(#m4)"/>
+  <text class="sm" x="450" y="140" text-anchor="middle">Only after this is it safe to run  mkfs.xfs /dev/sdb1</text>
+ </svg>
+
+ <ul>
+  <li><b>udev</b> is the part of Linux that creates and removes device files in <code>/dev</code> (like <code>/dev/sdb1</code>) when hardware or partitions change.</li>
+  <li>It works in the background, so it can be a little late.</li>
+  <li><code>udevadm settle</code> waits until udev has finished all its pending work, then returns. It prints <mark>nothing</mark> when it is done.</li>
+ </ul>
+
+ <h3>When to use</h3>
+ <p>Right after you save a partition change (<code>w</code> in fdisk), before <code>mkfs.xfs</code> or <code>mkswap</code>.</p>
+<pre class="term"><span class="p">[root@server ~]#</span> udevadm settle
+<span class="p">[root@server ~]#</span> mkfs.xfs /dev/sdb1</pre>
+
+ <div class="tip"><b>What if you skip it?</b>Most of the time nothing goes wrong. But sometimes the next command is too fast and fails like this. Run <code>udevadm settle</code> and try again:
+<pre class="term" style="margin-top:8px"><span class="p">[root@server ~]#</span> mkfs.xfs /dev/sdb1
+<span class="o">mkfs.xfs: cannot open /dev/sdb1: No such file or directory</span></pre></div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section id="fs">
+ <h2><span class="n">7</span>File system and temporary mount</h2>
+ <div class="why"><b>Why?</b> The partition is only empty space. <code>mkfs.xfs</code> (make file system) writes the XFS structure on it so files and folders can be stored. <code>mount</code> then attaches it to a folder so you can reach it.</div>
+
+ <ol class="steps">
+  <li><div><b><code>udevadm settle</code></b><br>Wait until <code>/dev/sdb1</code> exists.</div></li>
+  <li><div><b><code>mkfs.xfs /dev/sdb1</code></b><br>Format the partition with <mark>XFS</mark>.</div></li>
+  <li><div><b><code>mkdir /disksdb1</code></b><br>Make the mount point, an empty folder.</div></li>
+  <li><div><b><code>mount /dev/sdb1 /disksdb1</code></b><br>Attach the partition to that folder.</div></li>
+  <li><div><b><code>df -hT</code></b><br>Check size, type and mount point.</div></li>
+ </ol>
+
+<pre class="term"><span class="p">[root@server ~]#</span> mkfs.xfs /dev/sdb1
+<span class="o">meta-data=/dev/sdb1         isize=512    agcount=4, agsize=65536 blks
+         =                  sectsz=512   attr=2, projid32bit=1
+data     =                  bsize=4096   blocks=262144, imaxpct=25
+naming   =version 2         bsize=4096   ascii-ci=0, ftype=1
+log      =internal log      bsize=4096   blocks=16384, version=2
+realtime =none              extsz=4096   blocks=0, rtextents=0
+Discarding blocks...Done.</span>
+
+<span class="p">[root@server ~]#</span> mkdir /disksdb1
+<span class="p">[root@server ~]#</span> mount /dev/sdb1 /disksdb1
+<span class="p">[root@server ~]#</span> df -hT /disksdb1
+<span class="o">Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/sdb1      xfs   960M   39M  922M   5% /disksdb1</span>
+<span class="p">[root@server ~]#</span> mount | grep /disksdb1
+<span class="o">/dev/sdb1 on /disksdb1 type xfs (rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota)</span></pre>
+
+ <div class="warn"><b>Not permanent!</b>A mount done with the <code>mount</code> command is lost after reboot. For a permanent mount, add the partition to <code>/etc/fstab</code> (next section).</div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section id="fstab">
+ <h2><span class="n">8</span>Permanent mount with /etc/fstab</h2>
+ <div class="why"><b>Why?</b> <code>/etc/fstab</code> (file systems table) is the list Linux reads at boot to know what to mount. Without a line here, your mount disappears after reboot.</div>
+
+ <h3>Step 1: get the UUID</h3>
+ <p>Use <code>blkid</code> (or <code>lsblk --fs</code>) and copy the <mark>UUID</mark>.</p>
+<pre class="term"><span class="p">[root@server ~]#</span> blkid /dev/sdb1
+<span class="o">/dev/sdb1: UUID="d85f5387-9791-400a-9a74-f637e7ee68aa" TYPE="xfs" PARTUUID="7c1e0f1b-..."</span>
+
+<span class="p">[root@server ~]#</span> lsblk --fs /dev/sdb1
+<span class="o">NAME FSTYPE FSVER LABEL UUID
+sdb1 xfs                d85f5387-9791-400a-9a74-f637e7ee68aa</span></pre>
+
+ <h3>Step 2: edit the file</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> vim /etc/fstab</pre>
+ <p>Go to the last line and add one new line:</p>
+ <div class="file"><b>/etc/fstab</b><pre>...output omitted...
+<span class="add">UUID=d85f5387-9791-400a-9a74-f637e7ee68aa   /disksdb1   xfs   defaults   0 0</span></pre></div>
+ <p>You can also write <code>/dev/sdb1</code> in place of the UUID, but <mark>UUID is better</mark>. Disk names like sdb can change if disks are added or removed. The UUID never changes.</p>
+
+ <h3>The 6 fields of a fstab line</h3>
+ <svg class="dg" viewBox="0 0 900 190" role="img" aria-label="fstab line fields">
+  <rect class="bs" x="5" y="20" width="330" height="48" rx="8"/><text class="bd" x="170" y="50" text-anchor="middle" style="font-size:13px">UUID=d85f5387-...-74e68aa</text>
+  <rect class="bs" x="343" y="20" width="110" height="48" rx="8"/><text class="bd" x="398" y="50" text-anchor="middle" style="font-size:13px">/disksdb1</text>
+  <rect class="bs" x="461" y="20" width="80" height="48" rx="8"/><text class="bd" x="501" y="50" text-anchor="middle">xfs</text>
+  <rect class="bs" x="549" y="20" width="130" height="48" rx="8"/><text class="bd" x="614" y="50" text-anchor="middle">defaults</text>
+  <rect class="bs" x="687" y="20" width="90" height="48" rx="8"/><text class="bd" x="732" y="50" text-anchor="middle">0</text>
+  <rect class="bs" x="785" y="20" width="90" height="48" rx="8"/><text class="bd" x="830" y="50" text-anchor="middle">0</text>
+  <text class="sm" x="170" y="95" text-anchor="middle">1 Device</text><text class="sm" x="170" y="113" text-anchor="middle">what to mount</text>
+  <text class="sm" x="398" y="95" text-anchor="middle">2 Mount point</text><text class="sm" x="398" y="113" text-anchor="middle">which folder</text>
+  <text class="sm" x="501" y="95" text-anchor="middle">3 Type</text><text class="sm" x="501" y="113" text-anchor="middle">file system</text>
+  <text class="sm" x="614" y="95" text-anchor="middle">4 Options</text><text class="sm" x="614" y="113" text-anchor="middle">how to mount</text>
+  <text class="sm" x="732" y="95" text-anchor="middle">5 Dump</text><text class="sm" x="732" y="113" text-anchor="middle">backup flag</text>
+  <text class="sm" x="830" y="95" text-anchor="middle">6 Check</text><text class="sm" x="830" y="113" text-anchor="middle">fsck order</text>
+  <text class="sm" x="450" y="160" text-anchor="middle">For swap the mount point and type are both the word  swap</text>
+ </svg>
+
+ <p><mark>defaults</mark> is the default option set. It means: <code>rw</code> (read and write), <code>suid</code>, <code>dev</code>, <code>exec</code>, <code>auto</code> (mount at boot), <code>nouser</code> (only root can mount), <code>async</code>. The last two fields are normally <code>0 0</code>.</p>
+
+ <h3>Step 3: make it live and test</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> systemctl daemon-reload      <span class="c"># systemd reads the new fstab</span>
+<span class="p">[root@server ~]#</span> mount -a                      <span class="c"># mount everything in fstab. No message = good</span>
+<span class="p">[root@server ~]#</span> mount | grep /disksdb1
+<span class="o">/dev/sdb1 on /disksdb1 type xfs (rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota)</span>
+<span class="p">[root@server ~]#</span> df -hT</pre>
+
+ <div class="warn"><b>Always run mount -a before reboot</b>If the fstab line has a mistake, the server can fail to boot and go to emergency mode. <code>mount -a</code> shows the error now, while you can still fix it.</div>
+ <div class="tip"><b>Best test</b>Unmount first with <code>umount /disksdb1</code>, then run <code>mount -a</code>. If <code>/disksdb1</code> comes back, your fstab line works. A final <code>reboot</code> and <code>mount | grep /disksdb1</code> proves it.</div>
+</section>
+
+<!-- ================= 9 ================= -->
+<section id="remove">
+ <h2><span class="n">9</span>Removing a partition</h2>
+ <div class="why"><b>Why this order?</b> If you delete the partition but leave its fstab line, the next boot tries to mount something that no longer exists.</div>
+ <ol class="steps">
+  <li><div><b>Unmount it</b><br><code>umount /disksdb1</code></div></li>
+  <li><div><b>Remove its line from <code>/etc/fstab</code></b><br>Open <code>vim /etc/fstab</code> and delete the line that has the UUID. Then run <code>systemctl daemon-reload</code>.</div></li>
+  <li><div><b>Delete the partition</b><br><code>fdisk /dev/sdb</code>, press <code>d</code>, then <code>w</code>.</div></li>
+  <li><div><b>Reboot if the old partition still shows in <code>lsblk</code></b></div></li>
+ </ol>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="swap">
+ <h2><span class="n">10</span>Swap space</h2>
+ <div class="why"><b>Why swap?</b> When RAM is full, Linux moves old, unused data to the disk. This keeps the system running instead of crashing.</div>
+
+ <svg class="dg" viewBox="0 0 900 190" role="img" aria-label="RAM full, inactive pages moved to swap on disk">
+  <defs><marker id="m2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+  <rect class="bx" x="20" y="30" width="300" height="80" rx="12"/>
+  <rect class="wn" x="34" y="44" width="60" height="52" rx="5"/><rect class="wn" x="100" y="44" width="60" height="52" rx="5"/><rect class="wn" x="166" y="44" width="60" height="52" rx="5"/><rect class="bs" x="232" y="44" width="76" height="52" rx="5"/>
+  <text class="bd" x="170" y="140" text-anchor="middle">RAM (fast) is full</text>
+  <rect class="ok" x="580" y="30" width="300" height="80" rx="12"/>
+  <rect class="bs" x="594" y="44" width="80" height="52" rx="5"/><rect class="bs" x="680" y="44" width="80" height="52" rx="5"/>
+  <text x="820" y="76" text-anchor="middle" class="sm">free</text>
+  <text class="bd" x="730" y="140" text-anchor="middle">Swap on disk (slow)</text>
+  <line class="ar" x1="326" y1="70" x2="574" y2="70" marker-end="url(#m2)"/>
+  <text class="sm" x="450" y="58" text-anchor="middle">inactive pages move out</text>
+  <text class="sm" x="450" y="92" text-anchor="middle">to make room</text>
+ </svg>
+
+ <ul>
+  <li>Swap is <mark>slower</mark> than RAM. It is a safety net, not a replacement.</li>
+  <li>Low RAM and no swap: the system becomes unstable, and programs (such as a normal user login) can fail to start.</li>
+  <li>Swap can be a partition (this chapter). The partition type must be <mark>Linux swap</mark>.</li>
+ </ul>
+
+ <h3>The 5 swap steps</h3>
+ <ol class="steps">
+  <li><div><b>Create a partition</b> with fdisk and set its type to Linux swap</div></li>
+  <li><div><b><code>udevadm settle</code></b></div></li>
+  <li><div><b><code>mkswap</code></b> formats it as swap (instead of mkfs.xfs)</div></li>
+  <li><div><b><code>swapon</code></b> turns it on now</div></li>
+  <li><div><b>/etc/fstab</b> line for permanent use, then reboot to check</div></li>
+ </ol>
+
+ <div class="tblwrap"><table>
+  <tr><th>fdisk label</th><th>Type code for Linux swap</th></tr>
+  <tr><td>MBR (dos)</td><td><code>82</code></td></tr>
+  <tr><td>GPT</td><td><code>19</code> (or the alias <code>swap</code>)</td></tr>
+ </table></div>
+
+ <h3>Example: one 2 GB swap on /dev/sdc</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> fdisk /dev/sdc
+Command (m for help): <span class="c">g</span>
+Command (m for help): <span class="c">n</span>
+Partition number (1-128, default 1): <span class="c">1</span>
+First sector (2048-10485726, default 2048): <span class="c">[Enter]</span>
+Last sector, +/-sectors or +/-size{K,M,G,T,P}: <span class="c">+2G</span>
+<span class="o">Created a new partition 1 of type 'Linux filesystem' and of size 2 GiB.</span>
+
+Command (m for help): <span class="c">t</span>
+<span class="o">Selected partition 1</span>
+Partition type or alias (type L to list all): <span class="c">L</span>     <span class="c"># shows the list. Press q to leave the list</span>
+Partition type or alias (type L to list all): <span class="c">19</span>
+<span class="o">Changed type of partition 'Linux filesystem' to 'Linux swap'.</span>
+
+Command (m for help): <span class="c">p</span>
+<span class="o">Device     Start     End Sectors Size Type
+/dev/sdc1   2048 4196351 4194304   2G Linux swap</span>
+
+Command (m for help): <span class="c">w</span></pre>
+
+ <h3>Format and turn on</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> udevadm settle
+<span class="p">[root@server ~]#</span> mkswap /dev/sdc1
+<span class="o">Setting up swapspace version 1, size = 2 GiB (2147479552 bytes)
+no label, UUID=54a08491-2722-4145-911c-317c6919e53d</span>
+
+<span class="p">[root@server ~]#</span> swapon /dev/sdc1
+<span class="p">[root@server ~]#</span> swapon -s                    <span class="c"># same as: swapon --show</span>
+<span class="o">Filename                Type        Size      Used    Priority
+/dev/sdc1               partition   2097148   0       -2</span>
+
+<span class="p">[root@server ~]#</span> free -h
+<span class="o">               total        used        free      shared  buff/cache   available
+Mem:           3.6Gi       812Mi       2.1Gi        18Mi       890Mi       2.8Gi
+Swap:          2.0Gi          0B       2.0Gi</span></pre>
+ <p>The <b>Swap</b> line in <code>free -h</code> now shows 2.0Gi. Before <code>swapon</code> it showed 0B.</p>
+
+ <h3>Make it permanent</h3>
+ <p>Open <code>vim /etc/fstab</code> and add one line at the end:</p>
+ <div class="file"><b>/etc/fstab</b><pre>...output omitted...
+<span class="add">UUID=54a08491-2722-4145-911c-317c6919e53d   swap   swap   defaults   0 0</span></pre></div>
+ <p>(<code>/dev/sdc1 swap swap defaults 0 0</code> also works, but UUID is safer.)</p>
+<pre class="term"><span class="p">[root@server ~]#</span> systemctl daemon-reload
+<span class="p">[root@server ~]#</span> swapon -a                     <span class="c"># turn on everything marked swap in fstab</span>
+<span class="p">[root@server ~]#</span> reboot                        <span class="c"># or: init 6</span>
+<span class="p">[root@server ~]#</span> free -h                       <span class="c"># Swap line must still show 2.0Gi</span></pre>
+</section>
+
+<!-- ================= 11 ================= -->
+<section id="swap2">
+ <h2><span class="n">11</span>Two swaps and priority</h2>
+ <div class="why"><b>Why priority?</b> With more than one swap, you decide which one Linux fills first. Example: put the faster disk first.</div>
+ <p>The swap with the <mark>higher pri number is used first</mark>. If you set nothing, the first swap gets <code>-2</code>, the next one <code>-3</code>, and so on.</p>
+
+ <svg class="dg" viewBox="0 0 900 150" role="img" aria-label="sdc2 with pri 30 is used before sdc1 with pri 20">
+  <defs><marker id="m3" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+  <rect class="ok" x="40" y="30" width="340" height="70" rx="12"/>
+  <text class="bd" x="210" y="62" text-anchor="middle">/dev/sdc2</text><text x="210" y="86" text-anchor="middle">pri=30, used FIRST</text>
+  <line class="ar" x1="386" y1="65" x2="514" y2="65" marker-end="url(#m3)"/>
+  <text class="sm" x="450" y="55" text-anchor="middle">when full</text>
+  <rect class="bs" x="520" y="30" width="340" height="70" rx="12"/>
+  <text class="bd" x="690" y="62" text-anchor="middle">/dev/sdc1</text><text x="690" y="86" text-anchor="middle">pri=20, used SECOND</text>
+ </svg>
+
+ <h3>Step 1: create the second swap (512 MB) in fdisk</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> fdisk /dev/sdc
+Command (m for help): <span class="c">n</span>
+Partition number (2-128, default 2): <span class="c">2</span>
+First sector (4196352-10485726, default 4196352): <span class="c">[Enter]</span>
+Last sector, +/-sectors or +/-size{K,M,G,T,P}: <span class="c">+512M</span>
+<span class="o">Created a new partition 2 of type 'Linux filesystem' and of size 512 MiB.</span>
+
+Command (m for help): <span class="c">t</span>
+Partition number (1,2, default 2): <span class="c">2</span>
+Partition type or alias (type L to list all): <span class="c">19</span>
+<span class="o">Changed type of partition 'Linux filesystem' to 'Linux swap'.</span>
+
+Command (m for help): <span class="c">w</span></pre>
+
+<pre class="term"><span class="p">[root@server ~]#</span> udevadm settle
+<span class="p">[root@server ~]#</span> mkswap /dev/sdc2
+<span class="o">Setting up swapspace version 1, size = 512 MiB (536866816 bytes)
+no label, UUID=353fe8ca-1276-4443-935e-e1ae87039aef</span>
+<span class="p">[root@server ~]#</span> blkid /dev/sdc1 /dev/sdc2        <span class="c"># copy both UUIDs</span></pre>
+
+ <h3>Step 2: edit fstab and add pri</h3>
+ <p>Change the old sdc1 line (add <code>,pri=20</code>) and add one new line for sdc2:</p>
+ <div class="file"><b>/etc/fstab</b><pre>...output omitted...
+<span class="add">UUID=54a08491-2722-4145-911c-317c6919e53d   swap   swap   defaults,pri=20   0 0
+UUID=353fe8ca-1276-4443-935e-e1ae87039aef   swap   swap   defaults,pri=30   0 0</span></pre></div>
+ <p>Use your own UUIDs from <code>blkid</code>. The first line must belong to <code>/dev/sdc1</code>, the second to <code>/dev/sdc2</code>.</p>
+
+ <h3>Step 3: apply and check</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> systemctl daemon-reload
+<span class="p">[root@server ~]#</span> swapoff -a          <span class="c"># sdc1 is already on with the old priority, so switch all off first</span>
+<span class="p">[root@server ~]#</span> swapon -a
+<span class="p">[root@server ~]#</span> swapon --show
+<span class="o">NAME      TYPE      SIZE USED PRIO
+/dev/sdc1 partition   2G   0B   20
+/dev/sdc2 partition 512M   0B   30</span>
+
+<span class="p">[root@server ~]#</span> init 6
+<span class="c"># after reboot</span>
+<span class="p">[root@server ~]#</span> swapon -s
+<span class="p">[root@server ~]#</span> lsblk</pre>
+ <p>If both swaps and their <b>PRIO</b> values are the same after the reboot, the permanent setup is correct.</p>
+
+ <div class="note"><b>Turn a swap off</b><code>swapoff /dev/sdc1</code> turns it off now. Also delete its line from <code>/etc/fstab</code> so it does not come back at boot.</div>
+</section>
+
+<!-- ================= 12 ================= -->
+<section id="parted" class="extra">
+ <h2><span class="n">12</span>Extra: parted<span class="tag">extra, fdisk is enough</span></h2>
+ <div class="why"><b>Why parted?</b> <code>parted</code> (partition editor) does the same job as fdisk. You can do all the work with fdisk, so read this only if you want one more tool. The big difference: parted saves every change <mark>immediately</mark>, there is no <code>w</code> key and no undo.</div>
+
+ <h3>Partition with one-line commands (on /dev/sdd)</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> parted /dev/sdd print
+<span class="o">Error: /dev/sdd: unrecognised disk label
+Partition Table: unknown</span>
+
+<span class="p">[root@server ~]#</span> parted /dev/sdd mklabel gpt          <span class="c"># or: mklabel msdos for MBR</span>
+<span class="p">[root@server ~]#</span> parted /dev/sdd mkpart backup xfs 2048s 2GB
+<span class="o">Information: You may need to update /etc/fstab.</span>
+
+<span class="p">[root@server ~]#</span> parted /dev/sdd print
+<span class="o">Model: QEMU QEMU HARDDISK (scsi)
+Disk /dev/sdd: 5369MB
+Partition Table: gpt
+
+Number  Start   End     Size    File system  Name    Flags
+ 1      1049kB  2000MB  1999MB               backup</span></pre>
+
+ <div class="tblwrap"><table>
+  <tr><th>Part of the command</th><th>Meaning</th></tr>
+  <tr><td><code>mklabel gpt</code></td><td>sets the label (like <code>g</code> in fdisk). On a disk with data it wipes the old table.</td></tr>
+  <tr><td><code>backup</code></td><td>name of the partition (GPT). On MBR this place takes <code>primary</code> or <code>extended</code></td></tr>
+  <tr><td><code>xfs</code></td><td>file-system type label only. It does <mark>not</mark> format the partition</td></tr>
+  <tr><td><code>2048s</code></td><td>start at sector 2048 (<code>s</code> = sectors)</td></tr>
+  <tr><td><code>2GB</code></td><td>end position (not the size)</td></tr>
+ </table></div>
+
+ <h3>Menu mode</h3>
+<pre class="term"><span class="p">[root@server ~]#</span> parted /dev/sdd
+(parted) <span class="c">mklabel gpt</span>
+(parted) <span class="c">mkpart</span>
+<span class="o">Partition name?  []? </span><span class="c">backup</span>
+<span class="o">File system type?  [ext2]? </span><span class="c">xfs</span>
+<span class="o">Start? </span><span class="c">2048s</span>
+<span class="o">End? </span><span class="c">2GB</span>
+(parted) <span class="c">print</span>
+(parted) <span class="c">quit</span></pre>
+ <p>Type <code>?</code> or <code>help</code> inside parted for help. <code>help mkpart</code> shows help for one command.</p>
+
+ <h3>Swap with parted</h3>
+ <p>Write <code>linux-swap</code> in <code>mkpart</code>. The second swap starts where the first one ended.</p>
+<pre class="term"><span class="p">[root@server ~]#</span> parted /dev/sdd
+(parted) <span class="c">mkpart swap1 linux-swap 2001MB 3001MB</span>
+(parted) <span class="c">mkpart swap2 linux-swap 3001MB 3257MB</span>
+(parted) <span class="c">print</span>
+(parted) <span class="c">quit</span>
+<span class="p">[root@server ~]#</span> udevadm settle
+<span class="p">[root@server ~]#</span> mkswap /dev/sdd2
+<span class="p">[root@server ~]#</span> mkswap /dev/sdd3</pre>
+ <p>After that the steps are the same as before: <code>swapon</code>, <code>blkid</code>, the two <code>/etc/fstab</code> lines with <code>pri=</code>, <code>systemctl daemon-reload</code>, <code>swapon -a</code>, <code>swapon --show</code>.</p>
+</section>
+
+<!-- ================= 13 ================= -->
+<section id="cheat">
+ <h2><span class="n">13</span>Commands at a glance</h2>
+ <div class="tblwrap"><table class="cmdtable">
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td><code>lsblk</code> / <code>lsblk --fs</code></td><td>list disks, partitions, file systems and UUIDs</td></tr>
+  <tr><td><code>fdisk -l /dev/sdb</code></td><td>show partition table</td></tr>
+  <tr><td><code>fdisk /dev/sdb</code></td><td>edit partitions (g, n, t, d, p, w)</td></tr>
+  <tr><td><code>udevadm settle</code></td><td>wait until the new partition device exists</td></tr>
+  <tr><td><code>mkfs.xfs /dev/sdb1</code></td><td>format with XFS</td></tr>
+  <tr><td><code>mkdir /disksdb1</code></td><td>create mount point</td></tr>
+  <tr><td><code>mount /dev/sdb1 /disksdb1</code></td><td>mount now (temporary)</td></tr>
+  <tr><td><code>blkid /dev/sdb1</code></td><td>show UUID</td></tr>
+  <tr><td><code>vim /etc/fstab</code></td><td>add the permanent entry</td></tr>
+  <tr><td><code>systemctl daemon-reload</code></td><td>tell systemd about the fstab change</td></tr>
+  <tr><td><code>mount -a</code></td><td>mount everything in fstab, also tests it</td></tr>
+  <tr><td><code>mount | grep /disksdb1</code></td><td>check one mount</td></tr>
+  <tr><td><code>df -hT</code></td><td>size, type and mount point of all mounted file systems</td></tr>
+  <tr><td><code>umount /disksdb1</code></td><td>unmount</td></tr>
+  <tr><td><code>mkswap /dev/sdc1</code></td><td>format as swap</td></tr>
+  <tr><td><code>swapon /dev/sdc1</code> / <code>swapon -a</code></td><td>turn on one swap / all swaps in fstab</td></tr>
+  <tr><td><code>swapon -s</code> / <code>swapon --show</code></td><td>list active swap with priority</td></tr>
+  <tr><td><code>swapoff /dev/sdc1</code> / <code>swapoff -a</code></td><td>turn off one swap / all swaps</td></tr>
+  <tr><td><code>free -h</code></td><td>RAM and swap totals</td></tr>
+  <tr><td><code>parted /dev/sdd print</code> (extra)</td><td>show partition table with parted</td></tr>
+  <tr><td><code>parted /dev/sdd mklabel gpt</code> (extra)</td><td>set GPT label with parted</td></tr>
+  <tr><td><code>parted /dev/sdd mkpart NAME TYPE START END</code> (extra)</td><td>create a partition with parted</td></tr>
+ </table></div>
+</section>
+
+<!-- ================= 14 QUIZ ================= -->
+<section id="quiz">
+ <h2><span class="n">14</span>Quiz: test yourself</h2>
+ <p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+ <div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+ <div id="qs"></div>
+ <div id="result" role="status"></div>
+</section>
+
+<footer>RH134 &middot; Chapter 10 &middot; Managing Basic Storage</footer>
+</div>
+
+<script>
+const Q=[
+{q:"What is the full form of GPT?",o:["General Partition Tool","GUID Partition Table","Global Primary Table","GNU Partition Type"],a:1,e:"GPT = GUID Partition Table. It is the modern label type with 128 partitions."},
+{q:"A disk has an MBR label. What is the maximum number of primary partitions?",o:["2","3","4","128"],a:2,e:"MBR allows 4 primary partitions. Or 3 primary + 1 extended with logical drives inside."},
+{q:"You need to use a 6 TB disk. Which label type must you choose?",o:["MBR","GPT","Both work the same","No label is needed"],a:1,e:"MBR supports only up to 2 TB. GPT supports disks up to 8 ZiB."},
+{q:"Which fdisk key creates a new empty GPT label?",o:["o","n","g","w"],a:2,e:"g = new GPT label. o = new MBR (dos) label. n = new partition. w = write."},
+{q:"You made changes in fdisk and want to throw them away. Which key do you press?",o:["w","q","d","p"],a:1,e:"q quits without saving. w would save the changes."},
+{q:"Which command opens fdisk for the second disk correctly?",o:["fdisk /dev/sdb1","fdisk sdb","fdisk /dev/sdb","fdisk /dev/sda2"],a:2,e:"fdisk takes the whole disk (/dev/sdb), not a partition (/dev/sdb1)."},
+{q:"In fdisk, what does <code>+512M</code> at the 'Last sector' question mean?",o:["Start at 512 MB","Make a partition of 512 MB size","Make 512 partitions","Delete 512 MB"],a:1,e:"+512M sets the partition size to 512 MB, counted from the first sector."},
+{q:"What does <code>udevadm settle</code> do?",o:["Formats the new partition","Mounts the new partition","Waits until the system has finished creating the new device file","Reboots the server"],a:2,e:"It waits for udev to finish its background work, so /dev/sdb1 really exists before the next command."},
+{q:"After fdisk saved a new partition, which command is the right next one?",o:["mount -a","udevadm settle","swapon -a","systemctl reboot"],a:1,e:"Run udevadm settle first, then mkfs.xfs (or mkswap)."},
+{q:"Which command formats /dev/sdb1 with the default RHEL file system?",o:["mkswap /dev/sdb1","mkfs.xfs /dev/sdb1","mount /dev/sdb1","blkid /dev/sdb1"],a:1,e:"mkfs.xfs makes an XFS file system. mkswap is only for swap."},
+{q:"You ran <code>mount /dev/sdb1 /disksdb1</code> and did nothing else. What happens after reboot?",o:["It stays mounted","The mount is lost","The partition is deleted","The disk becomes read-only"],a:1,e:"A manual mount is temporary. Add a line in /etc/fstab for a permanent mount."},
+{q:"Why is UUID better than /dev/sdb1 in /etc/fstab?",o:["UUID is shorter","Disk names can change, the UUID does not","UUID makes the disk faster","/dev/sdb1 is not allowed"],a:1,e:"Names like sdb can change when disks are added or removed. The UUID stays the same."},
+{q:"How many fields does one line of /etc/fstab have?",o:["4","5","6","8"],a:2,e:"Device, mount point, type, options, dump, fsck order = 6 fields."},
+{q:"You edited /etc/fstab. Which command tests it for errors without a reboot?",o:["mount -a","fdisk -l","free -h","udevadm settle"],a:0,e:"mount -a mounts everything in fstab. No message means the lines are fine."},
+{q:"What can happen if you reboot with a wrong line in /etc/fstab?",o:["Nothing at all","The server may fail to boot and go to emergency mode","fstab fixes itself","All data is deleted"],a:1,e:"A bad fstab line can stop the boot. Always run mount -a before reboot."},
+{q:"Which fdisk partition type code is Linux swap on a GPT disk?",o:["82","83","19","8e"],a:2,e:"GPT: 19 = Linux swap. On an MBR (dos) disk the code is 82."},
+{q:"Which command formats /dev/sdc1 as swap?",o:["mkfs.xfs /dev/sdc1","mkswap /dev/sdc1","swapon /dev/sdc1","mount /dev/sdc1 swap"],a:1,e:"mkswap formats it as swap. swapon then turns it on."},
+{q:"Two swaps: sdc1 has pri=20 and sdc2 has pri=30. Which is used first?",o:["sdc1","sdc2","Both at the same time, always","The bigger one"],a:1,e:"The higher priority number is used first, so sdc2 (pri=30)."},
+{q:"If you set no priority, what does the first swap get by default?",o:["0","10","-2","32767"],a:2,e:"The first swap gets -2, the next -3, and so on."},
+{q:"Which command turns on every swap listed in /etc/fstab?",o:["swapon -a","swapoff -a","mkswap -a","mount -s"],a:0,e:"swapon -a activates all swap lines in fstab. swapoff -a turns them all off."},
+{q:"Extra (parted): when does parted save a change?",o:["Only when you type w","Immediately","Only after reboot","Only after udevadm settle"],a:1,e:"parted writes changes at once. There is no save key and no undo."}
+];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script>
+</body></html>

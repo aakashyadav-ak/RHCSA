@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapters 8–9 — Editing Text Files and Redirecting Shell Input and Output | RH124 Study Notes</title>
+<style>
+:root{--bg:#0a0e17;--bg2:#111827;--bg3:#1a2236;--bg4:#232d44;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--red:#ee0000;--red2:#ff3333;--red-glow:rgba(238,0,0,.15);--green:#22c55e;--blue:#3b82f6;--yellow:#eab308;--orange:#f97316;--purple:#a855f7;--cyan:#06b6d4;--border:#1e293b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px}
+::selection{background:var(--red);color:#fff}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--red),var(--red2));z-index:10000;transition:width .15s}
+.top-nav{position:sticky;top:3px;z-index:999;background:rgba(10,14,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top-nav a{color:var(--text2);text-decoration:none;font-size:.88rem;padding:6px 14px;border-radius:8px;transition:.2s;border:1px solid var(--border);display:inline-flex;align-items:center;gap:6px}
+.top-nav a:hover{color:#fff;border-color:var(--red);background:var(--red-glow)}
+.nav-title{font-weight:700;color:var(--red);font-size:.95rem}
+.toc-toggle{position:fixed;bottom:80px;right:20px;z-index:998;width:44px;height:44px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:1.2rem;cursor:pointer}
+.toc-toggle:hover{border-color:var(--red);color:var(--red)}
+.toc-sidebar{position:fixed;top:0;right:-340px;width:320px;height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:9999;padding:24px 20px;overflow-y:auto;transition:right .3s ease}
+.toc-sidebar.open{right:0}
+.toc-sidebar h3{color:var(--red);margin-bottom:16px;font-size:1rem}
+.toc-sidebar a{display:block;color:var(--text2);text-decoration:none;padding:6px 0;font-size:.84rem;border-bottom:1px solid var(--border);transition:.2s}
+.toc-sidebar a:hover{color:var(--red);padding-left:8px}
+.toc-sidebar a.sub{padding-left:16px;font-size:.8rem;color:var(--text3)}
+.toc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:none}
+.toc-overlay.show{display:block}
+.container{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+.hero{text-align:center;padding:48px 20px 36px;margin-bottom:24px}
+.hero-badge{display:inline-block;background:var(--red-glow);color:var(--red);padding:4px 16px;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:12px;border:1px solid rgba(238,0,0,.25)}
+.hero h1{font-size:2rem;margin-bottom:8px;background:linear-gradient(135deg,#fff,var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--text2);max-width:660px;margin:0 auto}
+.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:28px;overflow:hidden}
+.section-header{display:flex;align-items:center;gap:12px;padding:18px 24px;background:linear-gradient(135deg,var(--bg3),var(--bg2));border-bottom:1px solid var(--border)}
+.section-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.section-header h2{font-size:1.15rem;color:#fff}
+.section-body{padding:24px}
+.section-body h3{color:var(--red2);font-size:1.05rem;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.section-body h3:first-child{margin-top:0}
+.section-body h4{color:var(--cyan);font-size:.98rem;margin:20px 0 8px}
+.section-body p{margin-bottom:12px}
+.section-body ul,.section-body ol{margin:8px 0 16px 22px}
+.section-body li{margin-bottom:6px}
+.info-box{border-radius:10px;padding:14px 18px;margin:16px 0;border-left:4px solid;font-size:.93rem}
+.info-box .box-title{font-weight:700;margin-bottom:6px}
+.info-box.note{background:rgba(59,130,246,.08);border-color:var(--blue);color:#93c5fd}.info-box.note .box-title{color:var(--blue)}
+.info-box.tip{background:rgba(34,197,94,.08);border-color:var(--green);color:#86efac}.info-box.tip .box-title{color:var(--green)}
+.info-box.warning{background:rgba(234,179,8,.08);border-color:var(--yellow);color:#fde047}.info-box.warning .box-title{color:var(--yellow)}
+.info-box.important{background:rgba(168,85,247,.08);border-color:var(--purple);color:#d8b4fe}.info-box.important .box-title{color:var(--purple)}
+.info-box.analogy{background:rgba(6,182,212,.08);border-color:var(--cyan);color:#67e8f9}.info-box.analogy .box-title{color:var(--cyan)}
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin:12px 0;overflow-x:auto;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:.85rem;line-height:1.7;white-space:pre;color:#e2e8f0}
+.code-block .p{color:var(--green)}.code-block .c{color:#6a737d;font-style:italic}.code-block .o{color:var(--text3)}
+.code-inline{background:var(--bg3);color:var(--red2);padding:2px 7px;border-radius:5px;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:.87em}
+.table-wrapper{overflow-x:auto;margin:12px 0;border-radius:10px;border:1px solid var(--border)}
+.table-wrapper table{width:100%;border-collapse:collapse;font-size:.88rem}
+.table-wrapper th{background:var(--bg3);color:var(--red2);padding:12px 16px;text-align:left;font-weight:600}
+.table-wrapper td{padding:10px 16px;border-top:1px solid var(--border);vertical-align:top}
+.table-wrapper tr:hover td{background:rgba(238,0,0,.04)}
+.table-wrapper tr.grp td{background:var(--bg3);color:var(--cyan);font-weight:700;letter-spacing:.03em}
+.visual{background:#0d1117;border:1px solid var(--border);border-radius:10px;padding:14px;margin:16px 0;text-align:center}
+.visual svg{max-width:100%;height:auto}
+.visual .cap{color:var(--text3);font-size:.8rem;margin-top:8px}
+.vs-container{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.vs-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px}
+.vs-card h4{margin:0 0 10px}
+.vs-card.a{border-color:rgba(59,130,246,.35)}.vs-card.a h4{color:var(--blue)}
+.vs-card.b{border-color:rgba(168,85,247,.35)}.vs-card.b h4{color:var(--purple)}
+.badge{display:inline-block;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.35);padding:2px 12px;border-radius:20px;font-size:.78rem;font-weight:600;margin-left:8px;vertical-align:middle}
+.lsl{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.lsl .f{flex:1 1 118px;min-width:110px;background:var(--bg3);border:1px solid var(--border);border-top:4px solid var(--c);border-radius:10px;padding:10px 10px 12px;text-align:center}
+.lsl .lab{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--c);font-weight:700}
+.lsl .val{display:block;font-family:'Cascadia Code',Consolas,monospace;font-size:1.02rem;color:#fff;margin:6px 0;word-break:break-all}
+.lsl .exp{display:block;font-size:.78rem;color:var(--text2);line-height:1.4}
+.quiz-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.quiz-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.88rem;color:var(--text2);margin-bottom:10px}
+.quiz-bar{height:8px;background:var(--bg);border-radius:6px;overflow:hidden;margin-bottom:20px}
+.quiz-bar div{height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--orange));transition:width .3s}
+.quiz-q{font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:16px;line-height:1.5}
+.quiz-opt{display:block;width:100%;text-align:left;background:var(--bg2);color:var(--text);border:2px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;font-size:.95rem;font-family:inherit;cursor:pointer;transition:.15s}
+.quiz-opt:hover:not(:disabled){border-color:var(--blue);background:rgba(59,130,246,.08)}
+.quiz-opt:disabled{cursor:default}
+.quiz-opt.right{border-color:var(--green);background:rgba(34,197,94,.12)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(238,0,0,.12)}
+.quiz-fb{display:none;margin-top:6px;padding:12px 16px;border-radius:10px;font-size:.92rem;background:var(--bg2);border-left:4px solid var(--cyan);color:var(--text2)}
+.quiz-fb.show{display:block}
+.quiz-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:14px;margin-right:8px;font-family:inherit}
+.quiz-btn:hover{background:var(--red2)}
+.quiz-btn.alt{background:var(--bg4);color:var(--text)}
+.quiz-score{font-size:2.4rem;font-weight:800;color:var(--green);text-align:center;margin:8px 0}
+.quiz-miss{margin:14px 0;padding:12px 16px;background:var(--bg2);border-radius:10px;border-left:4px solid var(--red);font-size:.9rem}
+.quiz-miss b{color:var(--green)}
+.scroll-top{position:fixed;bottom:24px;right:20px;width:44px;height:44px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:1.2rem;cursor:pointer;opacity:0;transition:.3s;z-index:997}
+.scroll-top.show{opacity:1}
+@media(max-width:700px){.hero h1{font-size:1.5rem}.vs-container{grid-template-columns:1fr}.section-body{padding:16px}.top-nav{padding:8px 12px}}
+</style>
+</head>
+<body>
+<div id="progress-bar" style="width:0%"></div>
+<nav class="top-nav">
+  <a href="../index.html">← Dashboard</a>
+  <span class="nav-title">Chapter 8 · Editing Text Files and Redirecting Shell Input and Output</span>
+  <a href="rh124-ch10.html">Chapter 10 →</a>
+</nav>
+<button class="toc-toggle" onclick="toggleTOC()" title="Table of Contents">☰</button>
+<div class="toc-overlay" id="tocOverlay" onclick="toggleTOC()"></div>
+<aside class="toc-sidebar" id="tocSidebar">
+<h3>📑 Table of Contents</h3>
+  <a href="#prep" onclick="toggleTOC()">Before you start</a>
+  <a href="#s1" onclick="toggleTOC()">5.1 Redirect Output</a>
+  <a href="#fd" class="sub" onclick="toggleTOC()">↳ File descriptors</a>
+  <a href="#out" class="sub" onclick="toggleTOC()">↳ Output redirection</a>
+  <a href="#err" class="sub" onclick="toggleTOC()">↳ Handling errors</a>
+  <a href="#in" class="sub" onclick="toggleTOC()">↳ Input redirection</a>
+  <a href="#pipe" class="sub" onclick="toggleTOC()">↳ Pipes and tee</a>
+  <a href="#s3" onclick="toggleTOC()">5.3 Edit Text Files</a>
+  <a href="#nano" class="sub" onclick="toggleTOC()">↳ Nano</a>
+  <a href="#vim" class="sub" onclick="toggleTOC()">↳ Vi / Vim</a>
+  <a href="#sedawk" class="sub" onclick="toggleTOC()">↳ sed and awk (extra)</a>
+  <a href="#s5" onclick="toggleTOC()">RH134 1.1 Changing the Shell Environment</a>
+  <a href="#vars" class="sub" onclick="toggleTOC()">↳ Variables</a>
+  <a href="#path" class="sub" onclick="toggleTOC()">↳ PATH and other variables</a>
+  <a href="#startup" class="sub" onclick="toggleTOC()">↳ Startup files</a>
+  <a href="#alias" class="sub" onclick="toggleTOC()">↳ Aliases</a>
+  <a href="#persist" class="sub" onclick="toggleTOC()">↳ Make it permanent</a>
+  <a href="#history" class="sub" onclick="toggleTOC()">↳ Command history</a>
+  <a href="#practice" onclick="toggleTOC()">🧪 Practice</a>
+  <a href="#mistakes" onclick="toggleTOC()">⚠️ Common Mistakes</a>
+  <a href="#commands" onclick="toggleTOC()">📚 All Commands and Keys</a>
+  <a href="#quiz" onclick="toggleTOC()">🧠 Quiz</a>
+</aside>
+
+<div class="hero">
+  <div class="hero-badge">RH124 · Chapters 8–9 · RHEL 10</div>
+  <h1>Editing Text Files and Redirecting Shell Input and Output</h1>
+  <p>Save command output into files, connect commands together, edit files in the terminal, and make the shell work the way you like. Simple words, pictures, and outputs explained line by line.</p>
+</div>
+
+<div class="container">
+
+<div class="info-box tip" id="prep"><div class="box-title">🧭 Before you start</div>
+• Linux keeps almost all settings in <b>plain text files</b>. So this chapter is about <b>writing</b> those files (redirection), <b>changing</b> them (editors), and <b>setting up your shell</b> (variables and aliases).<br>
+• Practise in your home folder on a practice VM. Example user: <b>john</b>.<br>
+• Lines starting with <code class="code-inline">$</code> are commands you type (do not type the <code class="code-inline">$</code>). Lines without it are the output.<br>
+• Dates and numbers in outputs are examples. Yours will be different.</div>
+
+<!-- ===================== 5.1 ===================== -->
+<div class="section-card" id="s1">
+<div class="section-header"><div class="section-icon" style="background:rgba(59,130,246,.15)">📤</div><h2>9.1 Redirecting Output to Files and Programs</h2></div>
+<div class="section-body">
+
+<h3 id="fd">File descriptors: the three channels of every command</h3>
+<p>When you run a command, the result normally appears on your screen. That is <b>output</b>. But Linux has not one, but <b>three channels</b> for every running program. Each channel has a number, called a <b>file descriptor (FD)</b>.</p>
+
+<div class="visual">
+<svg viewBox="0 0 800 250" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,Arial,sans-serif" font-size="13">
+<defs><marker id="ar1" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<rect x="20" y="85" width="130" height="60" rx="10" fill="#1a2236" stroke="#3b82f6" stroke-width="2"/>
+<text x="85" y="112" fill="#fff" text-anchor="middle" font-weight="700">⌨️ Keyboard</text><text x="85" y="132" fill="#94a3b8" text-anchor="middle" font-size="11">where input comes from</text>
+<rect x="320" y="50" width="160" height="130" rx="14" fill="rgba(238,0,0,.12)" stroke="#ee0000" stroke-width="2"/>
+<text x="400" y="98" fill="#fff" text-anchor="middle" font-weight="700" font-size="15">COMMAND</text><text x="400" y="120" fill="#94a3b8" text-anchor="middle" font-size="12">(a running process)</text><text x="400" y="145" fill="#94a3b8" text-anchor="middle" font-size="11">for example: ls, find, cat</text>
+<rect x="650" y="40" width="130" height="60" rx="10" fill="#1a2236" stroke="#22c55e" stroke-width="2"/>
+<text x="715" y="66" fill="#fff" text-anchor="middle" font-weight="700">🖥️ Terminal</text><text x="715" y="86" fill="#94a3b8" text-anchor="middle" font-size="11">normal results</text>
+<rect x="650" y="130" width="130" height="60" rx="10" fill="#1a2236" stroke="#f97316" stroke-width="2"/>
+<text x="715" y="156" fill="#fff" text-anchor="middle" font-weight="700">🖥️ Terminal</text><text x="715" y="176" fill="#94a3b8" text-anchor="middle" font-size="11">error messages</text>
+<path d="M150 115 H318" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar1)"/>
+<text x="234" y="105" fill="#60a5fa" text-anchor="middle" font-weight="700">0  stdin</text>
+<path d="M480 85 H648" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar1)"/>
+<text x="564" y="75" fill="#4ade80" text-anchor="middle" font-weight="700">1  stdout</text>
+<path d="M480 145 H648" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar1)"/>
+<text x="564" y="170" fill="#fb923c" text-anchor="middle" font-weight="700">2  stderr</text>
+<text x="400" y="228" fill="#64748b" text-anchor="middle" font-size="12">Redirection simply means: send one of these channels somewhere else (a file, or another command).</text>
+</svg>
+<div class="cap">Input comes in on channel 0. Results leave on channel 1. Errors leave on channel 2.</div>
+</div>
+
+<div class="table-wrapper"><table><thead><tr><th>FD</th><th>Name</th><th>Meaning</th><th>Default</th></tr></thead><tbody>
+<tr><td><b>0</b></td><td><b>stdin</b> (standard input)</td><td>Data going <b>into</b> a command</td><td>Keyboard</td></tr>
+<tr><td><b>1</b></td><td><b>stdout</b> (standard output)</td><td>Normal <b>results</b></td><td>Terminal screen</td></tr>
+<tr><td><b>2</b></td><td><b>stderr</b> (standard error)</td><td><b>Error</b> messages</td><td>Terminal screen</td></tr>
+<tr><td>3 and up</td><td>other files</td><td>Files the program opens itself</td><td>none</td></tr>
+</tbody></table></div>
+<div class="info-box tip"><div class="box-title">💡 Why two output channels?</div>Results and errors are kept apart on purpose. You can <b>save the results</b> to a file and still <b>see the errors</b> on screen (or the other way round). On screen they look the same, but they are different channels.</div>
+<div class="code-block"><span class="p">$ </span>ls /etc/hostname /fake/folder
+<span class="o">ls: cannot access '/fake/folder': No such file or directory     </span><span class="c"># this line is stderr (channel 2)</span>
+<span class="o">/etc/hostname                                                   </span><span class="c"># this line is stdout (channel 1)</span>
+<span class="p">$ </span>ls -l /proc/$$/fd                  <span class="c"># $$ = the ID of your current shell</span>
+<span class="o">lrwx------. 1 john john 64 Oct 26 10:00 0 -&gt; /dev/pts/0
+lrwx------. 1 john john 64 Oct 26 10:00 1 -&gt; /dev/pts/0
+lrwx------. 1 john john 64 Oct 26 10:00 2 -&gt; /dev/pts/0</span></div>
+<p>Reading the second command: channels <b>0, 1 and 2</b> of your shell all point (<code class="code-inline">-&gt;</code>) to <code class="code-inline">/dev/pts/0</code>, which is your terminal window. That is why input, results and errors all use the same screen by default.</p>
+
+<h3 id="out">Output redirection: save results into a file</h3>
+<div class="info-box analogy"><div class="box-title">🚰 Water pipe analogy</div>Normally the results "flow" to the screen. With redirection you move the end of the pipe: the same water now flows into a <b>bucket</b> (a file).</div>
+<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>What it does</th><th>Keyword</th></tr></thead><tbody>
+<tr><td><code class="code-inline">&gt; file</code></td><td>Send stdout to a file. <b>Replaces</b> the old content. Creates the file if missing</td><td><b>overwrite</b></td></tr>
+<tr><td><code class="code-inline">&gt;&gt; file</code></td><td>Send stdout to a file and <b>add to the end</b></td><td><b>append</b></td></tr>
+<tr><td><code class="code-inline">2&gt; file</code></td><td>Send <b>only errors</b> to a file (overwrite)</td><td>errors</td></tr>
+<tr><td><code class="code-inline">2&gt;&gt; file</code></td><td>Send only errors to a file (append)</td><td>errors, append</td></tr>
+<tr><td><code class="code-inline">2&gt; /dev/null</code></td><td><b>Throw away</b> the errors</td><td>discard</td></tr>
+<tr><td><code class="code-inline">&gt; /dev/null</code></td><td>Throw away the normal output</td><td>discard</td></tr>
+<tr><td><code class="code-inline">&gt; file 2&gt;&amp;1</code></td><td>Results <b>and</b> errors into the <b>same</b> file (overwrite)</td><td>both</td></tr>
+<tr><td><code class="code-inline">&amp;&gt; file</code></td><td>Same as above (shorter, Bash only)</td><td>both</td></tr>
+<tr><td><code class="code-inline">&gt;&gt; file 2&gt;&amp;1</code></td><td>Results and errors into the same file (append)</td><td>both, append</td></tr>
+<tr><td><code class="code-inline">&amp;&gt;&gt; file</code></td><td>Same as above (shorter, Bash only)</td><td>both, append</td></tr>
+<tr><td><code class="code-inline">&amp;&gt; /dev/null</code></td><td>Throw away <b>everything</b></td><td>silence</td></tr>
+</tbody></table></div>
+<p><code class="code-inline">/dev/null</code> is a special "black hole" file. Anything sent there disappears.</p>
+
+<h4>Overwrite (<code class="code-inline">&gt;</code>) versus append (<code class="code-inline">&gt;&gt;</code>)</h4>
+<div class="code-block"><span class="p">$ </span>echo "Hello" &gt; file.txt            <span class="c"># file.txt is created and contains: Hello</span>
+<span class="p">$ </span>echo "World" &gt;&gt; file.txt           <span class="c"># World is ADDED below Hello</span>
+<span class="p">$ </span>cat file.txt
+<span class="o">Hello
+World</span>
+<span class="p">$ </span>echo "Only me" &gt; file.txt          <span class="c"># &gt; wipes the old content first!</span>
+<span class="p">$ </span>cat file.txt
+<span class="o">Only me</span></div>
+<div class="info-box warning"><div class="box-title">⚠️ One arrow deletes, two arrows add</div>A single <code class="code-inline">&gt;</code> destroys what was in the file, <b>without asking</b>. Be extra careful when the file is important (for example <code class="code-inline">~/.bashrc</code>). When in doubt, use <code class="code-inline">&gt;&gt;</code>.</div>
+
+<h4>More everyday examples</h4>
+<div class="code-block"><span class="p">$ </span>date &gt; /tmp/saved-timestamp                   <span class="c"># save the date and time</span>
+<span class="p">$ </span>tail -n 100 /var/log/dmesg &gt; /tmp/last-100    <span class="c"># save the last 100 lines of a file</span>
+<span class="p">$ </span>cat step1.sh step2.log &gt; /tmp/all-in-one       <span class="c"># join several files into one</span>
+<span class="p">$ </span>ls -a &gt; my-file-names                        <span class="c"># save the list of files (hidden too)</span>
+<span class="p">$ </span>echo "new line of information" &gt;&gt; /tmp/many-lines</div>
+
+<h4>Create files without an editor</h4>
+<div class="code-block"><span class="p">$ </span>&gt; empty.txt                          <span class="c"># an empty file (careful: empties an existing one!)</span>
+<span class="p">$ </span>echo "Hello World" &gt; myfile.txt        <span class="c"># a one-line file</span>
+<span class="p">$ </span>cat &gt; notes.txt                        <span class="c"># type lines, finish with Ctrl+D</span>
+<span class="p">$ </span>cat &gt; conf.txt &lt;&lt; EOF                  <span class="c"># "here-document": type many lines, end with the word EOF</span>
+<span class="o">&gt; line 1
+&gt; line 2
+&gt; EOF</span>
+<span class="p">$ </span>cat conf.txt
+<span class="o">line 1
+line 2</span></div>
+<p>With <code class="code-inline">&lt;&lt; EOF</code> the shell keeps reading your typing until you write a line that contains only <code class="code-inline">EOF</code>. The <code class="code-inline">&gt;</code> signs at the start of the lines are the shell asking for more.</p>
+
+<div class="info-box note"><div class="box-title">🔒 Extra: protect files from accidental overwrite (noclobber)</div>
+<div class="code-block" style="margin:8px 0 0"><span class="p">$ </span>set -o noclobber           <span class="c"># now &gt; refuses to replace an existing file</span>
+<span class="p">$ </span>echo hi &gt; f.txt
+<span class="o">bash: f.txt: cannot overwrite existing file</span>
+<span class="p">$ </span>echo hi &gt;| f.txt          <span class="c"># &gt;| = "yes, I really mean it"</span>
+<span class="p">$ </span>set +o noclobber           <span class="c"># switch the protection off again</span></div></div>
+
+<h3 id="err">Handling errors</h3>
+<p>The <code class="code-inline">find</code> command is a good test. A normal user is not allowed to look inside some folders, so <code class="code-inline">find</code> prints many errors:</p>
+<div class="code-block"><span class="p">$ </span>find /etc -name passwd
+<span class="o">find: '/etc/audit': Permission denied
+/etc/passwd
+find: '/etc/sudoers.d': Permission denied
+/etc/pam.d/passwd</span></div>
+<p>Reading the output: lines starting with <code class="code-inline">find:</code> are <b>errors</b> (stderr). Lines that are just a path are the <b>results</b> (stdout). Now we separate them:</p>
+<div class="code-block"><span class="p">$ </span>find /etc -name passwd 2&gt; /tmp/errors                <span class="c"># errors → file. Results stay on screen</span>
+<span class="p">$ </span>find /etc -name passwd &gt; /tmp/output 2&gt; /tmp/errors <span class="c"># results → one file, errors → another file</span>
+<span class="p">$ </span>find /etc -name passwd &gt; /tmp/output 2&gt; /dev/null <span class="c"># results saved, errors thrown away</span>
+<span class="p">$ </span>find /etc -name passwd &amp;&gt; /tmp/all-messages         <span class="c"># everything into one file</span>
+<span class="p">$ </span>find /etc -name passwd &gt;&gt; /tmp/all-messages 2&gt;&amp;1   <span class="c"># everything, appended to the file</span>
+<span class="p">$ </span>cat /tmp/output
+<span class="o">/etc/passwd
+/etc/pam.d/passwd</span>                                    <span class="c"># clean list: no error lines</span></div>
+
+<h4>Order matters with <code class="code-inline">2&gt;&amp;1</code></h4>
+<p><code class="code-inline">2&gt;&amp;1</code> means: "make channel 2 go <b>where channel 1 goes right now</b>". The shell reads left to right, so the order changes the result.</p>
+<div class="visual">
+<svg viewBox="0 0 800 270" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,Arial,sans-serif" font-size="13">
+<defs><marker id="ar2" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<rect x="8" y="8" width="385" height="254" rx="12" fill="rgba(34,197,94,.06)" stroke="#22c55e" stroke-width="2"/>
+<text x="200" y="34" fill="#4ade80" text-anchor="middle" font-weight="700">✅  cmd &gt; out.log 2&gt;&amp;1</text>
+<text x="200" y="56" fill="#94a3b8" text-anchor="middle" font-size="11">Step 1: stdout → out.log     Step 2: stderr → "same place as stdout"</text>
+<rect x="30" y="80" width="90" height="34" rx="7" fill="#1a2236" stroke="#22c55e"/><text x="75" y="102" fill="#e2e8f0" text-anchor="middle">1 stdout</text>
+<rect x="30" y="150" width="90" height="34" rx="7" fill="#1a2236" stroke="#f97316"/><text x="75" y="172" fill="#e2e8f0" text-anchor="middle">2 stderr</text>
+<rect x="270" y="110" width="105" height="40" rx="7" fill="#1a2236" stroke="#3b82f6" stroke-width="2"/><text x="322" y="135" fill="#e2e8f0" text-anchor="middle">📄 out.log</text>
+<path d="M120 97 L268 125" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar2)"/><path d="M120 167 L268 138" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar2)"/>
+<text x="200" y="225" fill="#86efac" text-anchor="middle">Both go to the file. The screen stays clean.</text>
+<rect x="407" y="8" width="385" height="254" rx="12" fill="rgba(238,0,0,.06)" stroke="#ee0000" stroke-width="2"/>
+<text x="600" y="34" fill="#ff6b6b" text-anchor="middle" font-weight="700">❌  cmd 2&gt;&amp;1 &gt; out.log</text>
+<text x="600" y="56" fill="#94a3b8" text-anchor="middle" font-size="11">Step 1: stderr → "where stdout is now" (the screen)   Step 2: stdout → file</text>
+<rect x="430" y="80" width="90" height="34" rx="7" fill="#1a2236" stroke="#22c55e"/><text x="475" y="102" fill="#e2e8f0" text-anchor="middle">1 stdout</text>
+<rect x="430" y="150" width="90" height="34" rx="7" fill="#1a2236" stroke="#f97316"/><text x="475" y="172" fill="#e2e8f0" text-anchor="middle">2 stderr</text>
+<rect x="670" y="80" width="105" height="40" rx="7" fill="#1a2236" stroke="#3b82f6" stroke-width="2"/><text x="722" y="105" fill="#e2e8f0" text-anchor="middle">📄 out.log</text>
+<rect x="670" y="150" width="105" height="40" rx="7" fill="#1a2236" stroke="#64748b" stroke-width="2"/><text x="722" y="175" fill="#e2e8f0" text-anchor="middle">🖥️ screen</text>
+<path d="M520 97 L668 100" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar2)"/><path d="M520 167 L668 170" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar2)"/>
+<text x="600" y="225" fill="#fca5a5" text-anchor="middle">Errors still appear on the screen.</text>
+</svg>
+<div class="cap">Always write the file first, then <code class="code-inline">2&gt;&amp;1</code> after it.</div>
+</div>
+<div class="info-box note"><div class="box-title">📝 <code class="code-inline">&amp;&gt;</code> versus <code class="code-inline">&gt; file 2&gt;&amp;1</code></div><code class="code-inline">&amp;&gt;</code> and <code class="code-inline">&amp;&gt;&gt;</code> work only in <b>Bash</b>. In scripts that must run in other shells (<code class="code-inline">sh</code>, <code class="code-inline">dash</code>), write the long form <code class="code-inline">&gt; file 2&gt;&amp;1</code>.</div>
+
+<h3 id="in">Input redirection: feed a file into a command</h3>
+<p>Output redirection uses <code class="code-inline">&gt;</code> (arrow pointing <b>out</b> to a file). Input redirection uses <code class="code-inline">&lt;</code> (arrow pointing <b>in</b> to the command).</p>
+<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>Name</th><th>Example</th></tr></thead><tbody>
+<tr><td><code class="code-inline">&lt; file</code></td><td>Input redirect</td><td><code class="code-inline">wc -l &lt; /etc/passwd</code></td></tr>
+<tr><td><code class="code-inline">&lt;&lt; WORD</code></td><td>Here-document (many lines)</td><td><code class="code-inline">cat &lt;&lt; EOF</code> … <code class="code-inline">EOF</code></td></tr>
+<tr><td><code class="code-inline">&lt;&lt;&lt; "text"</code></td><td>Here-string (one piece of text)</td><td><code class="code-inline">tr 'a-z' 'A-Z' &lt;&lt;&lt; "hello"</code></td></tr>
+</tbody></table></div>
+<div class="code-block"><span class="p">$ </span>wc -l /etc/passwd             <span class="c"># wc -l counts lines. It opens the file itself</span>
+<span class="o">42 /etc/passwd</span>
+<span class="p">$ </span>wc -l &lt; /etc/passwd           <span class="c"># the shell gives the file to wc as input</span>
+<span class="o">42</span>
+<span class="p">$ </span>sort &lt; unsorted.txt &gt; sorted.txt   <span class="c"># input AND output redirection together</span>
+<span class="p">$ </span>tr 'a-z' 'A-Z' &lt;&lt;&lt; "hello"
+<span class="o">HELLO</span></div>
+<p>Notice: with <code class="code-inline">wc -l file</code> the output has the <b>file name</b> after the number. With <code class="code-inline">wc -l &lt; file</code> the command only sees a stream of data, so it prints <b>just the number</b>.</p>
+
+<h3 id="pipe">Pipes: connect commands together</h3>
+<p>A <b>pipe</b> (the vertical bar <code class="code-inline">|</code>) sends the <b>output of one command directly into the input of the next command</b>. No file is needed in between.</p>
+<div class="visual">
+<svg viewBox="0 0 800 150" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Consolas,'Cascadia Code',monospace" font-size="14">
+<defs><marker id="ar3" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<rect x="20" y="45" width="180" height="55" rx="10" fill="#1a2236" stroke="#3b82f6" stroke-width="2"/><text x="110" y="78" fill="#e2e8f0" text-anchor="middle">ls -l /usr/bin</text>
+<rect x="310" y="45" width="180" height="55" rx="10" fill="#1a2236" stroke="#a855f7" stroke-width="2"/><text x="400" y="78" fill="#e2e8f0" text-anchor="middle">grep zip</text>
+<rect x="600" y="45" width="180" height="55" rx="10" fill="#1a2236" stroke="#22c55e" stroke-width="2"/><text x="690" y="78" fill="#e2e8f0" text-anchor="middle">wc -l</text>
+<path d="M200 72 H308" stroke="#94a3b8" stroke-width="3" marker-end="url(#ar3)"/><text x="254" y="62" fill="#ff3333" text-anchor="middle" font-size="22" font-weight="700">|</text>
+<path d="M490 72 H598" stroke="#94a3b8" stroke-width="3" marker-end="url(#ar3)"/><text x="544" y="62" fill="#ff3333" text-anchor="middle" font-size="22" font-weight="700">|</text>
+<text x="110" y="125" fill="#64748b" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11">makes a long list</text>
+<text x="400" y="125" fill="#64748b" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11">keeps only lines with "zip"</text>
+<text x="690" y="125" fill="#64748b" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11">counts what is left</text>
+</svg>
+<div class="cap">Each command does one small job. The pipe passes the result along, like a factory line.</div>
+</div>
+<div class="code-block"><span class="p">$ </span>ls -l /usr/bin | less                     <span class="c"># read a long list page by page (q to quit)</span>
+<span class="p">$ </span>ls | wc -l                                <span class="c"># how many items are in this folder?</span>
+<span class="p">$ </span>ls -t | head -n 10 &gt; /tmp/ten-newest      <span class="c"># 10 newest files, saved into a file</span>
+<span class="p">$ </span>ps aux | grep sshd                       <span class="c"># show only the lines that contain "sshd"</span>
+<span class="p">$ </span>cat /etc/passwd | cut -d: -f1 | sort     <span class="c"># usernames, in alphabetical order</span>
+<span class="p">$ </span>history | tail -n 5                      <span class="c"># your last 5 commands</span>
+<span class="p">$ </span>find /etc -name "*.conf" 2&gt;/dev/null | wc -l   <span class="c"># count .conf files, ignore errors</span></div>
+
+<div class="vs-container">
+<div class="vs-card a"><h4>📄 Redirection</h4>Connects a command and a <b>file</b>.<br><code class="code-inline">ls &gt; list.txt</code><br><code class="code-inline">sort &lt; list.txt</code></div>
+<div class="vs-card b"><h4>🔗 Pipe</h4>Connects a command and <b>another command</b>.<br><code class="code-inline">ls | sort</code></div>
+</div>
+
+<h4><code class="code-inline">tee</code>: save AND see at the same time</h4>
+<p><code class="code-inline">tee</code> works like a <b>T-shaped pipe fitting</b>: the data goes on to the next step <b>and</b> a copy is saved in a file.</p>
+<div class="visual">
+<svg viewBox="0 0 800 190" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Consolas,'Cascadia Code',monospace" font-size="14">
+<defs><marker id="ar4" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<rect x="20" y="60" width="150" height="50" rx="10" fill="#1a2236" stroke="#3b82f6" stroke-width="2"/><text x="95" y="91" fill="#e2e8f0" text-anchor="middle">ls -l</text>
+<rect x="290" y="60" width="150" height="50" rx="10" fill="#ee0000"/><text x="365" y="91" fill="#fff" text-anchor="middle" font-weight="700">tee out.txt</text>
+<rect x="620" y="20" width="150" height="50" rx="10" fill="#1a2236" stroke="#22c55e" stroke-width="2"/><text x="695" y="50" fill="#e2e8f0" text-anchor="middle">less / screen</text>
+<rect x="290" y="130" width="150" height="45" rx="10" fill="#1a2236" stroke="#eab308" stroke-width="2"/><text x="365" y="158" fill="#e2e8f0" text-anchor="middle">📄 out.txt</text>
+<path d="M170 85 H288" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar4)"/>
+<path d="M440 75 L618 50" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar4)"/>
+<path d="M365 110 V128" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar4)"/>
+<text x="540" y="120" fill="#64748b" font-family="Segoe UI,Arial" font-size="11" text-anchor="middle">one copy goes on…</text>
+<text x="450" y="165" fill="#64748b" font-family="Segoe UI,Arial" font-size="11">…one copy is saved</text>
+</svg>
+<div class="cap">tee = T-junction: the data splits in two.</div>
+</div>
+<div class="code-block"><span class="p">$ </span>ls | tee output.txt                              <span class="c"># shows the list AND saves it</span>
+<span class="p">$ </span>ls -l | tee /tmp/saved-output | less             <span class="c"># save it, then page through it</span>
+<span class="p">$ </span>ls -t | head -n 10 | tee /tmp/ten-last-changed  <span class="c"># save and show</span>
+<span class="p">$ </span>ls | tee -a output.txt                           <span class="c"># -a = append instead of overwrite</span></div>
+<div class="info-box warning"><div class="box-title">⚠️ Classic mistake: redirect in the middle of a pipe</div>
+<div class="code-block" style="margin:8px 0"><span class="p">$ </span>ls &gt; /tmp/saved-output | less        <span class="c"># less shows NOTHING!</span></div>
+The <code class="code-inline">&gt;</code> sends all output to the file, so nothing is left to flow into <code class="code-inline">less</code>. Use <code class="code-inline">tee</code> when you want both.</div>
+
+<h4>Pipe the errors too</h4>
+<p>A pipe carries only <b>stdout</b>. To send errors through as well:</p>
+<div class="code-block"><span class="p">$ </span>find / -name passwd 2&gt;&amp;1 | less        <span class="c"># errors joined to the results, then piped</span>
+<span class="p">$ </span>find / -name passwd |&amp; less           <span class="c"># Bash shortcut for the same thing</span></div>
+<p><code class="code-inline">&amp;&gt;</code> and <code class="code-inline">&amp;&gt;&gt;</code> cannot be used in the middle of a pipe. Remember the syntax of find: <b>path first</b>, then the options (<code class="code-inline">find / -name passwd</code>).</p>
+
+<h4>Cheat sheet: where does it go?</h4>
+<div class="table-wrapper"><table><thead><tr><th>You write</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code class="code-inline">cmd &gt; f</code></td><td>results → file f</td></tr>
+<tr><td><code class="code-inline">cmd 2&gt; f</code></td><td>errors → file f</td></tr>
+<tr><td><code class="code-inline">cmd &gt; f 2&gt;&amp;1</code></td><td>results and errors → file f</td></tr>
+<tr><td><code class="code-inline">cmd &lt; f</code></td><td>file f → input of cmd</td></tr>
+<tr><td><code class="code-inline">cmd1 | cmd2</code></td><td>results of cmd1 → input of cmd2</td></tr>
+<tr><td><code class="code-inline">cmd1 |&amp; cmd2</code></td><td>results and errors of cmd1 → cmd2</td></tr>
+<tr><td><code class="code-inline">cmd | tee f</code></td><td>screen (or next command) <b>and</b> file f</td></tr>
+</tbody></table></div>
+<div class="info-box note"><div class="box-title">🧩 Extra: open your own channel (intermediate)</div>
+<div class="code-block" style="margin:8px 0 0"><span class="p">$ </span>exec 3&gt; mylog.txt          <span class="c"># open channel 3 and point it at a file</span>
+<span class="p">$ </span>echo "hello" &gt;&amp;3           <span class="c"># write to channel 3</span>
+<span class="p">$ </span>exec 3&gt;&amp;-                 <span class="c"># close channel 3</span></div></div>
+
+</div></div>
+
+<!-- ===================== 5.3 ===================== -->
+<div class="section-card" id="s3">
+<div class="section-header"><div class="section-icon" style="background:rgba(34,197,94,.15)">✏️</div><h2>8.1 Editing Text Files from the Command Line</h2></div>
+<div class="section-body">
+
+<h3>Which editor should I choose?</h3>
+<p>Servers usually have <b>no desktop</b>, and you connect over SSH. So you need an editor that works inside the terminal.</p>
+<div class="table-wrapper"><table><thead><tr><th>Editor</th><th>Package</th><th>Difficulty</th><th>Notes</th></tr></thead><tbody>
+<tr><td><b>nano</b></td><td><code class="code-inline">nano</code></td><td>⭐ Easy</td><td>Shortcuts are shown at the bottom of the screen. Great for beginners</td></tr>
+<tr><td><b>vi</b></td><td><code class="code-inline">vim-minimal</code></td><td>⭐⭐⭐ Harder</td><td>Installed almost everywhere. Basic features</td></tr>
+<tr><td><b>vim</b> (Vi IMproved)</td><td><code class="code-inline">vim-enhanced</code></td><td>⭐⭐⭐ Harder</td><td>Better vi: colours, help, <code class="code-inline">vimtutor</code>, split screens</td></tr>
+<tr><td>gedit and similar</td><td>—</td><td>Easy</td><td>Needs a graphical desktop</td></tr>
+</tbody></table></div>
+<div class="info-box tip"><div class="box-title">💡 Recommendation</div>Learn the <b>vim basics</b> (the survival kit below). Almost every server has vi/vim, and exams use it. Use <b>nano</b> when you want something quick and simple.</div>
+<div class="code-block"><span class="p">$ </span>sudo dnf install vim-enhanced nano      <span class="c"># install both</span>
+<span class="p">$ </span>export EDITOR=nano                      <span class="c"># default editor for tools like crontab -e or git commit</span>
+<span class="p">$ </span>export VISUAL=nano                      <span class="c"># some programs read VISUAL first</span></div>
+<ul>
+<li>When <code class="code-inline">vim-enhanced</code> is installed, a regular user typing <code class="code-inline">vi</code> actually runs <code class="code-inline">vim</code> (an <b>alias</b>). Root and system users do not get this alias.</li>
+<li>To skip an alias for one command, put a backslash first: <code class="code-inline">\vi file</code>.</li>
+<li>Safer way to edit a root-owned file: <code class="code-inline">sudoedit /etc/file</code> (or <code class="code-inline">sudo -e</code>).</li>
+</ul>
+
+<h3 id="nano">Nano editor</h3>
+<div class="code-block"><span class="p">$ </span>nano test.txt          <span class="c"># open (or create) a file</span>
+<span class="p">$ </span>nano +25 test.txt       <span class="c"># open at line 25</span>
+<span class="p">$ </span>nano -l test.txt        <span class="c"># show line numbers</span></div>
+<p>In nano you just <b>type</b>, like in a notepad. The commands are shortcuts. The sign <b>^</b> means the <b>Ctrl</b> key, and <b>M-</b> means the <b>Alt</b> key. The bottom of the screen always lists them.</p>
+<div class="table-wrapper"><table><thead><tr><th>Action</th><th>Keys</th></tr></thead><tbody>
+<tr><td><b>Save</b> ("Write Out")</td><td><code class="code-inline">Ctrl+O</code>, then <code class="code-inline">Enter</code></td></tr>
+<tr><td><b>Exit</b></td><td><code class="code-inline">Ctrl+X</code> (asks to save if you changed something: <code class="code-inline">Y</code> / <code class="code-inline">N</code>)</td></tr>
+<tr><td>Cut the line</td><td><code class="code-inline">Ctrl+K</code></td></tr>
+<tr><td>Paste</td><td><code class="code-inline">Ctrl+U</code></td></tr>
+<tr><td>Search</td><td><code class="code-inline">Ctrl+W</code></td></tr>
+<tr><td>Search and replace</td><td><code class="code-inline">Ctrl+\</code></td></tr>
+<tr><td>Go to a line number</td><td><code class="code-inline">Ctrl+_</code> (or <code class="code-inline">Alt+G</code>)</td></tr>
+<tr><td>Undo / Redo</td><td><code class="code-inline">Alt+U</code> / <code class="code-inline">Alt+E</code></td></tr>
+<tr><td>Help</td><td><code class="code-inline">Ctrl+G</code></td></tr>
+<tr><td>Show cursor position</td><td><code class="code-inline">Ctrl+C</code></td></tr>
+<tr><td>Insert another file here</td><td><code class="code-inline">Ctrl+R</code></td></tr>
+</tbody></table></div>
+<div class="info-box tip"><div class="box-title">⏱️ 10-second workflow</div><code class="code-inline">nano test.txt</code> → type your text → <code class="code-inline">Ctrl+O</code> → <code class="code-inline">Enter</code> → <code class="code-inline">Ctrl+X</code></div>
+
+<h3 id="vim">Vi / Vim editor</h3>
+<p>Vim is different from other editors: it has <b>modes</b>. In each mode the same key does a different job. This is the most important idea. Once you know the modes, vim is easy.</p>
+
+<div class="visual">
+<svg viewBox="0 0 800 300" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,Arial,sans-serif" font-size="13">
+<defs><marker id="ar5" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<rect x="20" y="40" width="200" height="110" rx="12" fill="rgba(59,130,246,.12)" stroke="#3b82f6" stroke-width="2"/>
+<text x="120" y="68" fill="#60a5fa" text-anchor="middle" font-weight="700" font-size="15">COMMAND mode</text><text x="120" y="90" fill="#e2e8f0" text-anchor="middle" font-size="12">(also called Normal mode)</text><text x="120" y="112" fill="#94a3b8" text-anchor="middle" font-size="11">keys are COMMANDS</text><text x="120" y="130" fill="#94a3b8" text-anchor="middle" font-size="11">vim always starts here</text>
+<rect x="300" y="40" width="200" height="110" rx="12" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="2"/>
+<text x="400" y="68" fill="#4ade80" text-anchor="middle" font-weight="700" font-size="15">INSERT mode</text><text x="400" y="90" fill="#e2e8f0" text-anchor="middle" font-size="12">-- INSERT -- at the bottom</text><text x="400" y="112" fill="#94a3b8" text-anchor="middle" font-size="11">keys are TYPED as text</text>
+<rect x="580" y="40" width="200" height="110" rx="12" fill="rgba(234,179,8,.12)" stroke="#eab308" stroke-width="2"/>
+<text x="680" y="68" fill="#facc15" text-anchor="middle" font-weight="700" font-size="15">EXTENDED mode</text><text x="680" y="90" fill="#e2e8f0" text-anchor="middle" font-size="12">(command line, starts with :)</text><text x="680" y="112" fill="#94a3b8" text-anchor="middle" font-size="11">:w  :q  :wq  :q!  :%s/a/b/g</text>
+<path d="M220 80 H298" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar5)"/><text x="259" y="72" fill="#4ade80" text-anchor="middle" font-size="11">i  a  o</text>
+<path d="M298 120 H222" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar5)"/><text x="259" y="138" fill="#f87171" text-anchor="middle" font-size="11">Esc</text>
+<path d="M120 150 C120 190 600 190 680 152" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#ar5)"/><text x="400" y="205" fill="#facc15" text-anchor="middle" font-size="11">press  :</text>
+<path d="M740 150 C760 230 160 240 130 152" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#ar5)" stroke-dasharray="5 4"/><text x="440" y="244" fill="#f87171" text-anchor="middle" font-size="11">Enter (after the command) or Esc</text>
+<text x="400" y="285" fill="#64748b" text-anchor="middle" font-size="12">Lost? Press Esc two or three times. You are then safely back in Command mode.</text>
+</svg>
+<div class="cap">Three modes. Esc always takes you home to Command mode.</div>
+</div>
+<p>There is also <b>Visual mode</b> (to select text), entered from Command mode with <code class="code-inline">v</code>. It is explained below.</p>
+
+<h4>Open a file</h4>
+<div class="code-block"><span class="p">$ </span>vi filename          <span class="c"># simple version (vim-minimal)</span>
+<span class="p">$ </span>vim filename         <span class="c"># full version (vim-enhanced)</span>
+<span class="p">$ </span>vim +10 filename     <span class="c"># open at line 10</span>
+<span class="p">$ </span>vim -R filename      <span class="c"># read-only, so you cannot change it by mistake</span>
+<span class="p">$ </span>vimtutor             <span class="c"># 30-minute interactive lesson. Highly recommended!</span></div>
+
+<h4>The survival kit (learn these 7 first)</h4>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code class="code-inline">i</code></td><td>Start <b>inserting</b> text (go to Insert mode)</td></tr>
+<tr><td><code class="code-inline">Esc</code></td><td>Go back to Command mode</td></tr>
+<tr><td><code class="code-inline">u</code></td><td><b>Undo</b> the last change</td></tr>
+<tr><td><code class="code-inline">x</code></td><td>Delete one character</td></tr>
+<tr><td><code class="code-inline">:w</code></td><td><b>Write</b> (save), and stay in vim</td></tr>
+<tr><td><code class="code-inline">:wq</code></td><td>Save and quit</td></tr>
+<tr><td><code class="code-inline">:q!</code></td><td>Quit and <b>throw away</b> all changes</td></tr>
+</tbody></table></div>
+<div class="code-block"><span class="o">Typical session:</span>
+<span class="p">$ </span>vim hello.txt          <span class="c"># 1. open (the file may be new)</span>
+<span class="c">    press i              # 2. insert mode: "-- INSERT --" shows at the bottom</span>
+<span class="c">    type: Hello Linux    # 3. type your text</span>
+<span class="c">    press Esc            # 4. back to command mode</span>
+<span class="c">    type :wq  + Enter    # 5. save and quit</span></div>
+
+<h4>More ways to start typing</h4>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Starts inserting…</th></tr></thead><tbody>
+<tr><td><code class="code-inline">i</code> / <code class="code-inline">a</code></td><td><b>i</b>nsert before the cursor / <b>a</b>ppend after the cursor</td></tr>
+<tr><td><code class="code-inline">I</code> / <code class="code-inline">A</code></td><td>at the start of the line / at the end of the line</td></tr>
+<tr><td><code class="code-inline">o</code> / <code class="code-inline">O</code></td><td>on a new line <b>below</b> / <b>above</b></td></tr>
+</tbody></table></div>
+
+<h4>Move around (Command mode)</h4>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Moves</th></tr></thead><tbody>
+<tr><td><code class="code-inline">h</code> <code class="code-inline">j</code> <code class="code-inline">k</code> <code class="code-inline">l</code></td><td>left, down, up, right (arrow keys work too). Trick: "<b>h</b>ang back, <b>j</b>ump down, <b>k</b>ick up, <b>l</b>eap forward"</td></tr>
+<tr><td><code class="code-inline">w</code> / <code class="code-inline">b</code></td><td>next word / previous word</td></tr>
+<tr><td><code class="code-inline">0</code> / <code class="code-inline">^</code> / <code class="code-inline">$</code></td><td>start of line / first character / end of line</td></tr>
+<tr><td><code class="code-inline">gg</code> / <code class="code-inline">G</code></td><td>first line / last line</td></tr>
+<tr><td><code class="code-inline">25G</code> or <code class="code-inline">:25</code></td><td>go to line 25</td></tr>
+<tr><td><code class="code-inline">Ctrl+f</code> / <code class="code-inline">Ctrl+b</code></td><td>page down / page up</td></tr>
+</tbody></table></div>
+
+<h4>Delete, copy, paste</h4>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Action</th><th>Easy way to remember</th></tr></thead><tbody>
+<tr><td><code class="code-inline">x</code></td><td>Delete one character</td><td>like crossing out</td></tr>
+<tr><td><code class="code-inline">dd</code></td><td>Delete (cut) the whole line</td><td><b>d</b>elete <b>d</b>ouble</td></tr>
+<tr><td><code class="code-inline">3dd</code></td><td>Delete 3 lines</td><td>number + command</td></tr>
+<tr><td><code class="code-inline">dw</code> / <code class="code-inline">D</code></td><td>Delete a word / delete to the end of the line</td><td></td></tr>
+<tr><td><code class="code-inline">yy</code></td><td><b>Yank</b> (copy) the line</td><td><b>y</b>ank = copy</td></tr>
+<tr><td><code class="code-inline">p</code> / <code class="code-inline">P</code></td><td><b>Paste</b> after / before the cursor</td><td><b>p</b>ut</td></tr>
+<tr><td><code class="code-inline">r</code></td><td>Replace one character</td><td><b>r</b>eplace</td></tr>
+<tr><td><code class="code-inline">cw</code></td><td>Change a word (deletes it and starts Insert mode)</td><td><b>c</b>hange <b>w</b>ord</td></tr>
+<tr><td><code class="code-inline">.</code></td><td>Repeat the last change</td><td>a dot = "again"</td></tr>
+<tr><td><code class="code-inline">u</code> / <code class="code-inline">Ctrl+r</code></td><td>Undo / redo</td><td></td></tr>
+</tbody></table></div>
+
+<h4>Search and replace</h4>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Action</th></tr></thead><tbody>
+<tr><td><code class="code-inline">/text</code></td><td>Search forward. <code class="code-inline">n</code> = next match, <code class="code-inline">N</code> = previous match</td></tr>
+<tr><td><code class="code-inline">?text</code></td><td>Search backward</td></tr>
+<tr><td><code class="code-inline">:%s/old/new/g</code></td><td>Replace <b>every</b> "old" with "new" in the whole file</td></tr>
+<tr><td><code class="code-inline">:%s/old/new/gc</code></td><td>Same, but <b>asks</b> before each change</td></tr>
+<tr><td><code class="code-inline">:s/old/new/</code></td><td>Replace only on the current line</td></tr>
+</tbody></table></div>
+<p>Reading <code class="code-inline">:%s/old/new/g</code>: <b>:</b> start a command, <b>%</b> all lines, <b>s</b> substitute, <b>old</b> what to find, <b>new</b> the replacement, <b>g</b> every match on each line (not just the first).</p>
+
+<h4>Visual mode: select text first, then act</h4>
+<div class="table-wrapper"><table><thead><tr><th>Mode</th><th>Key</th><th>Bottom of the screen shows</th><th>Selects</th></tr></thead><tbody>
+<tr><td>Character</td><td><code class="code-inline">v</code></td><td><code class="code-inline">-- VISUAL --</code></td><td>Any piece of text</td></tr>
+<tr><td>Line</td><td><code class="code-inline">Shift+V</code></td><td><code class="code-inline">-- VISUAL LINE --</code></td><td>Whole lines</td></tr>
+<tr><td>Block</td><td><code class="code-inline">Ctrl+V</code></td><td><code class="code-inline">-- VISUAL BLOCK --</code></td><td>A <b>rectangle</b> (a column)</td></tr>
+</tbody></table></div>
+<p><b>Workflow:</b> move the cursor → start a visual mode → move to stretch the selection → act: <code class="code-inline">x</code> or <code class="code-inline">d</code> delete it, <code class="code-inline">y</code> copy it (then move and press <code class="code-inline">p</code> to paste). <code class="code-inline">Esc</code> leaves visual mode. Block mode is perfect for columns, like the output of <code class="code-inline">ls -l</code>.</p>
+
+<h4>Useful extended-mode (<code class="code-inline">:</code>) commands</h4>
+<div class="code-block"><span class="o">:set number</span>        <span class="c">show line numbers          (:set nonumber hides them)</span>
+<span class="o">:set paste</span>         <span class="c">stop auto-indent when pasting text</span>
+<span class="o">:w newfile.txt</span>    <span class="c">save a copy under a new name</span>
+<span class="o">:r otherfile</span>       <span class="c">insert the content of another file here</span>
+<span class="o">:!ls</span>               <span class="c">run a shell command, then come back</span>
+<span class="o">:x</span>                 <span class="c">save and quit (like :wq)        ZZ in Command mode does the same</span>
+<span class="o">:help</span>              <span class="c">built-in help (vim-enhanced)</span></div>
+
+<h4>Vim settings files</h4>
+<p><code class="code-inline">/etc/vimrc</code> is for <b>all users</b>. <code class="code-inline">~/.vimrc</code> is for <b>you only</b>. Example:</p>
+<div class="code-block"><span class="o">" ~/.vimrc   (a double quote starts a comment)
+set number
+set expandtab
+set tabstop=2
+set shiftwidth=2
+autocmd FileType yaml setlocal ts=2
+syntax on</span></div>
+<div class="info-box note"><div class="box-title">📝 Why indentation settings matter</div>YAML files (used by Ansible and Kubernetes) are strict about spaces. A tab or a wrong number of spaces breaks the file. <code class="code-inline">expandtab</code> turns a Tab key press into spaces.</div>
+
+<h3 id="sedawk">Extra: edit text without opening an editor (sed and awk)</h3>
+<p>Nano and vim are <b>interactive</b>: you open the file, change it, save it. <b><code class="code-inline">sed</code></b> and <b><code class="code-inline">awk</code></b> change or read text in <b>one command</b>, which is perfect for pipes and scripts. We use this small file:</p>
+<div class="code-block"><span class="p">$ </span>cat people.txt
+<span class="o">john 30 usa
+alice 25 uk
+bob 40 canada</span></div>
+
+<h4><code class="code-inline">sed</code>: find and replace (stream editor)</h4>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code class="code-inline">sed 's/usa/US/g' people.txt</code></td><td>Replace "usa" with "US" (<b>s</b> = substitute, <b>g</b> = every match on the line). Shows the result; the file is <b>not</b> changed</td></tr>
+<tr><td><code class="code-inline">sed -i 's/usa/US/g' people.txt</code></td><td><code class="code-inline">-i</code> = change the file <b>in place</b> (for real)</td></tr>
+<tr><td><code class="code-inline">sed -i.bak 's/usa/US/g' people.txt</code></td><td>Same, but first keeps a backup <code class="code-inline">people.txt.bak</code></td></tr>
+<tr><td><code class="code-inline">sed '/bob/d' people.txt</code></td><td>Delete lines that contain "bob"</td></tr>
+<tr><td><code class="code-inline">sed -n '2p' people.txt</code></td><td>Print only line 2 (<code class="code-inline">-n</code> = be quiet, <code class="code-inline">p</code> = print)</td></tr>
+</tbody></table></div>
+<div class="code-block"><span class="p">$ </span>sed 's/usa/US/g' people.txt
+<span class="o">john 30 US
+alice 25 uk
+bob 40 canada</span>
+<span class="p">$ </span>echo "hello root" | sed 's/root/admin/'      <span class="c"># works in a pipe too</span>
+<span class="o">hello admin</span></div>
+
+<h4><code class="code-inline">awk</code>: work with columns</h4>
+<p><code class="code-inline">awk</code> cuts every line into <b>fields</b> (columns), split by spaces or tabs. Then you pick the columns you want.</p>
+<div class="lsl">
+<div class="f" style="--c:#3b82f6"><span class="lab">$1</span><span class="val">john</span><span class="exp">First column</span></div>
+<div class="f" style="--c:#22c55e"><span class="lab">$2</span><span class="val">30</span><span class="exp">Second column</span></div>
+<div class="f" style="--c:#a855f7"><span class="lab">$3 or $NF</span><span class="val">usa</span><span class="exp">Third column. <b>$NF</b> = the <b>last</b> column</span></div>
+<div class="f" style="--c:#f97316"><span class="lab">NR</span><span class="val">1</span><span class="exp">The <b>line number</b> awk is reading now</span></div>
+<div class="f" style="--c:#06b6d4"><span class="lab">NF</span><span class="val">3</span><span class="exp">The <b>number of fields</b> on this line</span></div>
+</div>
+<div class="code-block"><span class="p">$ </span>awk '{print $1}' people.txt                     <span class="c"># first column only</span>
+<span class="o">john
+alice
+bob</span>
+<span class="p">$ </span>awk '$2 &gt; 28 {print $1, $2}' people.txt        <span class="c"># only lines where column 2 is bigger than 28</span>
+<span class="o">john 30
+bob 40</span>
+<span class="p">$ </span>awk 'NR==2' people.txt                          <span class="c"># only line number 2</span>
+<span class="o">alice 25 uk</span>
+<span class="p">$ </span>awk -F: '{print $1, $7}' /etc/passwd | head -2  <span class="c"># -F: = columns are split at colons</span>
+<span class="o">root /bin/bash
+bin /sbin/nologin</span>
+<span class="p">$ </span>awk -F: '$3 &gt;= 1000 {print $1, $3}' /etc/passwd   <span class="c"># regular users (UID 1000 and up)</span>
+<span class="o">john 1000
+alice 1001</span></div>
+<p>The pattern is: <code class="code-inline">awk 'condition { action }' file</code>. If you give no condition, the action runs on <b>every line</b>. If you give no action, awk prints the matching lines.</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th><code class="code-inline">sed</code></th><th><code class="code-inline">awk</code></th></tr></thead><tbody>
+<tr><td>Best at</td><td>Find and replace, delete lines, print some lines</td><td>Columns, conditions, reports</td></tr>
+<tr><td>Typical example</td><td><code class="code-inline">sed 's/old/new/g'</code></td><td><code class="code-inline">awk '{print $1}'</code></td></tr>
+</tbody></table></div>
+
+</div></div>
+
+<!-- ===================== 5.5 ===================== -->
+<div class="section-card" id="s5">
+<div class="section-header"><div class="section-icon" style="background:rgba(168,85,247,.15)">🌍</div><h2>RH134 1.1 Changing the Shell Environment</h2></div>
+<div class="section-body">
+
+<h3 id="vars">Variables: named boxes that hold text</h3>
+<div class="info-box analogy"><div class="box-title">📦 Labelled box analogy</div>A <b>variable</b> is a box with a label. The label is the <b>name</b> (<code class="code-inline">COUNT</code>) and inside is the <b>value</b> (<code class="code-inline">40</code>). The shell and many programs read these boxes to learn things like your username or your home folder.</div>
+
+<h4>Shell variable versus environment variable</h4>
+<div class="visual">
+<svg viewBox="0 0 800 250" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,Arial,sans-serif" font-size="13">
+<defs><marker id="ar6" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<rect x="20" y="20" width="360" height="200" rx="14" fill="rgba(59,130,246,.08)" stroke="#3b82f6" stroke-width="2"/>
+<text x="200" y="46" fill="#60a5fa" text-anchor="middle" font-weight="700">Your shell (parent)</text>
+<rect x="45" y="65" width="310" height="44" rx="8" fill="#1a2236" stroke="#64748b"/><text x="200" y="85" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">COUNT=40</text><text x="200" y="102" fill="#94a3b8" text-anchor="middle" font-size="11">shell variable: only this shell knows it</text>
+<rect x="45" y="125" width="310" height="44" rx="8" fill="#1a2236" stroke="#22c55e" stroke-width="2"/><text x="200" y="145" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">export EDITOR=vim</text><text x="200" y="162" fill="#94a3b8" text-anchor="middle" font-size="11">environment variable: shared with programs it starts</text>
+<rect x="470" y="20" width="310" height="200" rx="14" fill="rgba(168,85,247,.08)" stroke="#a855f7" stroke-width="2"/>
+<text x="625" y="46" fill="#c084fc" text-anchor="middle" font-weight="700">A program you start (child)</text>
+<rect x="495" y="65" width="260" height="44" rx="8" fill="none" stroke="#ef4444" stroke-dasharray="5 4"/><text x="625" y="92" fill="#ef4444" text-anchor="middle" font-family="Consolas,monospace">COUNT  ✗ not visible</text>
+<rect x="495" y="125" width="260" height="44" rx="8" fill="#1a2236" stroke="#22c55e" stroke-width="2"/><text x="625" y="152" fill="#4ade80" text-anchor="middle" font-family="Consolas,monospace">EDITOR=vim  ✓ visible</text>
+<path d="M380 147 H468" stroke="#22c55e" stroke-width="2.5" marker-end="url(#ar6)"/>
+<path d="M380 87 H430" stroke="#ef4444" stroke-width="2" stroke-dasharray="4 4"/>
+<text x="400" y="238" fill="#64748b" text-anchor="middle" font-size="12">Only exported variables travel to child programs. Each terminal window has its own set.</text>
+</svg>
+<div class="cap">export = "share this variable with the programs I start".</div>
+</div>
+
+<h4>Create a variable</h4>
+<div class="code-block"><span class="p">$ </span>COUNT=40                  <span class="c"># shell variable</span>
+<span class="p">$ </span>first_name=John
+<span class="p">$ </span>MSG="hello world"          <span class="c"># a value with a space needs quotes</span>
+<span class="p">$ </span>export EDITOR=vim          <span class="c"># create AND share it (environment variable)</span></div>
+<div class="table-wrapper"><table><thead><tr><th>Rule</th><th>Good</th><th>Bad</th></tr></thead><tbody>
+<tr><td>Name: letters, digits, underscore; <b>not</b> starting with a digit</td><td><code class="code-inline">_ID</code>, <code class="code-inline">file1</code></td><td><code class="code-inline">1file</code></td></tr>
+<tr><td><b>No spaces</b> around <code class="code-inline">=</code></td><td><code class="code-inline">COUNT=40</code></td><td><code class="code-inline">COUNT = 40</code></td></tr>
+<tr><td>Quotes for values with spaces</td><td><code class="code-inline">MSG="hello world"</code></td><td><code class="code-inline">MSG=hello world</code></td></tr>
+<tr><td>Habit: ALL CAPS for system variables, lowercase for yours</td><td><code class="code-inline">my_file</code></td><td></td></tr>
+</tbody></table></div>
+
+<h4>Use a variable: the <code class="code-inline">$</code> sign</h4>
+<div class="code-block"><span class="p">$ </span>COUNT=40
+<span class="p">$ </span>echo COUNT                <span class="o">COUNT</span>        <span class="c"># no $ = just the word</span>
+<span class="p">$ </span>echo $COUNT               <span class="o">40</span>           <span class="c"># $ = "give me what is inside the box"</span>
+<span class="p">$ </span>echo ${COUNT}x            <span class="o">40x</span>          <span class="c"># braces mark where the name ends</span>
+<span class="p">$ </span>echo $COUNTx              <span class="o"></span>             <span class="c"># shell looks for a variable named COUNTx: empty, no error</span></div>
+<p>A useful trick for long file names:</p>
+<div class="code-block"><span class="p">$ </span>file1=/tmp/tmp.z9pXW0HqcC
+<span class="p">$ </span>ls -l $file1
+<span class="p">$ </span>rm $file1</div>
+
+<h4>Command substitution: use a command's output as a value</h4>
+<div class="code-block"><span class="p">$ </span>today=$(date +%F)
+<span class="p">$ </span>echo "Backup_$today.tar.gz"
+<span class="o">Backup_2026-10-26.tar.gz</span>
+<span class="p">$ </span>cp notes.txt notes_$(date +%s).txt      <span class="c"># %s = seconds since 1970, so the name is always unique</span></div>
+<p>Write <code class="code-inline">$( )</code>, not the old backticks.</p>
+<div class="table-wrapper"><table><thead><tr><th>Quote</th><th>Effect</th><th>Example</th></tr></thead><tbody>
+<tr><td><code class="code-inline">"double"</code></td><td>Variables and <code class="code-inline">$( )</code> <b>are</b> expanded</td><td><code class="code-inline">echo "Hi $USER"</code> → Hi john</td></tr>
+<tr><td><code class="code-inline">'single'</code></td><td>Everything is <b>literal</b></td><td><code class="code-inline">echo 'Hi $USER'</code> → Hi $USER</td></tr>
+<tr><td><code class="code-inline">\</code></td><td>Protects the next character</td><td><code class="code-inline">echo \$USER</code> → $USER</td></tr>
+</tbody></table></div>
+
+<h4>List, share and remove variables</h4>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code class="code-inline">set | less</code></td><td>Show <b>all</b> variables (shell + environment, and functions)</td></tr>
+<tr><td><code class="code-inline">env</code> or <code class="code-inline">printenv</code></td><td>Show only the <b>environment</b> variables</td></tr>
+<tr><td><code class="code-inline">printenv HOME</code></td><td>Show one variable</td></tr>
+<tr><td><code class="code-inline">export NAME=value</code></td><td>Create and share in one step. Or: <code class="code-inline">NAME=value; export NAME</code></td></tr>
+<tr><td><code class="code-inline">export -n NAME</code></td><td>Stop sharing (it stays a shell variable)</td></tr>
+<tr><td><code class="code-inline">unset NAME</code></td><td>Delete the variable</td></tr>
+<tr><td><code class="code-inline">readonly PI=3.14</code></td><td>A value that cannot be changed</td></tr>
+</tbody></table></div>
+<div class="info-box tip"><div class="box-title">🔐 Security habit</div>Never keep passwords in variables. Check what is in your environment: <code class="code-inline">env | grep -i pass</code> and <code class="code-inline">env | grep -i key</code>. Nothing should appear.</div>
+
+<h3 id="path">Important built-in variables</h3>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>What it holds</th><th>Example</th></tr></thead><tbody>
+<tr><td><code class="code-inline">HOME</code></td><td>Your home folder</td><td><code class="code-inline">/home/john</code></td></tr>
+<tr><td><code class="code-inline">USER</code></td><td>Your username</td><td><code class="code-inline">john</code></td></tr>
+<tr><td><code class="code-inline">PWD</code></td><td>The folder you are in now</td><td><code class="code-inline">/home/john/docs</code></td></tr>
+<tr><td><code class="code-inline">SHELL</code></td><td>Your login shell</td><td><code class="code-inline">/bin/bash</code></td></tr>
+<tr><td><code class="code-inline">PATH</code></td><td>Folders searched for commands</td><td>see below</td></tr>
+<tr><td><code class="code-inline">EDITOR</code></td><td>Your default terminal editor</td><td><code class="code-inline">vim</code></td></tr>
+<tr><td><code class="code-inline">LANG</code></td><td>Language and format of dates and numbers</td><td><code class="code-inline">en_US.UTF-8</code></td></tr>
+<tr><td><code class="code-inline">PS1</code></td><td>The layout of your prompt</td><td>see below</td></tr>
+<tr><td><code class="code-inline">HISTFILE</code> · <code class="code-inline">HISTSIZE</code> · <code class="code-inline">HISTFILESIZE</code></td><td>History file · lines kept in memory · lines kept in the file</td><td><code class="code-inline">~/.bash_history</code></td></tr>
+<tr><td><code class="code-inline">HISTTIMEFORMAT</code></td><td>Adds date and time to <code class="code-inline">history</code> (unset by default)</td><td><code class="code-inline">"%F %T "</code></td></tr>
+<tr><td><code class="code-inline">$?</code></td><td>Result of the last command: <b>0 = success</b>, other = failure</td><td><code class="code-inline">echo $?</code> → 0</td></tr>
+<tr><td><code class="code-inline">$$</code></td><td>Process ID of your current shell</td><td><code class="code-inline">2301</code></td></tr>
+</tbody></table></div>
+
+<h4><code class="code-inline">PATH</code>: where does the shell look for commands?</h4>
+<p>When you type <code class="code-inline">ls</code>, the shell must find the program file. <code class="code-inline">PATH</code> is a list of folders, separated by colons. The shell checks them <b>from left to right</b> and runs the <b>first match</b>.</p>
+<div class="visual">
+<svg viewBox="0 0 800 180" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Consolas,'Cascadia Code',monospace" font-size="12">
+<defs><marker id="ar7" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<rect x="10" y="60" width="90" height="42" rx="8" fill="#ee0000"/><text x="55" y="86" fill="#fff" text-anchor="middle" font-family="Segoe UI" font-weight="700" font-size="14">ls</text>
+<rect x="150" y="50" width="150" height="30" rx="7" fill="#1a2236" stroke="#64748b"/><text x="225" y="70" fill="#e2e8f0" text-anchor="middle">/home/john/bin</text>
+<rect x="150" y="90" width="150" height="30" rx="7" fill="#1a2236" stroke="#64748b"/><text x="225" y="110" fill="#e2e8f0" text-anchor="middle">/usr/local/bin</text>
+<rect x="340" y="70" width="150" height="30" rx="7" fill="rgba(34,197,94,.15)" stroke="#22c55e" stroke-width="2"/><text x="415" y="90" fill="#4ade80" text-anchor="middle">/usr/bin  ✓ found ls!</text>
+<rect x="530" y="70" width="150" height="30" rx="7" fill="#1a2236" stroke="#475569" stroke-dasharray="4 3"/><text x="605" y="90" fill="#64748b" text-anchor="middle">/usr/sbin (not checked)</text>
+<path d="M100 81 L148 66" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar7)"/>
+<path d="M225 82 V88" stroke="#94a3b8" stroke-width="2"/>
+<path d="M300 106 L338 88" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar7)"/>
+<text x="400" y="150" fill="#64748b" text-anchor="middle" font-family="Segoe UI" font-size="12">1st folder → 2nd folder → 3rd folder ... The search stops at the first match.</text>
+</svg>
+<div class="cap">If the command is not in any listed folder: "command not found".</div>
+</div>
+<div class="code-block"><span class="p">$ </span>echo $PATH
+<span class="o">/home/john/.local/bin:/home/john/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin</span>
+<span class="p">$ </span>export PATH=${PATH}:/home/john/scripts     <span class="c"># add a folder at the END (this session only)</span>
+<span class="p">$ </span>which ls ; type ls                        <span class="c"># where is a command? what kind is it?</span>
+<span class="o">/usr/bin/ls
+ls is aliased to `ls --color=auto'</span></div>
+<p>Reading the <code class="code-inline">type ls</code> answer: on RHEL <code class="code-inline">ls</code> is actually an <b>alias</b> that adds colours (aliases are explained below).</p>
+
+<h4><code class="code-inline">LANG</code> and <code class="code-inline">HISTTIMEFORMAT</code> examples</h4>
+<div class="code-block"><span class="p">$ </span>date
+<span class="o">Mon Oct 26 10:05:00 UTC 2026</span>
+<span class="p">$ </span>export LANG=fr_FR.UTF-8              <span class="c"># works only if that language is installed on the system</span>
+<span class="p">$ </span>date
+<span class="o">lun. 26 oct. 2026 10:05:10 UTC</span>
+<span class="p">$ </span>HISTTIMEFORMAT="%F %T "
+<span class="p">$ </span>history | tail -2
+<span class="o">  101  2026-10-26 10:05:10 date
+  102  2026-10-26 10:05:25 history | tail -2</span></div>
+<p>For a permanent system-wide language, use <code class="code-inline">sudo localectl set-locale LANG=en_US.UTF-8</code>.</p>
+
+<h4><code class="code-inline">PS1</code>: design your prompt</h4>
+<div class="code-block"><span class="p">$ </span>PS1="[\u@\h \t \w]\$ "
+<span class="o">[john@server1 10:07:12 ~]$</span></div>
+<div class="lsl">
+<div class="f" style="--c:#3b82f6"><span class="lab">\u</span><span class="val">john</span><span class="exp">Your username</span></div>
+<div class="f" style="--c:#22c55e"><span class="lab">\h</span><span class="val">server1</span><span class="exp">Short hostname</span></div>
+<div class="f" style="--c:#eab308"><span class="lab">\t</span><span class="val">10:07:12</span><span class="exp">Time (24 hour)</span></div>
+<div class="f" style="--c:#a855f7"><span class="lab">\w</span><span class="val">~</span><span class="exp">Current folder (full path; ~ = home). <b>\W</b> = only the last part</span></div>
+<div class="f" style="--c:#ff3333"><span class="lab">\$</span><span class="val">$</span><span class="exp"><b>$</b> for normal users, <b>#</b> for root</span></div>
+</div>
+<div class="info-box tip"><div class="box-title">💡 Tip</div>Put the value in quotes, and end it with a space, so your typing does not touch the prompt.</div>
+
+<h3 id="startup">Shell configuration files: what runs when a shell starts</h3>
+<p>Bash reads some text files when it starts. Which files depend on the <b>type of shell</b>:</p>
+<div class="table-wrapper"><table><thead><tr><th>Shell type</th><th>How you get it</th></tr></thead><tbody>
+<tr><td><b>Login</b> shell</td><td>SSH login, console login, <code class="code-inline">su -</code>, <code class="code-inline">bash -l</code></td></tr>
+<tr><td><b>Non-login</b> interactive shell</td><td>Opening a terminal window on the desktop, or typing <code class="code-inline">bash</code> inside a shell</td></tr>
+<tr><td><b>Non-interactive</b> shell</td><td>Scripts and cron jobs</td></tr>
+</tbody></table></div>
+<div class="visual">
+<svg viewBox="0 0 800 270" width="800" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,Arial,sans-serif" font-size="12">
+<defs><marker id="ar8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 z" fill="#94a3b8"/></marker></defs>
+<text x="10" y="22" fill="#4ade80" font-weight="700" font-size="14">LOGIN shell (for example ssh)</text>
+<rect x="10" y="35" width="130" height="44" rx="8" fill="#1a2236" stroke="#3b82f6"/><text x="75" y="55" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">/etc/profile</text><text x="75" y="70" fill="#94a3b8" text-anchor="middle" font-size="10">everyone</text>
+<rect x="170" y="35" width="150" height="44" rx="8" fill="#1a2236" stroke="#3b82f6"/><text x="245" y="55" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">/etc/profile.d/*.sh</text><text x="245" y="70" fill="#94a3b8" text-anchor="middle" font-size="10">everyone</text>
+<rect x="350" y="35" width="130" height="44" rx="8" fill="#1a2236" stroke="#22c55e" stroke-width="2"/><text x="415" y="55" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">~/.bash_profile</text><text x="415" y="70" fill="#94a3b8" text-anchor="middle" font-size="10">only me</text>
+<rect x="510" y="35" width="110" height="44" rx="8" fill="#1a2236" stroke="#22c55e" stroke-width="2"/><text x="565" y="55" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">~/.bashrc</text><text x="565" y="70" fill="#94a3b8" text-anchor="middle" font-size="10">only me</text>
+<rect x="650" y="35" width="130" height="44" rx="8" fill="#1a2236" stroke="#3b82f6"/><text x="715" y="55" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">/etc/bashrc</text><text x="715" y="70" fill="#94a3b8" text-anchor="middle" font-size="10">everyone</text>
+<path d="M140 57 H168" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar8)"/><path d="M320 57 H348" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar8)"/><path d="M480 57 H508" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar8)"/><path d="M620 57 H648" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar8)"/>
+<text x="10" y="135" fill="#fb923c" font-weight="700" font-size="14">NON-LOGIN interactive shell (new terminal window)</text>
+<rect x="510" y="150" width="110" height="44" rx="8" fill="#1a2236" stroke="#22c55e" stroke-width="2"/><text x="565" y="170" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">~/.bashrc</text><text x="565" y="185" fill="#94a3b8" text-anchor="middle" font-size="10">only me</text>
+<rect x="650" y="150" width="130" height="44" rx="8" fill="#1a2236" stroke="#3b82f6"/><text x="715" y="170" fill="#e2e8f0" text-anchor="middle" font-family="Consolas,monospace">/etc/bashrc</text><text x="715" y="185" fill="#94a3b8" text-anchor="middle" font-size="10">everyone</text>
+<path d="M620 172 H648" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar8)"/>
+<text x="400" y="240" fill="#94a3b8" text-anchor="middle">~/.bash_profile calls ~/.bashrc (see the file below), so a login shell reads .bashrc too.</text>
+<text x="400" y="258" fill="#64748b" text-anchor="middle">~/.bash_logout runs when a login shell ends.</text>
+</svg>
+<div class="cap">Read the arrows from left to right: the order the files run.</div>
+</div>
+<div class="table-wrapper"><table><thead><tr><th>File</th><th>For</th><th>Runs for</th></tr></thead><tbody>
+<tr><td><code class="code-inline">/etc/profile</code></td><td>All users</td><td>Login shells</td></tr>
+<tr><td><code class="code-inline">/etc/profile.d/*.sh</code></td><td>All users</td><td>Login shells (called by /etc/profile)</td></tr>
+<tr><td><code class="code-inline">~/.bash_profile</code></td><td>One user</td><td>Login shells</td></tr>
+<tr><td><code class="code-inline">/etc/bashrc</code></td><td>All users</td><td>Interactive shells</td></tr>
+<tr><td><code class="code-inline">~/.bashrc</code></td><td>One user</td><td>Interactive shells</td></tr>
+<tr><td><code class="code-inline">~/.bash_logout</code></td><td>One user</td><td>When a login shell exits</td></tr>
+</tbody></table></div>
+<p>The name starts with a <b>dot</b> (<code class="code-inline">.bash_profile</code>), so it is a hidden file. The default <code class="code-inline">~/.bash_profile</code> on RHEL:</p>
+<div class="code-block"><span class="o"># .bash_profile
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+
+# User specific environment and startup programs</span></div>
+<p>Reading it: "if the file <code class="code-inline">~/.bashrc</code> exists, run it". The dot at the start of <code class="code-inline">. ~/.bashrc</code> is the same as the command <code class="code-inline">source</code>.</p>
+<div class="info-box tip"><div class="box-title">💡 Rule of thumb: where do I put it?</div>
+• <b>Aliases, prompt (PS1), functions</b> → <code class="code-inline">~/.bashrc</code><br>
+• <b>Settings once per login</b> (EDITOR, extra PATH) → <code class="code-inline">~/.bash_profile</code><br>
+• <b>For all users</b> → create a file such as <code class="code-inline">/etc/profile.d/custom.sh</code> (as root). Do not edit <code class="code-inline">/etc/profile</code> itself.
+<div class="code-block" style="margin:8px 0 0"><span class="c"># /etc/profile.d/custom.sh</span>
+export COMPANY="Example Corp"</div></div>
+
+<h3 id="alias">Aliases: your own shortcuts</h3>
+<p>An <b>alias</b> is a short name that is replaced by a longer command.</p>
+<div class="code-block"><span class="p">$ </span>alias hello='echo "Hello, this is a long string."'
+<span class="p">$ </span>hello
+<span class="o">Hello, this is a long string.</span>
+<span class="p">$ </span>alias ll='ls -lh --color=auto'      <span class="c"># long list with readable sizes</span>
+<span class="p">$ </span>alias update='sudo dnf update -y'
+<span class="p">$ </span>alias grep='grep --color=auto'
+<span class="p">$ </span>alias c='clear'
+<span class="p">$ </span>alias                               <span class="c"># list all aliases</span>
+<span class="p">$ </span>type ll                             <span class="c"># what is "ll"?</span>
+<span class="o">ll is aliased to `ls -lh --color=auto'</span>
+<span class="p">$ </span>unalias hello                       <span class="c"># remove one alias</span>
+<span class="p">$ </span>unalias -a                          <span class="c"># remove ALL aliases (this session)</span>
+<span class="p">$ </span>\ls                                  <span class="c"># backslash = ignore the alias for this one run</span></div>
+<div class="info-box note"><div class="box-title">📝 Aliases are temporary</div>An alias lives only in the shell where you typed it. When you close the terminal it is gone, unless you save it in <code class="code-inline">~/.bashrc</code> (see next part).</div>
+<div class="info-box tip"><div class="box-title">💡 Need arguments? Use a function</div>An alias is only text replacement. For logic or arguments, write a <b>function</b>:
+<div class="code-block" style="margin:8px 0 0"><span class="p">$ </span>mkcd() { mkdir -p "$1" &amp;&amp; cd "$1"; }     <span class="c"># make a folder and go into it</span>
+<span class="p">$ </span>mkcd projects/test</div></div>
+
+<h3 id="persist">Make changes permanent</h3>
+<div class="info-box important"><div class="box-title">❗ Key idea</div>Typing <code class="code-inline">export X=1</code> or <code class="code-inline">alias a=b</code> in a terminal lasts <b>only for that terminal session</b>. To keep it for ever, <b>write it into a startup file</b>.</div>
+<ol>
+<li>Open your file: <code class="code-inline">vim ~/.bashrc</code> (or <code class="code-inline">nano ~/.bashrc</code>)</li>
+<li>Add your lines at the bottom:
+<div class="code-block"><span class="o">PS1='[\u@\h \t \w]\$ '
+alias ll='ls -lh'
+export EDITOR=vim
+export PATH=$PATH:$HOME/bin</span></div></li>
+<li>Save and quit, then apply it <b>without logging out</b>: <code class="code-inline">source ~/.bashrc</code> (or <code class="code-inline">. ~/.bashrc</code>)</li>
+</ol>
+<p>Or add one line straight from the command line:</p>
+<div class="code-block"><span class="p">$ </span>echo "alias ll='ls -lh'" &gt;&gt; ~/.bashrc
+<span class="p">$ </span>echo 'export EDITOR=vim' &gt;&gt; ~/.bash_profile
+<span class="p">$ </span>source ~/.bashrc</div>
+<div class="info-box warning"><div class="box-title">⚠️ Use &gt;&gt; (append), never &gt;</div>A single <code class="code-inline">&gt;</code> would <b>erase your whole .bashrc</b> and put only the new line in it.</div>
+
+<div class="table-wrapper"><table><thead><tr><th>I want…</th><th>Put it in…</th><th>Applies to</th></tr></thead><tbody>
+<tr><td>An alias or prompt for me</td><td><code class="code-inline">~/.bashrc</code></td><td>Every interactive shell of mine</td></tr>
+<tr><td>A variable once per login</td><td><code class="code-inline">~/.bash_profile</code></td><td>My login shells</td></tr>
+<tr><td>A setting for everyone</td><td><code class="code-inline">/etc/profile.d/name.sh</code></td><td>All users' login shells</td></tr>
+<tr><td>Only for now</td><td>Type it in the terminal</td><td>This shell only</td></tr>
+</tbody></table></div>
+<p><b>Test it:</b> open a new login shell (<code class="code-inline">bash -l</code>, or <code class="code-inline">exit</code> and log in again) and run <code class="code-inline">echo $EDITOR</code> and <code class="code-inline">alias</code>. <b>Remove it:</b> <code class="code-inline">unset NAME</code>, <code class="code-inline">unalias name</code>, <b>and</b> delete the line from the file, or it returns at the next login.</p>
+<div class="info-box note"><div class="box-title">📝 Good to know (RHEL)</div>
+• <code class="code-inline">/etc/environment</code> is <b>not</b> read by Bash. Use <code class="code-inline">/etc/profile.d/*.sh</code> for system-wide variables.<br>
+• Find which file sets a value: <code class="code-inline">grep -R "EDITOR" ~/.bash* /etc/profile /etc/profile.d/ 2&gt;/dev/null</code><br>
+• Before editing an important config file, make a backup: <code class="code-inline">cp file file.bak</code></div>
+
+<h3 id="history">Extra: command history</h3>
+<p>Bash remembers the commands you typed, so you do not have to type them again.</p>
+<div class="code-block"><span class="p">$ </span>history | tail -3
+<span class="o">  98  ls /etc
+  99  cd /tmp
+ 100  history | tail -3</span>
+<span class="p">$ </span>!!                      <span class="c"># run the LAST command again</span>
+<span class="p">$ </span>sudo !!                 <span class="c"># last command again, with sudo (when you forgot it)</span>
+<span class="p">$ </span>!98                     <span class="c"># run command number 98 (ls /etc)</span>
+<span class="p">$ </span>!ls                     <span class="c"># run the last command that started with "ls"</span>
+<span class="p">$ </span>history -c              <span class="c"># clear the history of this shell</span></div>
+<p><b>Ctrl+R</b> is the fastest tool: press it, type a few letters of an old command, and Bash shows the match. Press <code class="code-inline">Enter</code> to run it, or <code class="code-inline">Esc</code> to edit it. The history is saved to <code class="code-inline">~/.bash_history</code> when the shell <b>exits</b>.</p>
+
+</div></div>
+
+<!-- ===================== PRACTICE ===================== -->
+<div class="section-card" id="practice">
+<div class="section-header"><div class="section-icon" style="background:rgba(238,0,0,.12)">🧪</div><h2>Practice: Three Small Exercises</h2></div>
+<div class="section-body">
+
+<h3>Exercise 1: redirection and pipes</h3>
+<div class="code-block"><span class="p">$ </span>cd ~ ; mkdir -p practice5 ; cd practice5
+<span class="p">$ </span>date &gt; log.txt                      <span class="c"># 1. create with the date</span>
+<span class="p">$ </span>echo "second line" &gt;&gt; log.txt         <span class="c"># 2. add a line</span>
+<span class="p">$ </span>ls /etc /fake &gt; out.txt 2&gt; err.txt    <span class="c"># 3. results and errors into two files</span>
+<span class="p">$ </span>cat err.txt
+<span class="o">ls: cannot access '/fake': No such file or directory</span>
+<span class="p">$ </span>wc -l &lt; out.txt                     <span class="c"># 4. how many lines of results?</span>
+<span class="p">$ </span>ls /etc | grep conf | tee conf-list.txt | wc -l     <span class="c"># 5. filter, save, count</span></div>
+<p>Questions to answer yourself: What does <code class="code-inline">log.txt</code> contain after step 2? Why is <code class="code-inline">err.txt</code> not empty in step 3? In step 5, which command wrote the file?</p>
+
+<h3>Exercise 2: edit a list with vim visual mode</h3>
+<p>We make a file from <code class="code-inline">ls -l</code>, then remove the columns we do not need.</p>
+<div class="code-block"><span class="p">$ </span>ls -l /etc | head -8 &gt; list.txt
+<span class="p">$ </span>cat list.txt
+<span class="o">total 1220
+drwxr-xr-x.  3 root root     28 Oct 20 09:12 NetworkManager
+-rw-r--r--.  1 root root     16 Oct 20 09:12 adjtime
+-rw-r--r--.  1 root root   1529 Jun 23 06:00 aliases
+drwxr-xr-x.  2 root root     62 Oct 20 09:12 alternatives
+...</span>
+<span class="p">$ </span>vim list.txt</div>
+<div class="table-wrapper"><table><thead><tr><th>Goal</th><th>Keys in vim</th></tr></thead><tbody>
+<tr><td>Delete the first line ("total …")</td><td><code class="code-inline">gg</code> then <code class="code-inline">dd</code></td></tr>
+<tr><td>Remove the permissions column</td><td>Cursor on the first character of line 1 → <code class="code-inline">Ctrl+V</code> → press <code class="code-inline">j</code> to go down to the last line → press <code class="code-inline">e</code> to reach the end of the column → <code class="code-inline">x</code></td></tr>
+<tr><td>Remove one whole line (for example a row you do not want)</td><td>Put the cursor on it → <code class="code-inline">Shift+V</code> → <code class="code-inline">x</code></td></tr>
+<tr><td>Copy a line and paste it below</td><td><code class="code-inline">yy</code> then <code class="code-inline">p</code></td></tr>
+<tr><td>Replace every "root" with "admin"</td><td><code class="code-inline">:%s/root/admin/g</code> then <code class="code-inline">Enter</code></td></tr>
+<tr><td>Save and quit</td><td><code class="code-inline">:wq</code> then <code class="code-inline">Enter</code> (if you broke something: <code class="code-inline">:q!</code>)</td></tr>
+</tbody></table></div>
+<p>Make a backup copy with a time stamp, add a line, and show what you added:</p>
+<div class="code-block"><span class="p">$ </span>cp list.txt list_$(date +%s).txt             <span class="c"># time-stamped backup</span>
+<span class="p">$ </span>echo "------------" &gt;&gt; list.txt              <span class="c"># append 12 dashes</span>
+<span class="p">$ </span>ls ~/Documents | tee -a list.txt             <span class="c"># show AND append</span>
+<span class="p">$ </span>cat list.txt</div>
+
+<h3>Exercise 3: shell environment</h3>
+<div class="code-block"><span class="p">$ </span>vim ~/.bashrc                              <span class="c"># add at the bottom:  PS1='[\u@\h \t \w]$ '</span>
+<span class="p">$ </span>source ~/.bashrc                           <span class="c"># the prompt changes at once</span>
+<span class="p">$ </span>file=tmp.zdkei083                          <span class="c"># shell variable</span>
+<span class="p">$ </span>touch $file ; ls -l $file ; rm $file
+<span class="p">$ </span>ls -l $file
+<span class="o">ls: cannot access 'tmp.zdkei083': No such file or directory</span>
+<span class="p">$ </span>export EDITOR=vim ; echo $EDITOR
+<span class="o">vim</span>
+<span class="p">$ </span>bash -c 'echo $EDITOR'                    <span class="c"># a child shell sees the exported variable</span>
+<span class="o">vim</span>
+<span class="p">$ </span>bash -c 'echo $file'                      <span class="c"># ...but NOT the unexported one (empty line)</span></div>
+<p>Cleanup: <code class="code-inline">cd ~ ; rm -r practice5</code>. Also remove the extra <code class="code-inline">PS1</code> line from <code class="code-inline">~/.bashrc</code> if you do not want it.</p>
+
+</div></div>
+
+<!-- ===================== MISTAKES ===================== -->
+<div class="section-card" id="mistakes">
+<div class="section-header"><div class="section-icon" style="background:rgba(249,115,22,.15)">⚠️</div><h2>Common Mistakes and Gotchas</h2></div>
+<div class="section-body">
+<div class="table-wrapper"><table><thead><tr><th>Mistake</th><th>Result</th><th>Fix</th></tr></thead><tbody>
+<tr><td><code class="code-inline">&gt;</code> into an important file</td><td>Old content is erased</td><td>Use <code class="code-inline">&gt;&gt;</code>, or <code class="code-inline">set -o noclobber</code></td></tr>
+<tr><td><code class="code-inline">cmd 2&gt;&amp;1 &gt; file</code> (wrong order)</td><td>Errors still on screen</td><td>Write <code class="code-inline">cmd &gt; file 2&gt;&amp;1</code></td></tr>
+<tr><td><code class="code-inline">ls &gt; f | less</code></td><td><code class="code-inline">less</code> shows nothing</td><td>Use <code class="code-inline">ls | tee f | less</code></td></tr>
+<tr><td><code class="code-inline">COUNT = 40</code> (spaces)</td><td>"command not found"</td><td><code class="code-inline">COUNT=40</code></td></tr>
+<tr><td>Forgetting quotes: <code class="code-inline">MSG=hello world</code></td><td>Error</td><td><code class="code-inline">MSG="hello world"</code></td></tr>
+<tr><td>Forgetting <code class="code-inline">export</code></td><td>Programs cannot see the variable</td><td><code class="code-inline">export NAME=value</code></td></tr>
+<tr><td>Editing <code class="code-inline">.bashrc</code> but not running <code class="code-inline">source</code></td><td>Nothing seems to change</td><td><code class="code-inline">source ~/.bashrc</code> or open a new shell</td></tr>
+<tr><td>Putting a setting in the wrong startup file</td><td>It does not appear</td><td>Aliases/prompt → <code class="code-inline">.bashrc</code>; per-login → <code class="code-inline">.bash_profile</code></td></tr>
+<tr><td>Stuck in vim</td><td>Cannot exit</td><td><code class="code-inline">Esc</code>, then <code class="code-inline">:q!</code> (discard) or <code class="code-inline">:wq</code> (save)</td></tr>
+<tr><td>Typing text in vim Command mode</td><td>Keys act as commands, text gets damaged</td><td>Press <code class="code-inline">i</code> first. Undo with <code class="code-inline">u</code></td></tr>
+<tr><td>Editing a root-owned file as a normal user</td><td>"Permission denied" or cannot save</td><td><code class="code-inline">sudoedit file</code> or <code class="code-inline">sudo vim file</code></td></tr>
+<tr><td><code class="code-inline">sed -i</code> without a backup</td><td>File changed for good</td><td>Use <code class="code-inline">sed -i.bak</code> or test without <code class="code-inline">-i</code> first</td></tr>
+<tr><td>Single quotes around a variable</td><td><code class="code-inline">'$HOME'</code> prints $HOME</td><td>Use double quotes</td></tr>
+</tbody></table></div>
+</div></div>
+
+<!-- ===================== COMMANDS ===================== -->
+<div class="section-card" id="commands">
+<div class="section-header"><div class="section-icon" style="background:rgba(34,197,94,.15)">📚</div><h2>All Commands and Keys of This Chapter</h2></div>
+<div class="section-body">
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>What it does</th><th>Examples and options</th></tr></thead><tbody>
+<tr class="grp"><td colspan="3">📤 Redirection and pipes</td></tr>
+<tr><td><code class="code-inline">&gt;</code> · <code class="code-inline">&gt;&gt;</code></td><td>Results to a file (overwrite · append)</td><td><code class="code-inline">date &gt; f</code> · <code class="code-inline">echo hi &gt;&gt; f</code></td></tr>
+<tr><td><code class="code-inline">2&gt;</code> · <code class="code-inline">2&gt;&gt;</code> · <code class="code-inline">2&gt; /dev/null</code></td><td>Errors to a file · append · discard</td><td><code class="code-inline">find /etc -name passwd 2&gt; /dev/null</code></td></tr>
+<tr><td><code class="code-inline">&gt; f 2&gt;&amp;1</code> · <code class="code-inline">&amp;&gt;</code> · <code class="code-inline">&amp;&gt;&gt;</code></td><td>Results and errors to one file</td><td><code class="code-inline">cmd &amp;&gt; f</code> · <code class="code-inline">&amp;&gt; /dev/null</code> = silence</td></tr>
+<tr><td><code class="code-inline">&lt;</code> · <code class="code-inline">&lt;&lt; WORD</code> · <code class="code-inline">&lt;&lt;&lt;</code></td><td>Input from a file · here-document · here-string</td><td><code class="code-inline">wc -l &lt; f</code></td></tr>
+<tr><td><code class="code-inline">|</code> · <code class="code-inline">|&amp;</code></td><td>Pipe (results · results and errors)</td><td><code class="code-inline">ls | wc -l</code></td></tr>
+<tr><td><code class="code-inline">tee</code></td><td>Show and save at the same time</td><td><code class="code-inline">ls | tee f</code> · <code class="code-inline">tee -a f</code> append</td></tr>
+<tr><td><code class="code-inline">set -o noclobber</code></td><td>Make <code class="code-inline">&gt;</code> refuse to overwrite</td><td><code class="code-inline">&gt;|</code> forces · <code class="code-inline">set +o noclobber</code> off</td></tr>
+<tr class="grp"><td colspan="3">🔧 Text tools used in pipes</td></tr>
+<tr><td><code class="code-inline">cat</code></td><td>Show or join files; create with <code class="code-inline">cat &gt; f</code> (end with Ctrl+D)</td><td><code class="code-inline">cat a b &gt; c</code></td></tr>
+<tr><td><code class="code-inline">wc</code></td><td>Count lines, words, bytes</td><td><code class="code-inline">wc -l</code></td></tr>
+<tr><td><code class="code-inline">head</code> · <code class="code-inline">tail</code></td><td>First / last lines</td><td><code class="code-inline">head -n 10</code> · <code class="code-inline">tail -n 100</code></td></tr>
+<tr><td><code class="code-inline">sort</code> · <code class="code-inline">cut</code> · <code class="code-inline">grep</code> · <code class="code-inline">tr</code></td><td>Sort · pick columns · filter lines · change letters</td><td><code class="code-inline">sort -r</code> · <code class="code-inline">cut -d: -f1</code> · <code class="code-inline">grep -i</code></td></tr>
+<tr><td><code class="code-inline">less</code></td><td>Read long output page by page</td><td><code class="code-inline">q</code> quit · <code class="code-inline">/word</code> search</td></tr>
+<tr><td><code class="code-inline">find</code> · <code class="code-inline">ls</code> · <code class="code-inline">date</code> · <code class="code-inline">echo</code></td><td>Sources of output used in examples</td><td><code class="code-inline">find / -name passwd</code></td></tr>
+<tr class="grp"><td colspan="3">✏️ Editors</td></tr>
+<tr><td><code class="code-inline">nano</code></td><td>Easy editor</td><td><code class="code-inline">nano +25 f</code> · <code class="code-inline">nano -l f</code></td></tr>
+<tr><td><code class="code-inline">vi</code> · <code class="code-inline">vim</code> · <code class="code-inline">vimtutor</code></td><td>Powerful editor · its tutorial</td><td><code class="code-inline">vim +10 f</code> · <code class="code-inline">vim -R f</code></td></tr>
+<tr><td><code class="code-inline">sudoedit</code></td><td>Safely edit a root-owned file</td><td><code class="code-inline">sudoedit /etc/hosts</code></td></tr>
+<tr><td><code class="code-inline">sed</code></td><td>Find and replace in a stream</td><td><code class="code-inline">sed 's/a/b/g'</code> · <code class="code-inline">-i</code> · <code class="code-inline">-i.bak</code> · <code class="code-inline">-n '2p'</code> · <code class="code-inline">'/x/d'</code></td></tr>
+<tr><td><code class="code-inline">awk</code></td><td>Work with columns</td><td><code class="code-inline">awk '{print $1}'</code> · <code class="code-inline">-F:</code> · <code class="code-inline">NR</code> · <code class="code-inline">NF</code> · <code class="code-inline">$NF</code></td></tr>
+<tr><td><code class="code-inline">sudo dnf install</code></td><td>Install an editor package</td><td><code class="code-inline">sudo dnf install vim-enhanced nano</code></td></tr>
+<tr class="grp"><td colspan="3">🌍 Shell environment</td></tr>
+<tr><td><code class="code-inline">NAME=value</code> · <code class="code-inline">$NAME</code> · <code class="code-inline">${NAME}</code></td><td>Set · use a variable</td><td><code class="code-inline">echo "$NAME"</code></td></tr>
+<tr><td><code class="code-inline">export</code> · <code class="code-inline">export -n</code> · <code class="code-inline">unset</code> · <code class="code-inline">readonly</code></td><td>Share · unshare · delete · lock a variable</td><td><code class="code-inline">export EDITOR=vim</code></td></tr>
+<tr><td><code class="code-inline">env</code> · <code class="code-inline">printenv</code> · <code class="code-inline">set</code></td><td>Show variables</td><td><code class="code-inline">printenv HOME</code> · <code class="code-inline">set | less</code></td></tr>
+<tr><td><code class="code-inline">$( )</code></td><td>Command substitution</td><td><code class="code-inline">$(date +%F)</code></td></tr>
+<tr><td><code class="code-inline">which</code> · <code class="code-inline">type</code></td><td>Find / identify a command</td><td><code class="code-inline">type ll</code></td></tr>
+<tr><td><code class="code-inline">alias</code> · <code class="code-inline">unalias</code></td><td>Create · remove shortcuts</td><td><code class="code-inline">alias ll='ls -lh'</code> · <code class="code-inline">unalias -a</code> · <code class="code-inline">\ls</code></td></tr>
+<tr><td><code class="code-inline">source</code> or <code class="code-inline">.</code></td><td>Run a file in the current shell</td><td><code class="code-inline">source ~/.bashrc</code></td></tr>
+<tr><td><code class="code-inline">bash -l</code></td><td>Start a login shell (to test)</td><td><code class="code-inline">bash -l</code></td></tr>
+<tr><td><code class="code-inline">localectl</code></td><td>Set the system language</td><td><code class="code-inline">localectl set-locale LANG=en_US.UTF-8</code></td></tr>
+<tr><td><code class="code-inline">history</code></td><td>Past commands</td><td><code class="code-inline">!!</code> · <code class="code-inline">!50</code> · <code class="code-inline">!ls</code> · <code class="code-inline">history -c</code> · <code class="code-inline">Ctrl+R</code></td></tr>
+</tbody></table></div>
+
+<h4>Vim key summary</h4>
+<div class="table-wrapper"><table><thead><tr><th>Purpose</th><th>Keys</th></tr></thead><tbody>
+<tr><td>Modes</td><td><code class="code-inline">i a I A o O</code> insert · <code class="code-inline">Esc</code> back · <code class="code-inline">:</code> command line · <code class="code-inline">v</code> <code class="code-inline">V</code> <code class="code-inline">Ctrl+V</code> visual</td></tr>
+<tr><td>Save and quit</td><td><code class="code-inline">:w</code> · <code class="code-inline">:wq</code> · <code class="code-inline">:x</code> · <code class="code-inline">ZZ</code> · <code class="code-inline">:q!</code></td></tr>
+<tr><td>Move</td><td><code class="code-inline">h j k l</code> · <code class="code-inline">w b</code> · <code class="code-inline">0 ^ $</code> · <code class="code-inline">gg G</code> · <code class="code-inline">25G</code></td></tr>
+<tr><td>Edit</td><td><code class="code-inline">x dd 3dd dw D yy p P r cw .</code> · <code class="code-inline">u</code> undo · <code class="code-inline">Ctrl+r</code> redo</td></tr>
+<tr><td>Search</td><td><code class="code-inline">/text</code> · <code class="code-inline">n N</code> · <code class="code-inline">:%s/old/new/g</code> · <code class="code-inline">:%s/old/new/gc</code></td></tr>
+<tr><td>Settings</td><td><code class="code-inline">:set number</code> · <code class="code-inline">:set paste</code> · <code class="code-inline">:r file</code> · <code class="code-inline">:!cmd</code></td></tr>
+</tbody></table></div>
+<h4>Nano key summary</h4>
+<p><code class="code-inline">Ctrl+O</code> save · <code class="code-inline">Ctrl+X</code> exit · <code class="code-inline">Ctrl+K</code> cut · <code class="code-inline">Ctrl+U</code> paste · <code class="code-inline">Ctrl+W</code> search · <code class="code-inline">Ctrl+\</code> replace · <code class="code-inline">Ctrl+_</code> go to line · <code class="code-inline">Ctrl+G</code> help</p>
+
+<h4>Important files</h4>
+<div class="table-wrapper"><table><thead><tr><th>File</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code class="code-inline">~/.bashrc</code> · <code class="code-inline">~/.bash_profile</code> · <code class="code-inline">~/.bash_logout</code></td><td>Your own shell settings</td></tr>
+<tr><td><code class="code-inline">/etc/profile</code> · <code class="code-inline">/etc/profile.d/*.sh</code> · <code class="code-inline">/etc/bashrc</code></td><td>Shell settings for all users</td></tr>
+<tr><td><code class="code-inline">~/.bash_history</code></td><td>Saved command history</td></tr>
+<tr><td><code class="code-inline">~/.vimrc</code> · <code class="code-inline">/etc/vimrc</code></td><td>Vim settings (you · everyone)</td></tr>
+<tr><td><code class="code-inline">/dev/null</code></td><td>The black hole: anything sent here disappears</td></tr>
+</tbody></table></div>
+</div></div>
+
+<!-- ===================== QUIZ ===================== -->
+<div class="section-card" id="quiz">
+<div class="section-header"><div class="section-icon" style="background:rgba(238,0,0,.12)">🧠</div><h2>Chapters 8–9 Quiz (multiple choice)</h2></div>
+<div class="section-body">
+<p>Pick one answer for each question. You see the result and a short explanation right away. Answers are shuffled each time you start.</p>
+<div class="quiz-box" id="quizBox"></div>
+</div></div>
+
+</div>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+<script>
+function toggleTOC(){document.getElementById('tocSidebar').classList.toggle('open');document.getElementById('tocOverlay').classList.toggle('show')}
+var pb=document.getElementById('progress-bar'),st=document.getElementById('scrollTop');
+window.addEventListener('scroll',function(){var h=document.documentElement.scrollHeight-window.innerHeight;pb.style.width=(h>0?window.scrollY/h*100:0)+'%';st.classList.toggle('show',window.scrollY>400)});
+
+/* ---------- QUIZ ---------- */
+var QUESTIONS=[
+{q:"What is the file descriptor number of stdout (standard output)?",o:["1","0","2","3"],a:0,e:"0 = stdin, 1 = stdout, 2 = stderr."},
+{q:"Which file descriptor carries error messages?",o:["2 (stderr)","1 (stdout)","0 (stdin)","4"],a:0,e:"Errors travel on channel 2, so they can be separated from normal results."},
+{q:"What does 'echo Hello > file.txt' do if file.txt already has text?",o:["Replaces the old text with Hello","Adds Hello at the end","Refuses to run","Adds Hello at the top"],a:0,e:"A single > overwrites. Use >> to append."},
+{q:"Which operator adds output to the END of a file?",o:[">>",">","2>","<"],a:0,e:">> means append."},
+{q:"Show the output on the screen and throw away the errors. Which is correct?",o:["command 2> /dev/null","command > /dev/null","command &> /dev/null","command 2>&1"],a:0,e:"2> sends only errors, and /dev/null discards them. > /dev/null would hide the results instead."},
+{q:"Which command saves results in one file and errors in a DIFFERENT file?",o:["command > out.txt 2> err.txt","command &> out.txt","command > out.txt 2>&1","command | tee out.txt"],a:0,e:"> handles channel 1 and 2> handles channel 2, each with its own file."},
+{q:"Which command sends results and errors to the same file and keeps the old content (append)?",o:["command >> file 2>&1","command > file 2>&1","command 2>&1 > file","command 2>> file"],a:0,e:">> appends. 2>&1 after it joins the errors to the same place. (&>> file is the Bash shortcut.)"},
+{q:"Which command throws away EVERYTHING (results and errors)?",o:["command &> /dev/null","command > /dev/null","command 2> /dev/null","command | tee /dev/null"],a:0,e:"&> covers both channels, and /dev/null is the black hole."},
+{q:"Why is 'command 2>&1 > file' usually wrong?",o:["The errors are connected to the screen before stdout moves to the file","It deletes the file","It only works as root","2>&1 is not valid in Bash"],a:0,e:"2>&1 copies where stdout points at that moment. Put it AFTER > file."},
+{q:"What is the difference between a pipe and a redirection?",o:["A pipe connects two commands; redirection connects a command and a file","A pipe connects a command and a file; redirection connects two commands","They are the same","A pipe only works with errors"],a:0,e:"cmd1 | cmd2 passes results to another command. cmd > file saves them in a file."},
+{q:"Which command shows output on the screen AND saves it to a file?",o:["ls | tee out.txt","ls > out.txt","ls 2> out.txt","ls < out.txt"],a:0,e:"tee works like a T-junction: one copy goes on, one copy is saved."},
+{q:"What happens with 'ls > saved.txt | less'?",o:["less shows nothing, because all output went to the file","less shows the list and the file is saved","An error appears","The list is shown twice"],a:0,e:"A redirection in the middle of a pipe takes all the output. Use tee instead."},
+{q:"What is the difference between 'wc -l /etc/passwd' and 'wc -l < /etc/passwd'?",o:["The first prints the file name after the number; the second prints only the number","The first counts words","The second does not work","There is no difference at all"],a:0,e:"With < the command only sees data from the input, not the name of the file."},
+{q:"Which operator sends errors through a pipe together with the normal results?",o:["|&  (or 2>&1 |)","&>","2>","<<"],a:0,e:"&> cannot be used inside a pipeline. Use 2>&1 | or |&."},
+{q:"Which editor is the easiest for a beginner, with shortcuts shown on screen?",o:["nano","vim","sed","awk"],a:0,e:"nano lists its shortcuts at the bottom."},
+{q:"In nano, how do you save and then exit?",o:["Ctrl+O, Enter, then Ctrl+X",":wq","Ctrl+S then Ctrl+Q","Esc then ZZ"],a:0,e:"Ctrl+O writes the file, Ctrl+X exits."},
+{q:"You open vim and start typing, but strange things happen. Why?",o:["You are in Command mode, where keys are commands","The file is read-only","vim is broken","Caps Lock is on"],a:0,e:"vim starts in Command mode. Press i to enter Insert mode first."},
+{q:"Which key returns you to Command mode from Insert mode?",o:["Esc","i","Ctrl+X","Enter"],a:0,e:"Esc is always safe. Press it a few times when you are lost."},
+{q:"How do you quit vim and DISCARD all changes?",o:[":q!",":wq",":w",":x"],a:0,e:":wq and :x save and quit. :w saves and stays. :q! throws changes away."},
+{q:"What does 'dd' do in vim Command mode?",o:["Deletes (cuts) the whole line","Deletes one character","Duplicates the line","Deletes to the end of the file"],a:0,e:"dd deletes the line. yy copies it. p pastes."},
+{q:"Which vim command replaces every 'old' with 'new' in the whole file?",o:[":%s/old/new/g",":s/old/new/",":replace old new","/old/new"],a:0,e:":% means all lines, s = substitute, g = every match on each line."},
+{q:"Which Visual mode key selects a rectangular block (a column)?",o:["Ctrl+V","v","Shift+V","Ctrl+B"],a:0,e:"v = characters, Shift+V = whole lines, Ctrl+V = block."},
+{q:"What does 'sed -i.bak s/a/b/g file' do?",o:["Changes the file in place and keeps a backup file.bak","Prints the result only","Deletes file.bak","Replaces only the first a"],a:0,e:"-i edits in place. A suffix after -i makes a backup first."},
+{q:"With awk, what does $NF mean?",o:["The last column of the line","The number of lines","The first column","The file name"],a:0,e:"NF is the number of fields, so $NF is the last field. NR is the line number."},
+{q:"Which command shows only the regular users (UID 1000 or more) from /etc/passwd?",o:["awk -F: '$3 >= 1000 {print $1, $3}' /etc/passwd","sed -n '1000p' /etc/passwd","cut -f3 /etc/passwd","grep 1000 /etc/passwd | wc"],a:0,e:"-F: splits at colons, and $3 is the UID column."},
+{q:"Which line creates a variable correctly?",o:["COUNT=40","COUNT = 40","$COUNT=40","set COUNT 40"],a:0,e:"No spaces around =, and no $ when you set a variable."},
+{q:"A program you start from your shell cannot see your variable NAME. What is missing?",o:["export","source","alias","$ in front of the name"],a:0,e:"Only exported (environment) variables are passed to child programs."},
+{q:"What does echo ${COUNT}x print when COUNT=40?",o:["40x","COUNTx","Nothing","${COUNT}x"],a:0,e:"The braces mark where the variable name ends."},
+{q:"What does echo '$HOME' print?",o:["$HOME","/home/john","Nothing","An error"],a:0,e:"Single quotes switch off all expansion."},
+{q:"The shell searches the folders in PATH in which order?",o:["From left to right, and uses the first match","From right to left","Alphabetically","All at once, then asks you"],a:0,e:"The first folder that contains the command wins."},
+{q:"Which command ADDS /home/john/scripts to PATH for this session only?",o:["export PATH=$PATH:/home/john/scripts","PATH=/home/john/scripts","export PATH=/home/john/scripts","path add /home/john/scripts"],a:0,e:"Keep the old value ($PATH) and add the new folder after a colon."},
+{q:"Which file is read by a NON-login interactive shell (for example a new terminal window)?",o:["~/.bashrc","~/.bash_profile only","/etc/profile only","~/.bash_logout"],a:0,e:"A login shell reads .bash_profile, which calls .bashrc. A non-login shell reads .bashrc directly."},
+{q:"Where is the cleanest place to put a variable for ALL users?",o:["A .sh file in /etc/profile.d/","~/.bashrc of each user","/etc/environment","/etc/vimrc"],a:0,e:"/etc/profile.d/*.sh is read by login shells. Bash does not read /etc/environment."},
+{q:"You typed an alias in a terminal. It is gone after you reopen the terminal. How do you keep it?",o:["Add it to ~/.bashrc and run source ~/.bashrc","Use export alias","Type it twice","Add it to ~/.bash_logout"],a:0,e:"Aliases are temporary unless they are saved in a startup file."},
+{q:"Which command safely adds a line to .bashrc without erasing it?",o:["echo \"alias ll='ls -lh'\" >> ~/.bashrc","echo \"alias ll='ls -lh'\" > ~/.bashrc","cat \"alias ll\" ~/.bashrc","source alias ll"],a:0,e:"Use >> (append). A single > would erase the whole file."},
+{q:"What does '\\ls' do when ls is an alias?",o:["Runs the real ls and ignores the alias once","Lists hidden files","Removes the alias","Shows an error"],a:0,e:"A backslash in front of a command skips the alias for that one run."},
+{q:"Which command runs your last command again with sudo?",o:["sudo !!","!! sudo","sudo last","sudo history"],a:0,e:"!! stands for the previous command."},
+{q:"Which key combination searches your command history while you type?",o:["Ctrl+R","Ctrl+H","Ctrl+F","Ctrl+S"],a:0,e:"Press Ctrl+R, type a few letters, and Bash shows the latest matching command."}
+];
+var quiz={list:[],i:0,score:0,missed:[],locked:false};
+var box=document.getElementById('quizBox');
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function startQuiz(pool){
+  quiz.list=shuffle(pool).map(function(q){
+    var opts=shuffle(q.o.map(function(t,idx){return {t:t,ok:idx===q.a}}));
+    return {q:q.q,opts:opts,e:q.e,src:q};
+  });
+  quiz.i=0;quiz.score=0;quiz.missed=[];quiz.locked=false;
+  renderQ();
+}
+function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function renderQ(){
+  box.innerHTML='';
+  var total=quiz.list.length,q=quiz.list[quiz.i];
+  var top=el('div','quiz-top');
+  top.appendChild(el('span','', 'Question '+(quiz.i+1)+' of '+total));
+  top.appendChild(el('span','', 'Score: '+quiz.score));
+  box.appendChild(top);
+  var bar=el('div','quiz-bar');var fill=el('div');fill.style.width=(quiz.i/total*100)+'%';bar.appendChild(fill);box.appendChild(bar);
+  box.appendChild(el('div','quiz-q',q.q));
+  var fb=el('div','quiz-fb');
+  var next=el('button','quiz-btn',quiz.i===total-1?'See result':'Next question →');
+  next.style.display='none';
+  next.onclick=function(){quiz.i++;if(quiz.i>=total){renderResult()}else{renderQ()}};
+  quiz.locked=false;
+  q.opts.forEach(function(o,idx){
+    var b=el('button','quiz-opt',String.fromCharCode(65+idx)+'.  '+o.t);
+    b.onclick=function(){
+      if(quiz.locked)return;quiz.locked=true;
+      var all=box.querySelectorAll('.quiz-opt');
+      all.forEach(function(x,k){x.disabled=true;if(q.opts[k].ok)x.classList.add('right')});
+      if(o.ok){quiz.score++;fb.textContent='✅ Correct! '+q.e}
+      else{b.classList.add('wrong');quiz.missed.push(q);fb.textContent='❌ Not quite. '+q.e}
+      fb.classList.add('show');next.style.display='inline-block';
+      top.lastChild.textContent='Score: '+quiz.score;
+      fill.style.width=((quiz.i+1)/total*100)+'%';
+    };
+    box.appendChild(b);
+  });
+  box.appendChild(fb);box.appendChild(next);
+}
+function renderResult(){
+  box.innerHTML='';
+  var total=quiz.list.length,pct=Math.round(quiz.score/total*100);
+  box.appendChild(el('div','quiz-q','Quiz finished'));
+  box.appendChild(el('div','quiz-score',quiz.score+' / '+total+'  ('+pct+'%)'));
+  var msg=pct>=80?'🎉 Great work! You know this chapter well.':(pct>=50?'👍 Good start. Read the explanations below and try again.':'📖 Read the chapter again, then retry the quiz.');
+  box.appendChild(el('p','',msg));
+  if(quiz.missed.length){
+    box.appendChild(el('p','', 'Questions you missed:'));
+    quiz.missed.forEach(function(q){
+      var d=el('div','quiz-miss');
+      d.appendChild(el('div','',q.q));
+      var right=q.opts.filter(function(o){return o.ok})[0].t;
+      var ans=el('div','','');ans.appendChild(document.createTextNode('Correct answer: '));ans.appendChild(el('b','',right));d.appendChild(ans);
+      d.appendChild(el('div','',q.e));
+      box.appendChild(d);
+    });
+  }
+  var again=el('button','quiz-btn','🔁 Restart full quiz');
+  again.onclick=function(){startQuiz(QUESTIONS)};
+  box.appendChild(again);
+  if(quiz.missed.length){
+    var retry=el('button','quiz-btn alt','Retry only missed questions');
+    retry.onclick=function(){startQuiz(quiz.missed.map(function(m){return m.src}))};
+    box.appendChild(retry);
+  }
+}
+(function(){
+  var intro=el('div','');
+  intro.appendChild(el('p','',QUESTIONS.length+' questions covering the whole chapter.'));
+  var go=el('button','quiz-btn','▶ Start quiz');
+  go.onclick=function(){startQuiz(QUESTIONS)};
+  intro.appendChild(go);box.appendChild(intro);
+})();
+</script>
+</body>
+</html>

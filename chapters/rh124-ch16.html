@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 16 – Controlling Services and Daemons</title>
+<style>:root{--bg:#0a0e17;--card:#1a2234;--tx:#e2e8f0;--tx2:#94a3b8;--red:#ee0000;--grn:#22c55e;--yel:#eab308;--blu:#3b82f6;--pur:#a855f7;--cyn:#06b6d4;--org:#f97316;--bd:#1e293b;--bd2:#334155;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.7}
+.top{position:sticky;top:0;z-index:9;background:rgba(10,14,23,.94);border-bottom:1px solid var(--bd);padding:9px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.top a{color:var(--tx2);text-decoration:none;font-size:.78rem;padding:3px 10px;border:1px solid var(--bd2);border-radius:20px}
+.top a:hover,.top .b{color:var(--red);border-color:var(--red)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:2rem;margin:14px 0 6px}h2{font-size:1.45rem;margin:44px 0 12px;padding-left:12px;border-left:4px solid var(--red)}
+h3{font-size:1.05rem;margin:20px 0 6px;color:var(--cyn)}p{margin:7px 0}
+.card,.q{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.kw{background:rgba(238,0,0,.14);color:#ff9a9a;border-radius:6px;padding:0 7px;font-weight:600}
+code{font-family:Consolas,monospace;background:#0d1423;color:#7dd3fc;padding:1px 6px;border-radius:5px;font-size:.9em}
+pre{background:#0d1423;border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin:10px 0;overflow-x:auto;font:.84rem/1.6 Consolas,monospace;color:#cbd5e1}
+.c{color:#64748b}.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem}
+th,td{border:1px solid var(--bd2);padding:7px 9px;text-align:left}th{background:#111b2e;color:var(--tx2)}
+.note,.warn,.tip,.where,.sc{border-radius:var(--r);padding:12px 15px;margin:14px 0;border-left:4px solid}
+.note{background:rgba(59,130,246,.09);border-color:var(--blu)}.warn{background:rgba(249,115,22,.09);border-color:var(--org)}
+.tip{background:rgba(34,197,94,.09);border-color:var(--grn)}.where{background:rgba(238,0,0,.07);border-color:var(--red)}
+.sc{background:rgba(168,85,247,.09);border-color:var(--pur)}.where h4{color:#ff9a9a}.sc h4{color:#d8b4fe}
+.r{color:var(--grn);font-weight:700}.w{color:var(--yel);font-weight:700}.x{color:var(--red);font-weight:700}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center;align-items:stretch}
+.flow div{background:var(--card);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 12px;text-align:center;font-size:.85rem}
+.flow .ar{border:0;background:none;color:var(--red);font-size:1.4rem;align-self:center;padding:0}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.st div{background:var(--card);border:2px solid;border-radius:var(--r);padding:10px;text-align:center;font-size:.85rem}
+.st b{display:block;font:700 1.8rem Consolas,monospace}
+.nice{height:34px;border-radius:8px;background:linear-gradient(90deg,#ee0000,#eab308,#22c55e);margin:8px 0 2px}
+.nl{display:flex;justify-content:space-between;font:.78rem Consolas,monospace;color:var(--tx2)}
+.tree{font:.9rem/1.5 Consolas,monospace}
+.q{margin:12px 0}.q label{display:block;padding:6px 8px;border-radius:8px;cursor:pointer}.q label:hover{background:#111b2e}
+.ex{display:none;margin-top:8px;font-size:.9rem}.q.ok{border-color:var(--grn)}.q.bad{border-color:var(--red)}
+.out{text-align:center;font:700 1.2rem Consolas,monospace;margin-top:8px}
+input[type=text]{background:#0d1423;border:1px solid var(--bd2);color:var(--tx);border-radius:8px;padding:6px;font:1rem Consolas,monospace;width:70px;text-align:center}
+button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px 22px;font-size:1rem;cursor:pointer}
+</style></head><body>
+<div class="top"><a class="b" href="../Index.html">← Dashboard</a><a href="#a">Daemon vs Service</a><a href="#b">systemd</a><a href="#c">status</a><a href="#d">systemctl</a><a href="#e">mask</a><a href="#f">Create service</a><a href="#g">Targets</a><a href="#lab">Labs</a><a href="#h">Troubleshoot</a><a href="#quiz">Quiz</a></div>
+<div class="wrap">
+<small style="color:var(--red);font-weight:700">CHAPTER 12</small>
+<h1>🛎️ Controlling Services and Daemons</h1>
+<p>Web servers, SSH, firewalls and schedulers all run in the background. In this chapter you learn how to <b>see</b>, <b>start</b>, <b>stop</b>, <b>auto-start</b> and <b>block</b> them with <code>systemctl</code>. This is a core RHCSA topic.</p>
+
+<h2 id="a">1. Daemon vs Service</h2>
+<div class="grid">
+<div class="card"><b>🧩 Daemon</b><br>The <b>background process</b> itself, running without a user at the keyboard. Example: <code>sshd</code>. Names often end in <b>d</b>.</div>
+<div class="card"><b>🎛️ Service</b><br>How <b>systemd manages</b> that daemon: start, stop, restart, auto-start. Example: <code>sshd.service</code>.</div></div>
+<div class="flow"><div>You type<br><code>systemctl start sshd</code></div><div class="ar">→</div><div><b>systemd</b><br>(PID 1) reads <code>sshd.service</code></div><div class="ar">→</div><div><b>sshd daemon</b><br>runs in the background</div></div>
+<div class="tw"><table><tr><th></th><th>Regular process</th><th>Service / daemon</th></tr><tr><td>Started by</td><td>You</td><td>systemd, often automatically at boot</td></tr><tr><td>Runs in</td><td>Foreground (or your job)</td><td>Background</td></tr><tr><td>After you log out</td><td>Stops</td><td>Keeps running</td></tr><tr><td>Terminal (TTY)</td><td>Yes, e.g. <code>pts/0</code></td><td>None, shows <code>?</code></td></tr></table></div>
+<div class="tw"><table><tr><th>Daemon</th><th>Job</th><th>Service name on RHEL</th></tr><tr><td>sshd</td><td>Remote login</td><td><code>sshd</code></td></tr><tr><td>httpd</td><td>Apache web server</td><td><code>httpd</code></td></tr><tr><td>nginx</td><td>Nginx web server</td><td><code>nginx</code></td></tr><tr><td>mysqld / mariadbd</td><td>Database</td><td><code>mariadb</code></td></tr><tr><td>crond</td><td>Scheduled tasks</td><td><code>crond</code></td></tr><tr><td>firewalld</td><td>Firewall</td><td><code>firewalld</code></td></tr><tr><td>chronyd</td><td>Time sync</td><td><code>chronyd</code></td></tr></table></div>
+<div class="note">On RHEL the SSH service is <code>sshd</code>. The name <code>ssh</code> is used on Ubuntu and Debian. Always use <code>sshd</code> in RHCSA.</div>
+
+<div class="card"><b>⚡ Oneshot service:</b> a service that runs <b>once</b>, changes something (for example applies a setting at boot) and <b>exits</b>. It shows <code>active (exited)</code> and there is no process to find with <code>ps</code>. That is normal, not a fault.</div>
+<h2 id="b">2. systemd: The Boss of Services</h2>
+<p><span class="kw">systemd</span> is <b>PID 1</b>, the first process. It boots the system, starts services in the right order, restarts crashed ones and collects logs. Each thing it manages is called a <span class="kw">unit</span>, described by a small text file.</p>
+<h3>Why systemd is better than the old init</h3>
+<div class="grid"><div class="card"><b>⚡ Parallel start</b><br>Starts many services at the same time, so boot is faster.</div><div class="card"><b>🎯 On-demand start</b><br>Starts a daemon only when someone needs it.</div><div class="card"><b>🔗 Dependencies</b><br>A service that needs the network waits until the network is up.</div><div class="card"><b>📦 cgroups tracking</b><br>Keeps all processes of a service together, so <code>stop</code> removes every child too.</div></div>
+<div class="tw"><table><tr><th>Unit type</th><th>What it manages</th><th>Example</th></tr>
+<tr><td><code>.service</code></td><td>A daemon or task. <b>The default type</b>, so <code>sshd</code> means <code>sshd.service</code></td><td>sshd.service</td></tr>
+<tr><td><code>.socket</code></td><td>Starts a service only when a connection arrives. Must be defined</td><td>cockpit.socket</td></tr>
+<tr><td><code>.path</code></td><td>Starts a service when a file or folder changes. Must be defined</td><td>cups.path</td></tr>
+<tr><td><code>.timer</code></td><td>Starts a service on a schedule (like cron)</td><td>dnf-makecache.timer</td></tr>
+<tr><td><code>.target</code></td><td>A group of units = a system mode</td><td>multi-user.target</td></tr>
+<tr><td><code>.mount</code></td><td>A mounted file system</td><td>home.mount</td></tr></table></div>
+<pre>$ systemctl -t help                 <span class="c"># list every unit type</span>
+$ systemctl list-units --type=service              <span class="c"># services loaded now</span>
+$ systemctl list-units --type=service --state=running
+$ systemctl list-unit-files --type=service         <span class="c"># all installed, with enabled/disabled</span>
+$ systemctl list-dependencies sshd                 <span class="c"># what sshd needs to start</span>
+$ systemctl list-sockets ; systemctl list-timers   <span class="c"># sockets and timers</span></pre>
+<h3><code>list-units</code>: what is loaded now</h3>
+<pre>$ systemctl list-units --type=service
+UNIT              LOAD    ACTIVE   SUB      DESCRIPTION
+atd.service       loaded  active   running  Job spooling tools
+chronyd.service   loaded  active   running  NTP client/server
+crond.service     loaded  active   running  Command Scheduler
+cpupower.service  loaded  inactive dead     Configure CPU power
+$ systemctl list-units --type=service --all     <span class="c"># include inactive units</span>
+$ systemctl list-units --state=failed           <span class="c"># filter by a LOAD, ACTIVE or SUB value</span></pre>
+<div class="tw"><table><tr><th>Column</th><th>Meaning</th></tr><tr><td>LOAD</td><td>Did systemd read the unit file? <code>loaded</code>, <code>not-found</code>, <code>masked</code></td></tr><tr><td>ACTIVE</td><td>High-level state: <code>active</code>, <code>inactive</code>, <code>failed</code></td></tr><tr><td>SUB</td><td>Detail: <code>running</code>, <code>exited</code>, <code>dead</code>, <code>waiting</code>, <code>listening</code></td></tr></table></div>
+<h3><code>list-unit-files</code>: everything installed</h3>
+<pre>$ systemctl list-unit-files --type=service
+UNIT FILE                   STATE     PRESET
+arp-ethers.service          disabled  disabled
+atd.service                 enabled   enabled
+auth-rpcgss-module.service  static    -
+autovt@.service             alias     -</pre>
+<div class="tw"><table><tr><th>STATE</th><th>Meaning</th></tr><tr><td class="r">enabled</td><td>Starts at boot</td></tr><tr><td class="x">disabled</td><td>Does not start at boot, but can be started by hand</td></tr><tr><td class="w">static</td><td>Cannot be enabled (no <code>[Install]</code> part). Starts only when another unit needs it</td></tr><tr><td>masked</td><td>Completely blocked</td></tr><tr><td>alias</td><td>Another name for a unit</td></tr></table></div>
+<div class="note"><b>Remember:</b> <code>list-units</code> answers "what is loaded now?". <code>list-unit-files</code> answers "<b>will it start at boot?</b>".</div>
+<h3>Where unit files live</h3>
+<div class="tw"><table><tr><th>Folder</th><th>Used for</th><th>Priority</th></tr><tr><td><code>/etc/systemd/system/</code></td><td><b>Your</b> files and changes</td><td class="r">Highest</td></tr><tr><td><code>/run/systemd/system/</code></td><td>Temporary, lost at reboot</td><td class="w">Middle</td></tr><tr><td><code>/usr/lib/systemd/system/</code></td><td>Files from installed packages. <b>Never edit these</b></td><td>Lowest</td></tr></table></div>
+<pre>$ systemctl cat sshd           <span class="c"># shows the unit file and where it came from</span></pre>
+
+<h2 id="c">3. Reading <code>systemctl status</code></h2>
+<pre>$ systemctl status sshd
+<span style="color:#22c55e">●</span> sshd.service - OpenSSH server daemon                          <span class="c"># name and description</span>
+     Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: enabled)
+     Active: active (running) since Sun 2026-11-01 09:10:11 IST; 2h ago
+   Main PID: 850 (sshd)                                          <span class="c"># the daemon's PID</span>
+      Tasks: 1 (limit: 11200)
+     Memory: 5.2M
+     CGroup: /system.slice/sshd.service
+             └─850 "sshd: /usr/sbin/sshd -D [listener]"
+Nov 01 09:10:11 server sshd[850]: Server listening on 0.0.0.0 port 22.   <span class="c"># latest log lines</span></pre>
+<h3>The "Loaded" line: your note, made precise</h3>
+<div class="grid"><div class="card"><b><code>enabled</code></b> (first word)<br>This service <b>will start at boot</b> on this machine. Someone ran <code>systemctl enable</code>, or the install did.</div><div class="card"><b><code>preset: enabled</code></b> (older RHEL: <code>vendor preset</code>)<br>The <b>default policy</b> from the distribution (RHEL) for this service. It is only advice. Your own setting is the first word.</div></div>
+<p>So <code>enabled; preset: disabled</code> means: RHEL's default is off, but an admin turned it on. Other values: <code>disabled</code>, <code>static</code> (cannot be enabled, started only by another unit), <code>masked</code>.</p>
+<h3>The "Active" line</h3>
+<div class="st">
+<div style="border-color:var(--grn)"><b class="r" style="font-size:1rem">active (running)</b>Daemon is running now</div>
+<div style="border-color:var(--cyn)"><b style="font-size:1rem;color:var(--cyn)">active (exited)</b>A one-time task ran and finished OK</div>
+<div style="border-color:var(--yel)"><b class="w" style="font-size:1rem">active (waiting)</b>Started, waiting for an event</div>
+<div style="border-color:var(--tx2)"><b style="font-size:1rem;color:var(--tx2)">inactive (dead)</b>Not running</div>
+<div style="border-color:var(--red)"><b class="x" style="font-size:1rem">failed</b>Crashed or could not start</div></div>
+<h3>Quick checks (good for scripts)</h3>
+<pre>$ systemctl is-active sshd     <span class="c"># active</span>
+$ systemctl is-enabled sshd    <span class="c"># enabled</span>
+$ systemctl is-failed sshd     <span class="c"># active  (says "failed" only when failed)</span>
+$ systemctl --failed           <span class="c"># list all failed units</span></pre>
+
+<div class="tw"><table><tr><th>Quick check</th><th>Prints</th><th>Exit code (<code>$?</code>)</th></tr><tr><td><code>is-active</code></td><td>active / inactive</td><td>0 when active</td></tr><tr><td><code>is-enabled</code></td><td>enabled / disabled / static / masked</td><td>0 when enabled</td></tr><tr><td><code>is-failed</code></td><td>failed, or the current state</td><td>0 when <b>failed</b></td></tr></table></div>
+<pre>$ systemctl is-active chronyd &amp;&amp; echo "time sync is running"
+active
+time sync is running
+$ journalctl -u sshd -b        <span class="c"># logs of sshd since this boot (-f = follow live, -p err = errors only)</span>
+$ systemctl show sshd -p MainPID,ActiveState,UnitFileState
+$ ps -p $(systemctl show -p MainPID --value sshd)    <span class="c"># TTY is ?, so it is a daemon</span></pre>
+<div class="note"><b>Who may do what?</b> Any user can <b>view</b> (<code>status</code>, <code>list-units</code>, <code>is-active</code>). <b>Changing</b> a service (<code>start</code>, <code>stop</code>, <code>enable</code>, <code>mask</code>) needs <b>root</b> or <code>sudo</code>. In <code>status</code>, press <code>q</code> to leave the pager.</div>
+<h2 id="d">4. Controlling Services with <code>systemctl</code></h2>
+<h3>Now vs at boot: the most important idea</h3>
+<div class="tw"><table><tr><th></th><th>Running now?</th><th>Starts at boot?</th></tr><tr><td><code>start</code></td><td class="r">Yes</td><td class="x">No change</td></tr><tr><td><code>stop</code></td><td class="x">No</td><td>No change</td></tr><tr><td><code>enable</code></td><td>No change</td><td class="r">Yes</td></tr><tr><td><code>disable</code></td><td>No change</td><td class="x">No</td></tr><tr><td><code>enable --now</code></td><td class="r">Yes</td><td class="r">Yes</td></tr><tr><td><code>disable --now</code></td><td class="x">No</td><td class="x">No</td></tr></table></div>
+<div class="tw"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>systemctl start sshd</code></td><td>Start now</td></tr><tr><td><code>systemctl stop sshd</code></td><td>Stop now</td></tr><tr><td><code>systemctl restart sshd</code></td><td>Stop, then start. <b>Brief downtime</b>, connections drop</td></tr><tr><td><code>systemctl reload sshd</code></td><td>Re-read the config file <b>without stopping</b>. Use after editing the config</td></tr><tr><td><code>systemctl reload-or-restart sshd</code></td><td>Reload if the service supports it, else restart</td></tr><tr><td><code>systemctl try-restart sshd</code></td><td>Restart only if it is already running</td></tr></table></div>
+<div class="sc"><h4>🏢 Scenario: install and run a web server</h4><pre>$ sudo dnf install -y httpd
+$ sudo systemctl enable --now httpd
+Created symlink /etc/systemd/system/multi-user.target.wants/httpd.service → /usr/lib/systemd/system/httpd.service.
+$ systemctl is-active httpd ; systemctl is-enabled httpd
+active
+enabled
+$ sudo vim /etc/httpd/conf/httpd.conf    <span class="c"># change a setting</span>
+$ sudo apachectl configtest              <span class="c"># check for typos first</span>
+Syntax OK
+$ sudo systemctl reload httpd            <span class="c"># apply it with no downtime</span></pre></div>
+<div class="note"><b>Enable</b> just creates a symlink inside <code>/etc/systemd/system/multi-user.target.wants/</code>. That link is how systemd knows to start the service at boot.</div>
+<h3>Proof: <code>restart</code> changes the PID, <code>reload</code> does not</h3>
+<pre>$ systemctl status sshd | grep "Main PID"
+   Main PID: 784 (sshd)
+$ sudo systemctl restart sshd
+$ systemctl status sshd | grep "Main PID"
+   Main PID: 1193 (sshd)            <span class="c"># NEW process</span>
+$ sudo systemctl reload sshd
+$ systemctl status sshd | grep "Main PID"
+   Main PID: 1193 (sshd)            <span class="c"># same PID. Reload sends SIGHUP (ExecReload=/bin/kill -HUP $MAINPID)</span></pre>
+<pre>$ sudo sshd -t &amp;&amp; sudo systemctl reload sshd     <span class="c"># safe habit: test the config first, then reload</span>
+$ sudo systemctl try-restart chronyd              <span class="c"># restart only if it is already running</span>
+$ sudo systemctl reload-or-restart chronyd        <span class="c"># reload if supported, else restart</span></pre>
+<div class="warn"><b>Two different "configs":</b> a <b>service config</b> (<code>/etc/ssh/sshd_config</code>) needs <code>reload</code> or <code>restart</code>. A <b>unit file</b> (<code>/etc/systemd/system/x.service</code>) needs <code>daemon-reload</code> first.</div>
+<h3>🎮 Try it: service simulator</h3>
+<div class="card"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+<button onclick="act('start')">start</button><button onclick="act('stop')">stop</button><button onclick="act('enable')">enable</button><button onclick="act('disable')">disable</button><button onclick="act('mask')">mask</button><button onclick="act('unmask')">unmask</button></div>
+<pre id="sim" style="margin:0"></pre></div>
+
+<h3>Dependencies and on-demand start</h3>
+<div class="sc"><h4>🏢 Scenario: you stopped CUPS (printing) but it came back</h4><pre>$ sudo systemctl stop cups.service
+Warning: Stopping cups.service, but it can still be activated by:
+  cups.path
+  cups.socket</pre>A print job lands in the spool folder (<code>.path</code>) or a client connects (<code>.socket</code>), and systemd starts the service again. To stop printing completely, stop and disable all three:<pre>$ sudo systemctl disable --now cups.service cups.socket cups.path</pre></div>
+<pre>$ systemctl list-dependencies sshd.service           <span class="c"># what sshd needs</span>
+sshd.service
+● ├─system.slice
+● ├─sshd-keygen.target
+● │ ├─sshd-keygen@ecdsa.service
+● │ ├─sshd-keygen@ed25519.service
+● │ └─sshd-keygen@rsa.service
+● └─sysinit.target
+$ systemctl list-dependencies --reverse sshd.service <span class="c"># what depends on sshd</span></pre>
+<h2 id="e">5. Mask and Unmask: the Hard Block</h2>
+<p><code>disable</code> only stops auto-start. Someone can still run <code>start</code> by hand. <span class="kw">mask</span> links the unit to <code>/dev/null</code>, so it <b>cannot be started at all</b>, not even by another service. Use it for something that must never run (for example, to stop <code>firewalld</code> clashing with another firewall tool).</p>
+<pre>$ sudo systemctl mask sshd
+Created symlink /etc/systemd/system/sshd.service → /dev/null.
+$ sudo systemctl restart sshd
+Failed to restart sshd.service: Unit sshd.service is masked.
+$ systemctl is-enabled sshd
+masked
+$ sudo systemctl unmask sshd
+Removed "/etc/systemd/system/sshd.service".
+$ sudo systemctl start sshd                  <span class="c"># works again</span></pre>
+<div class="warn">Never mask <code>sshd</code> on a remote server you are connected to, or you may lock yourself out after the next reboot. Practise only on a lab VM.</div>
+<div class="tw"><table><tr><th></th><th>At boot</th><th>Manual <code>start</code></th><th>Started by another unit</th></tr><tr><td>enabled</td><td class="r">Yes</td><td class="r">Works</td><td class="r">Works</td></tr><tr><td>disabled</td><td class="x">No</td><td class="r">Works</td><td class="r">Works</td></tr><tr><td>masked</td><td class="x">No</td><td class="x">Blocked</td><td class="x">Blocked</td></tr></table></div><div class="sc"><h4>🏢 Scenario: two mail servers conflict</h4>Postfix and sendmail must not both run. Run <code>sudo systemctl mask sendmail</code>. Now nobody can start sendmail by mistake. Check: <code>systemctl list-unit-files | grep sendmail</code> shows <code>masked</code>.</div>
+
+<h2 id="f">6. Create Your Own Service</h2>
+<div class="sc"><h4>🏢 Scenario: run your monitoring script as a service</h4>You have a script <code>/usr/local/bin/monitor.sh</code> and want it to start at boot and restart if it crashes.</div>
+<div class="where"><h4>📍 Where to Add What</h4>Create the file <code>/etc/systemd/system/monitor.service</code> (as root) with exactly these lines:
+<pre>[Unit]
+Description=My monitoring script
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/monitor.sh
+Restart=on-failure
+User=nobody
+
+[Install]
+WantedBy=multi-user.target</pre>
+<div class="tw"><table><tr><th>Section</th><th>Meaning</th></tr><tr><td><code>[Unit]</code></td><td>Description and ordering. <code>After=</code> means start later than that unit</td></tr><tr><td><code>[Service]</code></td><td><code>ExecStart</code> = command to run. <code>Restart</code> = auto-restart rule. <code>User</code> = run as this user, not root</td></tr><tr><td><code>[Install]</code></td><td><code>WantedBy=multi-user.target</code> = what <code>enable</code> hooks into</td></tr></table></div></div>
+<pre>$ sudo chmod +x /usr/local/bin/monitor.sh
+$ sudo systemctl daemon-reload           <span class="c"># REQUIRED: tell systemd about the new/changed file</span>
+$ sudo systemctl enable --now monitor
+$ systemctl status monitor | grep Active
+     Active: active (running) since Sun 2026-11-01 11:20:01 IST; 3s ago</pre>
+<div class="where"><h4>📍 Where to Add What: change an existing service safely</h4>Do not edit files in <code>/usr/lib/systemd/system/</code>. Package updates overwrite them. Run <code>sudo systemctl edit sshd</code>. It opens a new file, <code>/etc/systemd/system/sshd.service.d/override.conf</code>. Add:
+<pre>[Service]
+Restart=on-failure</pre>Save, and systemd reloads automatically. Check with <code>systemctl cat sshd</code>.</div>
+
+<h2 id="g">7. Targets: System Modes</h2>
+<p>A <span class="kw">target</span> is a group of units that make up a system state. It replaces the old "runlevels".</p>
+<div class="tw"><table><tr><th>Target</th><th>Meaning</th></tr><tr><td><code>multi-user.target</code></td><td>Text mode, network, no GUI. Normal for servers</td></tr><tr><td><code>graphical.target</code></td><td>Multi-user plus a GUI desktop</td></tr><tr><td><code>rescue.target</code></td><td>Single-user repair mode</td></tr><tr><td><code>poweroff.target</code> / <code>reboot.target</code></td><td>Shut down / reboot</td></tr></table></div>
+<pre>$ systemctl get-default
+graphical.target
+$ sudo systemctl set-default multi-user.target   <span class="c"># next boot = text mode (no file to edit)</span>
+Removed "/etc/systemd/system/default.target".
+Created symlink /etc/systemd/system/default.target → /usr/lib/systemd/system/multi-user.target.
+$ sudo systemctl isolate multi-user.target       <span class="c"># switch NOW, no reboot</span></pre>
+
+<h2 id="lab">Practice Labs (do these on a lab VM)</h2>
+<h3>Lab 1: see "now" vs "at boot" for real</h3>
+<pre>$ sudo -i
+# systemctl status chronyd | grep Active      <span class="c"># active (running)</span>
+# systemctl stop chronyd ; systemctl is-enabled chronyd
+enabled                       <span class="c"># stopped now, but still enabled</span>
+# systemctl reboot            <span class="c"># log in again after it is up</span>
+# systemctl is-active chronyd
+active                        <span class="c"># came back because it is ENABLED</span>
+# systemctl disable chronyd ; systemctl is-active chronyd
+active                        <span class="c"># disable does NOT stop it. It only affects the next boot</span>
+# systemctl reboot
+# systemctl is-active chronyd
+inactive                      <span class="c"># gone after boot because it is disabled</span></pre>
+<div class="tip"><b>Learn:</b> <code>stop</code> + <code>enable</code> = comes back after reboot. <code>disable</code> alone does not stop a running service. Use <code>disable --now</code> for both.</div>
+<h3>Lab 2: match a specification</h3>
+<div class="tw"><table><tr><th>Requirement</th><th>Command</th></tr><tr><td>psacct running and starts at boot</td><td><code>systemctl enable --now psacct</code></td></tr><tr><td>rsyslog stopped and not starting at boot</td><td><code>systemctl disable --now rsyslog</code></td></tr><tr><td>Reboot to prove it persists</td><td><code>systemctl reboot</code></td></tr></table></div>
+<pre>$ for s in psacct rsyslog; do echo "$s: $(systemctl is-active $s) / $(systemctl is-enabled $s)"; done
+psacct: active / enabled
+rsyslog: inactive / disabled</pre>
+<div class="warn">Disabling <code>rsyslog</code> stops the classic text logs in <code>/var/log/</code> such as <code>/var/log/messages</code>. The journal (<code>journalctl</code>) still records. Do this only in a lab. Never <code>disable --now sshd</code> on a remote server.</div>
+<h2 id="h">8. When a Service Fails</h2>
+<div class="flow"><div>1. <code>systemctl status</code><br>read the red lines</div><div class="ar">→</div><div>2. <code>journalctl -u name</code><br>read the full log</div><div class="ar">→</div><div>3. Fix config / port / permission</div><div class="ar">→</div><div>4. <code>daemon-reload</code> if you changed a unit, then <code>restart</code></div></div>
+<div class="sc"><h4>🏢 Scenario: nginx will not start</h4><pre>$ sudo systemctl start nginx
+Job for nginx.service failed because the control process exited with error code.
+$ journalctl -u nginx -n 5 --no-pager
+nginx[3201]: bind() to 0.0.0.0:80 failed (98: Address already in use)   <span class="c"># port 80 is taken</span>
+$ sudo ss -tlnp | grep ':80'
+LISTEN 0 511 *:80  *:*  users:(("httpd",pid=2210,fd=4))               <span class="c"># httpd owns it</span>
+$ sudo systemctl stop httpd ; sudo systemctl start nginx             <span class="c"># fixed</span>
+$ sudo systemctl reset-failed nginx                                   <span class="c"># clear the failed mark if needed</span></pre></div>
+<h3>Useful extras</h3>
+<div class="grid"><div class="card"><b>Who is slow at boot?</b><br><code>systemd-analyze blame | head</code></div><div class="card"><b>All failed units</b><br><code>systemctl --failed</code></div><div class="card"><b>Reboot / shut down</b><br><code>systemctl reboot</code> · <code>systemctl poweroff</code></div><div class="card"><b>Stop a daemon the right way</b><br>Use <code>systemctl stop</code>, not <code>kill</code>. systemd may restart a killed daemon.</div>
+<div class="card"><b>Which daemon owns a port?</b><br><code>sudo ss -tulpn</code></div><div class="card"><b>Processes per service</b><br><code>systemd-cgls</code> (tree), <code>systemd-cgtop</code> (live use)</div><div class="card"><b>Clear a failed mark</b><br><code>systemctl reset-failed name</code></div><div class="card"><b>Your own user services</b><br><code>systemctl --user status</code></div></div>
+<div class="warn"><b>Common mistakes:</b> thinking <code>disable</code> stops a running service · stopping only <code>cups.service</code> and not its socket and path · trying to <code>enable</code> a static unit · forgetting <code>sudo</code> · <code>start</code> without <code>enable</code> (service gone after reboot) · <code>enable</code> without <code>start</code> (not running now) · using <code>ssh</code> instead of <code>sshd</code> on RHEL · editing a unit file and forgetting <code>daemon-reload</code> · editing files in <code>/usr/lib/systemd/system/</code> · using <code>restart</code> when <code>reload</code> is enough · confusing <code>disable</code> with <code>mask</code>.</div>
+<pre>systemctl status|start|stop|restart|reload|enable|disable|mask|unmask NAME
+systemctl enable --now NAME      systemctl is-active|is-enabled NAME
+systemctl list-units --type=service      systemctl --failed      systemctl daemon-reload
+systemctl get-default | set-default TARGET | isolate TARGET</pre>
+
+<h2 id="quiz">📝 Quiz</h2>
+<div id="qbox"></div><button onclick="grade()">Check answers</button><div class="out" id="score"></div>
+</div>
+<script>
+var S={on:false,en:false,mk:false};
+function act(a){if(a=='mask'){S.mk=true;S.on=false;S.en=false}else if(a=='unmask'){S.mk=false}
+else if(S.mk){document.getElementById('sim').textContent='$ systemctl '+a+' demo\nFailed: Unit demo.service is masked.';return}
+else if(a=='start')S.on=true;else if(a=='stop')S.on=false;else if(a=='enable')S.en=true;else if(a=='disable')S.en=false;
+render(a)}
+function render(a){var e=S.mk?'masked':S.en?'enabled':'disabled';
+document.getElementById('sim').textContent='$ systemctl '+(a||'status')+' demo\n'+(S.on?'● ':'○ ')+'demo.service\n   Loaded: '+(S.mk?'masked (/dev/null)':'loaded; '+e)+'\n   Active: '+(S.on?'active (running)':'inactive (dead)')+'\n   At next boot: '+(S.en?'WILL start':'will NOT start')}
+render();
+var Q=[
+["Which is the daemon and which is the service?",["sshd is the service, sshd.service the daemon","sshd is the daemon, sshd.service is how systemd manages it","They are the same thing","Both are users"],1,"The daemon is the process. The service is the systemd unit that manages it."],
+["Which unit type is used by default if you only type <code>systemctl status sshd</code>?",[".socket",".target",".service",".path"],2,"systemctl assumes .service."],
+["Which command lists all unit types?",["systemctl -t help","systemctl list-types","systemctl units","systemctl all"],0,"systemctl -t help prints the types."],
+["Where should you put your own unit files?",["/usr/lib/systemd/system/","/etc/systemd/system/","/var/log/","/boot/"],1,"/etc/systemd/system has the highest priority and is safe from updates."],
+["<code>Loaded: ... enabled; preset: enabled</code>. What does the first word mean?",["Running now","Starts at boot on this machine","Default from the vendor","It is masked"],1,"The first word is the real setting. The preset is the distribution default."],
+["Which state means a one-time task ran and finished successfully?",["active (running)","active (exited)","active (waiting)","failed"],1,"Typical for oneshot units."],
+["Which command starts a service now AND at every boot?",["systemctl start --boot","systemctl enable --now name","systemctl enable name","systemctl on name"],1,"enable --now does both."],
+["You edited a service's config file and want no downtime. Use:",["restart","reload","stop","mask"],1,"reload re-reads the config without stopping."],
+["What does <code>systemctl mask sshd</code> do?",["Hides the log","Stops auto-start only","Links the unit to /dev/null so it cannot be started","Deletes sshd"],2,"A masked unit cannot be started at all."],
+["You created <code>/etc/systemd/system/app.service</code>. What must you run next?",["systemctl daemon-reload","reboot","systemctl mask app","chmod 777"],0,"systemd must re-read unit files."],
+["Which command shows a service's recent log lines?",["journalctl -u name","systemctl logs name","cat /var/run/name","ps name"],0,"journalctl -u reads the journal for that unit."],
+["Which target is the normal text-mode mode for servers?",["graphical.target","rescue.target","multi-user.target","reboot.target"],2,"multi-user = text mode with networking."],
+["Which command changes the boot mode permanently?",["systemctl isolate","systemctl set-default","systemctl enable target","systemctl reboot"],1,"set-default changes default.target. isolate only switches for now."],
+["Why use <code>systemctl stop</code> instead of <code>kill</code> for a daemon?",["It is faster","systemd keeps track and will not just restart it","kill needs a GUI","No difference"],1,"systemd manages the service state and may restart a killed daemon."],
+["You run <code>systemctl disable chronyd</code> on a running service. What happens?",["It stops now","It keeps running now but will not start at next boot","It is deleted","It is masked"],1,"disable only changes the next boot. Use disable --now to stop it too."],
+["Which shows whether a service will start at boot, even if it is not loaded now?",["systemctl list-units","systemctl list-unit-files","ps aux","top"],1,"list-unit-files shows every installed unit with its enabled state."],
+["A unit shows <code>static</code>. What does it mean?",["It is masked","It cannot be enabled and starts only as a dependency","It is failed","It is running"],1,"Static units have no [Install] section."],
+["After <code>reload</code>, what happens to the Main PID?",["It changes","It stays the same","It becomes 1","The service is stopped"],1,"reload rereads the config in the same process. restart gives a new PID."],
+["A disabled service vs a masked service: which can be started by another unit?",["Both","Only disabled","Only masked","Neither"],1,"A masked unit is blocked even as a dependency."],
+["You stopped <code>cups.service</code> but it came back. Why?",["A bug","Its .socket or .path unit started it again","It was masked","Reboot"],1,"Stop and disable the socket and path units too."],
+["Which command is safe to run before reloading sshd?",["sshd -t","sshd -x","kill sshd","systemctl mask sshd"],0,"sshd -t tests the configuration for errors."]];
+var qb=document.getElementById('qbox');
+Q.forEach(function(q,i){var h='<div class="q" id="q'+i+'"><b>'+(i+1)+'. '+q[0]+'</b>';q[1].forEach(function(o,j){h+='<label><input type="radio" name="q'+i+'" value="'+j+'"> '+o+'</label>'});qb.innerHTML+=h+'<div class="ex"></div></div>'});
+function grade(){var n=0;Q.forEach(function(q,i){var b=document.getElementById('q'+i),c=document.querySelector('input[name="q'+i+'"]:checked'),ok=!!c&&+c.value===q[2];if(ok)n++;
+b.className='q '+(ok?'ok':'bad');var e=b.querySelector('.ex');e.style.display='block';e.innerHTML=(ok?'✅ Correct. ':'❌ Answer: '+q[1][q[2]]+'. ')+q[3]});
+document.getElementById('score').textContent='Score: '+n+' / '+Q.length}
+</script>
+</body></html>

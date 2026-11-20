@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapter 19 – Configuring and Securing SSH</title>
+<style>:root{--bg:#0a0e17;--card:#1a2234;--tx:#e2e8f0;--tx2:#94a3b8;--red:#ee0000;--grn:#22c55e;--yel:#eab308;--blu:#3b82f6;--pur:#a855f7;--cyn:#06b6d4;--org:#f97316;--bd:#1e293b;--bd2:#334155;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.7}
+.top{position:sticky;top:0;z-index:9;background:rgba(10,14,23,.94);border-bottom:1px solid var(--bd);padding:9px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.top a{color:var(--tx2);text-decoration:none;font-size:.78rem;padding:3px 10px;border:1px solid var(--bd2);border-radius:20px}
+.top a:hover,.top .b{color:var(--red);border-color:var(--red)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:2rem;margin:14px 0 6px}h2{font-size:1.45rem;margin:44px 0 12px;padding-left:12px;border-left:4px solid var(--red)}
+h3{font-size:1.05rem;margin:20px 0 6px;color:var(--cyn)}p{margin:7px 0}
+.card,.q{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.kw{background:rgba(238,0,0,.14);color:#ff9a9a;border-radius:6px;padding:0 7px;font-weight:600}
+code{font-family:Consolas,monospace;background:#0d1423;color:#7dd3fc;padding:1px 6px;border-radius:5px;font-size:.9em}
+pre{background:#0d1423;border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin:10px 0;overflow-x:auto;font:.84rem/1.6 Consolas,monospace;color:#cbd5e1}
+.c{color:#64748b}.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.9rem}
+th,td{border:1px solid var(--bd2);padding:7px 9px;text-align:left}th{background:#111b2e;color:var(--tx2)}
+.note,.warn,.tip,.where,.sc{border-radius:var(--r);padding:12px 15px;margin:14px 0;border-left:4px solid}
+.note{background:rgba(59,130,246,.09);border-color:var(--blu)}.warn{background:rgba(249,115,22,.09);border-color:var(--org)}
+.tip{background:rgba(34,197,94,.09);border-color:var(--grn)}.where{background:rgba(238,0,0,.07);border-color:var(--red)}
+.sc{background:rgba(168,85,247,.09);border-color:var(--pur)}.where h4{color:#ff9a9a}.sc h4{color:#d8b4fe}
+.r{color:var(--grn);font-weight:700}.w{color:var(--yel);font-weight:700}.x{color:var(--red);font-weight:700}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center;align-items:stretch}
+.flow div{background:var(--card);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 12px;text-align:center;font-size:.85rem}
+.flow .ar{border:0;background:none;color:var(--red);font-size:1.4rem;align-self:center;padding:0}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.st div{background:var(--card);border:2px solid;border-radius:var(--r);padding:10px;text-align:center;font-size:.85rem}
+.st b{display:block;font:700 1.8rem Consolas,monospace}
+.nice{height:34px;border-radius:8px;background:linear-gradient(90deg,#ee0000,#eab308,#22c55e);margin:8px 0 2px}
+.nl{display:flex;justify-content:space-between;font:.78rem Consolas,monospace;color:var(--tx2)}
+.tree{font:.9rem/1.5 Consolas,monospace}
+.q{margin:12px 0}.q label{display:block;padding:6px 8px;border-radius:8px;cursor:pointer}.q label:hover{background:#111b2e}
+.ex{display:none;margin-top:8px;font-size:.9rem}.q.ok{border-color:var(--grn)}.q.bad{border-color:var(--red)}
+.out{text-align:center;font:700 1.2rem Consolas,monospace;margin-top:8px}
+input[type=text]{background:#0d1423;border:1px solid var(--bd2);color:var(--tx);border-radius:8px;padding:6px;font:1rem Consolas,monospace;width:70px;text-align:center}
+button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px 22px;font-size:1rem;cursor:pointer}
+
+.lay{border:2px solid;border-radius:var(--r);padding:8px 12px;margin:6px 0;font-size:.88rem}
+.pb{height:14px;background:#0d1423;border-radius:7px;overflow:hidden;margin:8px 0}.pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--grn));transition:width .3s}
+.ck label{display:block;padding:4px 6px;cursor:pointer}
+</style></head><body>
+<div class="top"><a class="b" href="../Index.html">← Dashboard</a><a href="#a">Basics</a><a href="#b">Connect</a><a href="#hk">Host keys</a><a href="#c">Keys</a><a href="#pp">Passphrase</a><a href="#d">sshd_config</a><a href="#e">Hostname/MOTD</a><a href="#f">Transfer</a><a href="#g">Firewall</a><a href="#proj">🔒 Hardening Project</a><a href="#quiz">Quiz</a></div>
+<div class="wrap">
+<small style="color:var(--red);font-weight:700">CHAPTER 13</small>
+<h1>🔑 Configuring and Securing SSH</h1>
+<p>SSH lets you control a Linux server from anywhere, safely. It is the most used admin tool and the most attacked service on the Internet, so you must know both <b>how to use it</b> and <b>how to lock it down</b>.</p>
+
+<h2 id="a">1. SSH Basics</h2>
+<div class="grid">
+<div class="card"><b>What</b><br><span class="kw">SSH</span> = Secure Shell. An encrypted protocol for remote login, remote commands and file transfer.</div>
+<div class="card"><b>Server side</b><br>Service/daemon: <code>sshd</code><br>Package: <code>openssh-server</code></div>
+<div class="card"><b>Client side</b><br>Command: <code>ssh</code><br>Package: <code>openssh-clients</code></div>
+<div class="card"><b>Port</b><br><span class="kw">TCP 22</span> by default</div></div>
+<div class="flow"><div><b>💻 Client</b><br><code>ssh user@ip</code></div><div class="ar">⇄</div><div>🔒 Encrypted tunnel<br>TCP port 22</div><div class="ar">⇄</div><div><b>🖥️ Server</b><br><code>sshd</code> reads <code>/etc/ssh/sshd_config</code></div></div>
+<pre>$ sudo dnf install -y openssh-server        <span class="c"># usually already installed</span>
+$ sudo systemctl enable --now sshd          <span class="c"># start now AND at every boot</span>
+$ systemctl status sshd | grep Active
+     Active: active (running) since Sun 2026-11-01 09:10:11 IST; 2h ago</pre>
+<div class="tw"><table><tr><th>File</th><th>Side</th><th>Purpose</th></tr>
+<tr><td><code>/etc/ssh/sshd_config</code></td><td>Server</td><td>Settings of the sshd daemon</td></tr>
+<tr><td><code>/etc/ssh/sshd_config.d/*.conf</code></td><td>Server</td><td>Extra settings files (RHEL 9). Best place for your changes</td></tr>
+<tr><td><code>/etc/ssh/ssh_config</code> / <code>~/.ssh/config</code></td><td>Client</td><td>Client settings, system-wide / per user</td></tr>
+<tr><td><code>~/.ssh/known_hosts</code></td><td>Client</td><td>Servers you already trust</td></tr>
+<tr><td><code>~/.ssh/authorized_keys</code></td><td>Server</td><td>Public keys allowed to log in as this user</td></tr>
+<tr><td><code>/etc/ssh/ssh_host_*_key</code></td><td>Server</td><td>The server's own identity keys</td></tr></table></div>
+<div class="note"><b>Do not mix up:</b> <code>sshd_config</code> = server (with a <b>d</b>). <code>ssh_config</code> = client.</div>
+
+<h2 id="b">2. Connecting to a Server</h2>
+<h3>Before you connect: 3 checks</h3>
+<div class="flow"><div><b>1. Connectivity</b><br><code>ping 192.168.1.10</code></div><div class="ar">→</div><div><b>2. Service</b><br><code>systemctl status sshd</code><br><code>ss -tlnp | grep :22</code></div><div class="ar">→</div><div><b>3. Credentials</b><br>username + password or key</div></div>
+<pre>$ ping -c 2 192.168.1.10
+64 bytes from 192.168.1.10: icmp_seq=1 ttl=64 time=0.41 ms
+$ nc -zv 192.168.1.10 22          <span class="c"># is port 22 open?</span>
+Connection to 192.168.1.10 22 port [tcp/ssh] succeeded!
+$ ssh student@192.168.1.10
+The authenticity of host '192.168.1.10' can't be established.
+ED25519 key fingerprint is SHA256:h/hEJa/anxp6AP7BmB5azIPVbPNqieh0oKi4KWOTK80.
+Are you sure you want to continue connecting (yes/no)? yes
+student@192.168.1.10's password:
+[student@server1 ~]$                <span class="c"># prompt changed = you are on the server</span></pre>
+<div class="tw"><table><tr><th>Form</th><th>Meaning</th></tr><tr><td><code>ssh user@ip</code></td><td>Log in as that user</td></tr><tr><td><code>ssh ip</code></td><td>Log in with your current local username</td></tr><tr><td><code>ssh user@ip hostname</code></td><td>Run <b>one command</b>, print the result, return. No shell</td></tr><tr><td><code>ssh -p 2222 user@ip</code></td><td>Use a different port</td></tr><tr><td><code>exit</code> or Ctrl+D</td><td>Leave the remote shell</td></tr></table></div>
+<div class="note"><b>The first-time question:</b> SSH shows the server's fingerprint. Answering <code>yes</code> saves it in <code>~/.ssh/known_hosts</code> so next time it is checked silently. On a real network, compare it with a trusted source first. If it ever <b>changes</b>, SSH shows <code>WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!</code>. The server was either rebuilt or someone is intercepting. Confirm, then run <code>ssh-keygen -R servername</code>.</div>
+<div class="tip"><b>Lab VM text too small?</b> On the console run <code>sudo setfont sun12x22</code> for a bigger font.</div>
+<h3>Use a hostname instead of the IP</h3>
+<p>Typing IPs is hard. Give the IP a name. You edit the file <b>on the machine you connect FROM</b> (the client), not on the server.</p>
+<div class="where"><h4>📍 Where to Add What</h4><div class="tw"><table><tr><th>File (on the client)</th><th>Line to add</th></tr><tr><td><code>/etc/hosts</code> (as root)</td><td><code>192.168.1.10   server1</code></td></tr></table></div>Format: <code>IP-address  name</code>. Now <code>ssh student@server1</code> works. For many machines, use a DNS server instead.</div>
+<h3>Who is logged in to my machine?</h3>
+<pre>$ w
+ 11:02:10 up 3:50,  2 users,  load average: 0.00, 0.01, 0.05
+USER     TTY    FROM          LOGIN@  IDLE   JCPU   PCPU  WHAT
+student  pts/0  192.168.1.20  10:58   2.00s  0.03s  0.00s w
+admin1   pts/1  192.168.1.30  10:40   18:21  0.02s  0.02s -bash
+$ who -a                 <span class="c"># also shows boot time and dead processes</span>
+$ last -n 5              <span class="c"># login history</span>
+$ sudo lastb -n 5        <span class="c"># FAILED logins (guessing attempts)</span></pre>
+<p><code>pts/N</code> = a remote or terminal-window session. <code>FROM</code> = the address they came from.</p>
+
+<h2 id="hk">🔏 Host Keys, Fingerprints and known_hosts</h2>
+<p>SSH has <b>two different kinds of keys</b>. Beginners often mix them up:</p>
+<div class="grid"><div class="card"><b>🖥️ Host key = the SERVER's identity</b><br>Proves to you "I really am server1". Lives on the server. Created automatically when sshd is first installed.</div><div class="card"><b>👤 User key = YOUR identity</b><br>Proves to the server "I really am student". The key pair you make with <code>ssh-keygen</code> (next section).</div></div>
+<div class="flow"><div>1. You connect<br><code>ssh server1</code></div><div class="ar">→</div><div>2. Server shows its <b>host public key</b></div><div class="ar">→</div><div>3. Client checks <code>known_hosts</code><br>seen before?</div><div class="ar">→</div><div>4a. <span class="r">Same key</span>: connect<br>4b. <span class="x">Different</span>: WARNING</div></div>
+<div class="tw"><table><tr><th>Where</th><th>File</th><th>What it is</th></tr>
+<tr><td>Server</td><td><code>/etc/ssh/ssh_host_ed25519_key</code></td><td>Host <b>private</b> key. Secret, root only</td></tr>
+<tr><td>Server</td><td><code>/etc/ssh/ssh_host_ed25519_key.pub</code></td><td>Host <b>public</b> key. This is what clients see. Also <code>_rsa_</code> and <code>_ecdsa_</code> versions</td></tr>
+<tr><td>Client</td><td><code>~/.ssh/known_hosts</code></td><td>Servers <b>you</b> trust</td></tr>
+<tr><td>Client</td><td><code>/etc/ssh/ssh_known_hosts</code></td><td>Servers trusted by <b>all users</b> of this machine</td></tr></table></div>
+<p>A <span class="kw">fingerprint</span> is a short "photo" (hash) of a long key, so humans can compare it. Same key = same fingerprint.</p>
+<h3>Step by step: connect safely the first time</h3>
+<div class="sc"><h4>Step 1: On the SERVER, find its real fingerprint (use the console or a trusted admin)</h4><pre>server1$ ls /etc/ssh/*.pub
+/etc/ssh/ssh_host_ecdsa_key.pub  /etc/ssh/ssh_host_ed25519_key.pub  /etc/ssh/ssh_host_rsa_key.pub
+server1$ ssh-keygen -l -f /etc/ssh/ssh_host_ed25519_key.pub
+256 SHA256:h/hEJa/anxp6AP7BmB5azIPVbPNqieh0oKi4KWOTK80 root@server1 (ED25519)</pre></div>
+<div class="sc"><h4>Step 2: On the CLIENT, connect and COMPARE</h4><pre>client$ ssh student@server1
+The authenticity of host 'server1 (192.168.1.10)' can't be established.
+ED25519 key fingerprint is SHA256:h/hEJa/anxp6AP7BmB5azIPVbPNqieh0oKi4KWOTK80.   <span class="c"># same as Step 1? good</span>
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'server1' (ED25519) to the list of known hosts.</pre>If the strings match, type <code>yes</code>. If not, type <code>no</code> and report it. Never type <code>yes</code> without checking on a real network.</div>
+<div class="sc"><h4>Step 3: Look at what was saved</h4><pre>client$ cat ~/.ssh/known_hosts
+server1,192.168.1.10 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3x...
+<span class="c"># field 1: hostname,IP    field 2: key type    field 3: the public key</span>
+client$ ssh-keygen -F server1          <span class="c"># find one host's entry</span>
+# Host server1 found: line 1
+client$ ssh-keygen -lf ~/.ssh/known_hosts      <span class="c"># show fingerprints of all saved hosts</span>
+client$ ls -l ~/.ssh/known_hosts
+-rw-------. 1 student student 202 Nov  1 11:30 /home/student/.ssh/known_hosts</pre><div class="note">Some systems store hostnames as scrambled hashes (<code>|1|abc...</code>) so a thief cannot read your server list. That is normal. Use <code>ssh-keygen -F name</code> to search.</div></div>
+<h3>When the host key changes</h3>
+<pre>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</pre>
+<div class="flow"><div>1. <b>Stop.</b> Ask: was server1 reinstalled or replaced?</div><div class="ar">→</div><div>2. Verify the new fingerprint (Step 1)</div><div class="ar">→</div><div>3. Remove the old entry<br><code>ssh-keygen -R server1</code></div><div class="ar">→</div><div>4. Connect again and accept the new key</div></div>
+<pre>$ ssh-keygen -R server1
+# Host server1 found: line 1
+/home/student/.ssh/known_hosts updated.
+Original contents retained as /home/student/.ssh/known_hosts.old</pre>
+<div class="warn">Remove <b>one</b> entry with <code>-R</code>. Do not delete the whole <code>known_hosts</code> file, or you lose trust in every server.</div>
+<div class="where"><h4>📍 Where to Add What</h4><div class="tw"><table><tr><th>Goal</th><th>File</th><th>Line</th></tr>
+<tr><td>Preload a trusted server (no prompt)</td><td><code>~/.ssh/known_hosts</code></td><td>Run <code>ssh-keyscan -t ed25519 server1 &gt;&gt; ~/.ssh/known_hosts</code>. Then check the fingerprint with Step 1</td></tr>
+<tr><td>Trust a server for all users</td><td><code>/etc/ssh/ssh_known_hosts</code> (as root)</td><td>Same line format as above</td></tr>
+<tr><td>Refuse unknown or changed hosts (strict)</td><td><code>~/.ssh/config</code> (client)</td><td><code>Host *</code> then a new line <code>    StrictHostKeyChecking yes</code></td></tr></table></div></div>
+<div class="sc"><h4>🏢 Scenario: a cloned VM has the same host key as the original</h4>Two servers sharing one host key is a security problem. On the clone, make new keys:<pre>clone$ sudo rm /etc/ssh/ssh_host_*
+clone$ sudo ssh-keygen -A               <span class="c"># creates all missing host keys</span>
+clone$ sudo systemctl restart sshd
+<span class="c"># every client will now see the CHANGED warning once. Run ssh-keygen -R clone-name</span></pre></div>
+
+<h2 id="c">3. Key-Based Login (no password)</h2>
+<p>A <b>key pair</b> has two files. The <span class="kw">private key</span> stays secret on your machine. The <span class="kw">public key</span> is copied to the server. Like a lock (public) and its only key (private).</p>
+<div class="flow"><div>1. <code>ssh-keygen</code><br>makes the pair</div><div class="ar">→</div><div>2. <code>ssh-copy-id</code><br>puts the <b>public</b> key in the server's <code>authorized_keys</code></div><div class="ar">→</div><div>3. <code>ssh user@ip</code><br>client proves it owns the private key</div><div class="ar">→</div><div class="r">✔ logged in, no password sent</div></div>
+<pre>$ ssh-keygen                           <span class="c"># Enter 3 times, or set a passphrase (recommended)</span>
+Your identification has been saved in /home/student/.ssh/id_rsa
+Your public key has been saved in /home/student/.ssh/id_rsa.pub
+$ ssh-keygen -t ed25519 -C "student@laptop"     <span class="c"># modern, short, fast (preferred)</span>
+$ ssh-keygen -t rsa -b 4096                     <span class="c"># RSA, -t = type, -b = bits</span>
+$ ssh-copy-id -i ~/.ssh/id_rsa.pub student@192.168.1.10
+Number of key(s) added: 1
+$ ssh student@192.168.1.10             <span class="c"># no password asked now</span>
+$ ls -l ~/.ssh/                        <span class="c"># on the server: check authorized_keys exists</span>
+-rw-------. 1 student student  563 Nov  1 11:10 authorized_keys</pre>
+<div class="tw"><table><tr><th>Key file</th><th>Mode</th><th>Share it?</th></tr><tr><td><code>~/.ssh/id_rsa</code> (private)</td><td>600</td><td class="x">NEVER</td></tr><tr><td><code>~/.ssh/id_rsa.pub</code> (public)</td><td>644</td><td class="r">Yes</td></tr><tr><td><code>~/.ssh/</code> folder</td><td>700</td><td>-</td></tr><tr><td><code>authorized_keys</code></td><td>600</td><td>-</td></tr></table></div>
+<div class="warn"><b>Careful:</b> running <code>ssh-keygen</code> with an existing file name <b>overwrites</b> your old key pair. Servers that had the old public key will reject you until you copy the new one. Use <code>-f ~/.ssh/other_name</code> for a second key.</div>
+<div class="note"><b>Two ways to share a key:</b> (1) create the key on the client and copy the public part to the server (usual way), or (2) create it on the server and give the private key safely to the user. Way 1 is safer because the private key never travels.</div>
+<h3>Extras you should know</h3>
+<pre>$ eval $(ssh-agent) ; ssh-add          <span class="c"># type the passphrase once per session</span>
+$ ssh -v student@server1               <span class="c"># debug: see which key and method is used</span></pre>
+<div class="where"><h4>📍 Where to Add What: save typing with <code>~/.ssh/config</code> (client)</h4>
+<pre>Host web1
+    HostName 192.168.1.10
+    User student
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519</pre>Now <code>ssh web1</code> does everything. Run <code>chmod 600 ~/.ssh/config</code>. To reach an internal server through a jump host, add <code>ProxyJump external</code>, or run <code>ssh -J external internal</code>.</div>
+<div class="tw"><table><tr><th>Error</th><th>Likely cause</th></tr><tr><td>Asks for password though key is set</td><td>Public key missing or wrong, or bad permissions on <code>~/.ssh</code></td></tr><tr><td><code>Permission denied (publickey)</code></td><td>Passwords are off and no valid key</td></tr><tr><td><code>Connection refused</code></td><td>sshd not running, or wrong port</td></tr><tr><td><code>Connection timed out</code></td><td>Network or firewall is blocking</td></tr></table></div>
+
+<h2 id="pp">🔐 Passphrase Protection and ssh-agent</h2>
+<p>A key <b>without</b> a passphrase is like a house key with your address on it: whoever finds it can walk in. A <span class="kw">passphrase</span> locks the private key file itself. A thief needs the file <b>and</b> the passphrase. The passphrase never travels to the server. It only unlocks the key on <b>your</b> computer.</p>
+<div class="tw"><table><tr><th></th><th>Password</th><th>Passphrase</th></tr><tr><td>Protects</td><td>The account on the server</td><td>The private key file on your machine</td></tr><tr><td>Sent over the network?</td><td>Yes (encrypted)</td><td class="r">Never</td></tr></table></div>
+<h3>Step by step</h3>
+<div class="sc"><h4>Step 1: Create a key WITH a passphrase</h4><pre>$ ssh-keygen -t ed25519 -f ~/.ssh/id_work
+Enter passphrase (empty for no passphrase): ********     <span class="c"># type it. You will not see it</span>
+Enter same passphrase again: ********
+Your identification has been saved in /home/student/.ssh/id_work
+Your public key has been saved in /home/student/.ssh/id_work.pub</pre><code>-f</code> chooses the file name, so your other keys stay safe. Already have a key with no passphrase? Add one: <code>ssh-keygen -p -f ~/.ssh/id_rsa</code>.</div>
+<div class="sc"><h4>Step 2: Install the public key on the server</h4><pre>$ ssh-copy-id -i ~/.ssh/id_work.pub student@server1
+student@server1's password:          <span class="c"># the ACCOUNT password, needed this one time</span>
+Number of key(s) added: 1</pre></div>
+<div class="sc"><h4>Step 3: Log in. Now it asks for the PASSPHRASE</h4><pre>$ ssh -i ~/.ssh/id_work student@server1
+Enter passphrase for key '/home/student/.ssh/id_work':     <span class="c"># passphrase, not account password</span>
+[student@server1 ~]$</pre>It is safe, but typing it every time is boring. That is the job of the agent.</div>
+<h3><code>ssh-agent</code>: type the passphrase once</h3>
+<div class="flow"><div>Start the agent<br><code>eval $(ssh-agent)</code></div><div class="ar">→</div><div>Load the key once<br><code>ssh-add ~/.ssh/id_work</code></div><div class="ar">→</div><div>Agent keeps it <b>unlocked in memory</b></div><div class="ar">→</div><div class="r">Every <code>ssh</code> uses it, no prompt</div></div>
+<div class="sc"><h4>Step 4: Start the agent</h4><pre>$ eval $(ssh-agent)
+Agent pid 10155</pre><code>ssh-agent</code> prints commands that set two variables (<code>SSH_AUTH_SOCK</code>, <code>SSH_AGENT_PID</code>). <code>eval</code> runs them in your current shell. Without <code>eval</code> nothing is set.</div>
+<div class="sc"><h4>Step 5: Add the key, check, and log in</h4><pre>$ ssh-add ~/.ssh/id_work
+Enter passphrase for /home/student/.ssh/id_work:      <span class="c"># last time you type it</span>
+Identity added: /home/student/.ssh/id_work (student@laptop)
+$ ssh-add -l                                           <span class="c"># list loaded keys</span>
+256 SHA256:Qk1... student@laptop (ED25519)
+$ ssh -i ~/.ssh/id_work student@server1                <span class="c"># no passphrase prompt now</span></pre></div>
+<div class="sc"><h4>Step 6: Remove keys when done</h4><pre>$ ssh-add -D            <span class="c"># remove all keys from the agent</span>
+$ ssh-agent -k          <span class="c"># stop the agent</span></pre></div>
+<div class="warn"><b>The agent works only in the shell that started it</b> (and programs started from it). Open a second terminal and it asks for the passphrase again, because that shell has no agent variables. Logging out clears the keys from memory. On a GNOME desktop, the agent starts for you automatically.</div>
+<div class="where"><h4>📍 Where to Add What: load the key automatically on first use</h4>Add to <code>~/.ssh/config</code> on the client:
+<pre>Host *
+    AddKeysToAgent yes
+    IdentityFile ~/.ssh/id_work</pre>The first <code>ssh</code> asks for the passphrase and adds the key to a running agent. You still need the agent started once per session.</div>
+
+<h2 id="d">4. Configuring the Server: <code>sshd_config</code></h2>
+<div class="where"><h4>📍 Where to Add What</h4>Edit <code>/etc/ssh/sshd_config</code> as root and add or change these lines:
+<pre>PermitRootLogin yes          # allow root login (default varies. Check with: sshd -T | grep permitroot)
+AllowUsers xyz abc           # ONLY these users may log in
+DenyUsers  baduser           # these users are always blocked</pre>
+Then apply it: <code>sudo systemctl reload sshd</code> (or <code>restart</code>).</div>
+<div class="warn"><b>Spelling matters:</b> <code>PermitRootLogin</code> (not Loging) and <code>reload</code> (not relod). A wrong word makes sshd refuse to load. Always run <code>sudo sshd -t</code> first. No output means OK.</div>
+<div class="tw"><table><tr><th>Setting</th><th>Meaning</th></tr><tr><td><code>PermitRootLogin yes|no|prohibit-password</code></td><td>Can root log in? <code>prohibit-password</code> = only with a key</td></tr><tr><td><code>PasswordAuthentication yes|no</code></td><td>Allow passwords?</td></tr><tr><td><code>PubkeyAuthentication yes</code></td><td>Allow keys (never turn off)</td></tr><tr><td><code>AllowUsers</code> / <code>AllowGroups</code></td><td>Whitelist. Everyone else is denied</td></tr><tr><td><code>DenyUsers</code> / <code>DenyGroups</code></td><td>Blacklist</td></tr><tr><td><code>Port 2222</code></td><td>Change the port</td></tr></table></div>
+<div class="note"><b>Order of checks:</b> DenyUsers → AllowUsers → DenyGroups → AllowGroups. A user on the deny list is blocked even if also allowed. <b>Drop-in warning:</b> in OpenSSH the <b>first</b> value read wins, and the main file starts with <code>Include /etc/ssh/sshd_config.d/*.conf</code>. A setting in a drop-in file can beat your edit in the main file. Always check the real value with <code>sudo sshd -T | grep -Ei 'permitrootlogin|passwordauth|allowusers'</code>.</div>
+<div class="sc"><h4>🏢 Scenario: only two admins may use SSH</h4><pre>$ sudo vim /etc/ssh/sshd_config.d/40-access.conf       <span class="c"># add: AllowUsers xyz abc</span>
+$ sudo sshd -t && sudo systemctl reload sshd
+$ ssh mallory@server1
+mallory@server1: Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password).
+$ sudo journalctl -u sshd -n 2
+sshd[3011]: User mallory from 192.168.1.50 not allowed because not listed in AllowUsers</pre></div>
+
+<h2 id="e">5. Login Messages: Welcome Text and MOTD</h2>
+<div class="tw"><table><tr><th>Where</th><th>Shown to</th><th>When</th></tr><tr><td><code>~/.bash_profile</code></td><td>Only that user</td><td>After login</td></tr><tr><td><code>/etc/motd</code></td><td>Every user</td><td>After login ("message of the day")</td></tr><tr><td><code>/etc/issue.net</code> + <code>Banner</code></td><td>Everyone</td><td><b>Before</b> the password prompt</td></tr></table></div>
+<div class="where"><h4>📍 Where to Add What</h4><div class="tw"><table><tr><th>File</th><th>Line to add</th></tr>
+<tr><td><code>~/.bash_profile</code> (end of file)</td><td><code>echo "Hello, this is the IT server machine!!"</code></td></tr>
+<tr><td><code>/etc/motd</code> (as root, whole file is the message)</td><td><code>Hello, this is the IT Server Machine!! Authorised use only.</code></td></tr>
+<tr><td><code>/etc/issue.net</code> then <code>sshd_config</code></td><td>Text: <code>Authorised access only. Activity is logged.</code> Then add <code>Banner /etc/issue.net</code> and reload sshd</td></tr></table></div></div>
+<pre>$ ssh student@server1
+Authorised access only. Activity is logged.        <span class="c"># banner (before password)</span>
+student@server1's password:
+Hello, this is the IT Server Machine!! Authorised use only.   <span class="c"># motd</span>
+Hello, this is the IT server machine!!                         <span class="c"># .bash_profile</span></pre>
+
+<h2 id="f">6. Transferring Files over SSH</h2>
+<pre>$ scp file.txt student@192.168.1.10:/home/student/      <span class="c"># upload</span>
+$ scp student@192.168.1.10:/home/student/file.txt .     <span class="c"># download to current folder (the dot)</span>
+$ scp -r project/ student@server1:/srv/                  <span class="c"># whole folder (-r)</span>
+$ scp -P 2222 file.txt student@server1:/tmp/             <span class="c"># capital P for port in scp</span>
+$ sftp student@server1                                   <span class="c"># interactive: get, put, ls, exit</span>
+$ rsync -av -e ssh /data/ student@server1:/backup/       <span class="c"># only copies changes</span></pre>
+
+<h2 id="g">7. Firewall: Allow or Block by IP and Port</h2>
+<p>The firewall decides <b>who can even reach</b> port 22. On RHEL use <span class="kw">firewalld</span> (<code>firewall-cmd</code>). The older tool <span class="kw">iptables</span> does the same job: <b>accept or drop traffic from an IP or port</b>.</p>
+<div class="tw"><table><tr><th>Goal</th><th>firewalld (RHEL way)</th><th>iptables (older)</th></tr>
+<tr><td>Allow SSH</td><td><code>firewall-cmd --permanent --add-service=ssh</code></td><td><code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code></td></tr>
+<tr><td>Allow only one IP</td><td><code>firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.1.50" service name="ssh" accept'</code></td><td><code>iptables -A INPUT -p tcp -s 192.168.1.50 --dport 22 -j ACCEPT</code></td></tr>
+<tr><td>Block an IP</td><td><code>firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.9" drop'</code></td><td><code>iptables -A INPUT -s 10.0.0.9 -j DROP</code></td></tr>
+<tr><td>Apply / save</td><td><code>firewall-cmd --reload</code> (permanent is saved)</td><td>Rules are <b>lost at reboot</b> unless saved</td></tr></table></div>
+<div class="warn">Order matters in iptables: a <code>DROP</code> placed before an <code>ACCEPT</code> wins. Do not run iptables and firewalld together. Pick one (firewalld on RHEL). Never block port 22 on a remote server unless you have another way in.</div>
+
+<h2 id="proj">🔒 SSH Hardening Project</h2>
+<p><b>Goal:</b> take a default SSH server and make it hard to attack, without locking yourself out. Think in <b>layers</b>: if one fails, the next still protects you.</p>
+<div class="lay" style="border-color:var(--red)"><b>Layer 1: Network.</b> Firewall allows port 22 only from trusted IPs. Optional fail2ban bans guessers.</div>
+<div class="lay" style="border-color:var(--org)"><b>Layer 2: Service.</b> sshd settings: no root, limited tries, short login window, no empty passwords.</div>
+<div class="lay" style="border-color:var(--yel)"><b>Layer 3: Authentication.</b> Keys only (with passphrase). Passwords off.</div>
+<div class="lay" style="border-color:var(--grn)"><b>Layer 4: Authorisation.</b> <code>AllowUsers</code> or <code>AllowGroups</code>. Admins use <code>sudo</code>, not root.</div>
+<div class="lay" style="border-color:var(--cyn)"><b>Layer 5: Watching.</b> Logs, <code>lastb</code>, alerts, and regular review.</div>
+
+<h3>Step-by-step</h3>
+<div class="sc"><h4>Step 0: Safety first</h4><pre>$ sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak.$(date +%F)    <span class="c"># backup</span>
+$ ssh student@server1        <span class="c"># KEEP this session open until the very end. It is your lifeline.</span></pre></div>
+<div class="sc"><h4>Step 1: Create a normal admin user with sudo</h4><pre>$ sudo useradd -m -G wheel admin1 ; sudo passwd admin1      <span class="c"># wheel group = sudo rights on RHEL</span></pre></div>
+<div class="sc"><h4>Step 2: Set up keys for that user, then test in a second terminal</h4><pre>client$ ssh-keygen -t ed25519
+client$ ssh-copy-id admin1@server1
+client$ ssh admin1@server1 &amp;&amp; sudo whoami           <span class="c"># must print: root</span></pre>Do <b>not</b> continue until this works.</div>
+<div class="where"><h4>📍 Step 3: Where to Add What</h4>Create the file <code>/etc/ssh/sshd_config.d/40-hardening.conf</code> (name starts with <b>40</b> so it is read <b>before</b> RHEL's own <code>50-redhat.conf</code>, and the first value wins):
+<pre>PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+PermitEmptyPasswords no
+AllowUsers admin1 student
+MaxAuthTries 3
+LoginGraceTime 30
+ClientAliveInterval 300
+ClientAliveCountMax 2
+X11Forwarding no
+Banner /etc/issue.net</pre>
+<div class="tw"><table><tr><th>Line</th><th>Why</th></tr><tr><td>PermitRootLogin no</td><td>Everyone knows the username "root", so attackers only need a password. Also loses audit trail</td></tr><tr><td>PasswordAuthentication no</td><td>Stops password guessing completely</td></tr><tr><td>PermitEmptyPasswords no</td><td>Blocks accounts with no password</td></tr><tr><td>AllowUsers</td><td>Whitelist: only named accounts can even try</td></tr><tr><td>MaxAuthTries 3</td><td>Disconnects after 3 wrong attempts</td></tr><tr><td>LoginGraceTime 30</td><td>30 seconds to log in, then the connection is dropped</td></tr><tr><td>ClientAliveInterval 300 + CountMax 2</td><td>Drops idle sessions after about 10 minutes</td></tr><tr><td>X11Forwarding no</td><td>Removes an unneeded feature (less attack surface)</td></tr></table></div></div>
+<div class="sc"><h4>Step 4: Test, check the real values, apply</h4><pre>$ sudo sshd -t                         <span class="c"># no output = syntax OK</span>
+$ sudo sshd -T | grep -Ei 'permitrootlogin|passwordauthentication|allowusers|maxauthtries'
+permitrootlogin no
+passwordauthentication no
+maxauthtries 3
+allowusers admin1 student
+$ sudo systemctl reload sshd           <span class="c"># existing sessions stay open</span></pre></div>
+<div class="sc"><h4>Step 5: Prove it works from a SECOND terminal</h4><pre>$ ssh root@server1
+root@server1: Permission denied (publickey,gssapi-keyex,gssapi-with-mic).    <span class="c"># root blocked</span>
+$ ssh -o PubkeyAuthentication=no admin1@server1
+admin1@server1: Permission denied (publickey,gssapi-keyex,gssapi-with-mic).  <span class="c"># "password" is gone from the list</span>
+$ ssh admin1@server1                                                          <span class="c"># key still works</span></pre></div>
+<div class="where"><h4>📍 Step 6: Firewall (only trusted IPs)</h4><pre>$ sudo firewall-cmd --permanent --remove-service=ssh
+$ sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" service name="ssh" accept'
+$ sudo firewall-cmd --reload
+$ sudo firewall-cmd --list-all | grep -E 'services|rich'</pre>Use a network range (<code>/24</code>) or a single admin IP. If you are not sure of your IP, skip this step.</div>
+<div class="warn"><b>If you change the port (<code>Port 2222</code>)</b>, you must also do both of these or sshd will not start or you cannot connect:<pre>$ sudo semanage port -a -t ssh_port_t -p tcp 2222        <span class="c"># tell SELinux</span>
+$ sudo firewall-cmd --permanent --add-port=2222/tcp ; sudo firewall-cmd --reload</pre>Changing the port only hides you from automatic scans. It is <b>not</b> real security. Keys-only is.</div>
+<div class="sc"><h4>Step 7: Watch and ban</h4><pre>$ sudo journalctl -u sshd -f                  <span class="c"># live log. Also /var/log/secure</span>
+$ sudo grep "Failed password" /var/log/secure | tail -3
+$ sudo lastb -n 5                              <span class="c"># failed logins</span>
+$ sudo dnf install -y epel-release fail2ban    <span class="c"># bans IPs after repeated failures</span>
+$ sudo systemctl enable --now fail2ban</pre>
+<div class="where" style="margin:8px 0"><h4>📍 Where to Add What (fail2ban)</h4>Create <code>/etc/fail2ban/jail.local</code>:<pre>[sshd]
+enabled  = true
+maxretry = 3
+bantime  = 1h</pre></div></div>
+<h3>✅ Final checklist (tick what you have done)</h3>
+<div class="card ck" id="ck"></div>
+<div class="pb"><i id="pbar"></i></div><div class="out" id="pscore"></div>
+<div class="tw"><table><tr><th>Locked out? Rescue</th><th>How</th></tr><tr><td>Still have an open session</td><td>Edit the drop-in file, run <code>sshd -t</code>, reload</td></tr><tr><td>No session left</td><td>Use the VM console or cloud console, log in locally and fix <code>sshd_config</code>. This is why you keep a console way in</td></tr></table></div>
+
+<h2>Common Mistakes</h2>
+<div class="warn">Turning off passwords before the key works · testing only in the same session · editing a commented line (<code>#PermitRootLogin</code>) · forgetting to reload · a drop-in file overriding your edit · changing the port without SELinux and firewall · wrong permissions on <code>~/.ssh</code> · typing <code>yes</code> to an unknown fingerprint without checking · sharing the private key · typos like <code>PermitRootLoging</code>.</div>
+<pre>ssh user@ip | ssh -p 2222 user@ip | ssh -v user@ip | ssh-keygen -t ed25519 | ssh-copy-id user@ip
+scp file user@ip:/path | sshd -t | sshd -T | systemctl reload sshd | w | last | lastb</pre>
+
+<h2 id="quiz">📝 Quiz</h2>
+<div id="qbox"></div><button onclick="grade()">Check answers</button><div class="out" id="score"></div>
+</div>
+<script>
+var C=['Backed up sshd_config before editing','Created a non-root admin user with sudo','Key login tested in a second terminal','PermitRootLogin no','PasswordAuthentication no (after keys work)','AllowUsers or AllowGroups set','MaxAuthTries 3 and LoginGraceTime 30','Idle timeout (ClientAliveInterval) set','sshd -t passed and sshd -T checked','Firewall limits port 22 to trusted IPs','fail2ban or log monitoring in place','Port change (if any) done in SELinux and firewall too'];
+var ck=document.getElementById('ck');C.forEach(function(t,i){ck.innerHTML+='<label><input type="checkbox" onchange="chk()"> '+t+'</label>'});
+function chk(){var b=ck.querySelectorAll('input'),n=0;for(var i=0;i<b.length;i++)if(b[i].checked)n++;
+document.getElementById('pbar').style.width=Math.round(n/C.length*100)+'%';
+document.getElementById('pscore').textContent=n+' / '+C.length+(n==C.length?'  🔒 Hardened':'')}
+chk();
+var Q=[
+["What is the default SSH port?",["21","22","80","443"],1,"SSH uses TCP 22."],
+["Which package provides the SSH server?",["openssh-server","ssh-client","sshd-tools","openssl"],0,"openssh-server provides sshd."],
+["Which file configures the SSH <b>server</b>?",["/etc/ssh/ssh_config","/etc/ssh/sshd_config","~/.ssh/config","/etc/hosts"],1,"sshd_config (with a d) is the server file."],
+["After editing sshd_config, what do you run first to check for typos?",["sshd -t","ssh -v","ping","reboot"],0,"sshd -t tests the syntax. No output means OK."],
+["Where do you add <code>192.168.1.10 server1</code> to connect by name?",["/etc/hosts on the client","sshd_config on the server","/etc/motd","~/.ssh/known_hosts"],0,"/etc/hosts on the machine you connect from."],
+["Which message is shown to ALL users after login?",["~/.bash_profile","/etc/motd","~/.ssh/config","/etc/hosts"],1,"/etc/motd is the message of the day."],
+["Which file holds the public keys allowed to log in?",["known_hosts","authorized_keys","id_rsa","ssh_config"],1,"~/.ssh/authorized_keys on the server."],
+["Which key must NEVER be shared?",["Public key","Private key","Host fingerprint","authorized_keys line"],1,"The private key stays secret."],
+["Which command copies your public key to a server?",["ssh-add","ssh-keygen -R","ssh-copy-id","scp key"],2,"ssh-copy-id installs it for you with correct permissions."],
+["You re-run <code>ssh-keygen</code> with the same file name. What happens?",["Nothing","A second key is added","The old key pair is overwritten","Server key changes"],2,"You lose the old private key. Back it up."],
+["Which setting stops direct root login?",["PermitRootLogin no","AllowRoot no","RootSSH off","DenyRoot yes"],0,"PermitRootLogin no."],
+["What must be true BEFORE setting PasswordAuthentication no?",["The server is rebooted","Your public key is already in authorized_keys and tested","Port is changed","Firewall is off"],1,"Otherwise nobody can log in."],
+["You changed the port to 2222. What else must you do on RHEL?",["Nothing","Allow it in SELinux and the firewall","Delete known_hosts","Disable sshd"],1,"semanage port plus firewall-cmd --add-port."],
+["Which command copies a folder to a server over SSH?",["scp -r dir user@ip:/path","ssh dir","cp dir ip","ssh-copy-id dir"],0,"scp -r copies recursively."],
+["Which command lists FAILED logins?",["last","lastb","w","who"],1,"lastb (as root) shows failed attempts."],
+["Your drop-in file sets <code>PermitRootLogin no</code> but root still logs in. What do you check?",["sshd -T for the effective value and other drop-in files","Reinstall ssh","Reboot the client","Delete known_hosts"],0,"The first value read wins, so another file may override. sshd -T shows the real result."],
+["What does a host key prove?",["Who the USER is","Who the SERVER is","The password is right","The port is open"],1,"The host key is the server's identity shown to the client."],
+["Which file on the client stores trusted servers?",["authorized_keys","known_hosts","sshd_config","id_rsa.pub"],1,"~/.ssh/known_hosts."],
+["How do you see a server's host key fingerprint on the server?",["ssh-keygen -l -f /etc/ssh/ssh_host_ed25519_key.pub","ssh-add -l","who -a","ssh -v"],0,"ssh-keygen -l -f prints the fingerprint of a key file."],
+["The REMOTE HOST IDENTIFICATION HAS CHANGED warning appears and you confirmed the server was rebuilt. Next?",["Delete all of ~/.ssh","ssh-keygen -R servername","Reinstall ssh","Ignore and use -f"],1,"ssh-keygen -R removes only that host's old entry."],
+["A passphrase protects:",["The account on the server","The private key file on your machine","The firewall","known_hosts"],1,"It locks the private key. It is never sent to the server."],
+["Why do you run <code>eval $(ssh-agent)</code> and not just <code>ssh-agent</code>?",["eval is faster","eval sets the agent variables in your current shell","It is the same","eval adds your key"],1,"The agent only prints the variable settings. eval applies them."]];
+var qb=document.getElementById('qbox');
+Q.forEach(function(q,i){var h='<div class="q" id="q'+i+'"><b>'+(i+1)+'. '+q[0]+'</b>';q[1].forEach(function(o,j){h+='<label><input type="radio" name="q'+i+'" value="'+j+'"> '+o+'</label>'});qb.innerHTML+=h+'<div class="ex"></div></div>'});
+function grade(){var n=0;Q.forEach(function(q,i){var b=document.getElementById('q'+i),c=document.querySelector('input[name="q'+i+'"]:checked'),ok=!!c&&+c.value===q[2];if(ok)n++;
+b.className='q '+(ok?'ok':'bad');var e=b.querySelector('.ex');e.style.display='block';e.innerHTML=(ok?'✅ Correct. ':'❌ Answer: '+q[1][q[2]]+'. ')+q[3]});
+document.getElementById('score').textContent='Score: '+n+' / '+Q.length}
+</script>
+</body></html>

@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 1 - Shell Scripting and the Command Line</title>
+<style>
+:root{
+  --bg:#f6f7fb; --card:#ffffff; --text:#1d2433; --muted:#5b6478; --line:#dde1ec;
+  --accent:#c4161c; --accent2:#2563eb; --good:#15803d; --bad:#b91c1c; --warn:#b45309;
+  --code-bg:#0f172a; --code-text:#e2e8f0; --key:#fff3c4; --keytext:#5c4400;
+  --svg-box:#eef2ff; --svg-stroke:#4f46e5; --svg-box2:#ecfdf5; --svg-stroke2:#059669;
+  --svg-box3:#fff7ed; --svg-stroke3:#ea580c; --svg-text:#1d2433;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b1020; --card:#131a2e; --text:#e6e9f2; --muted:#9aa4bd; --line:#26304d;
+    --accent:#ff5a5f; --accent2:#7aa2ff; --good:#4ade80; --bad:#f87171; --warn:#fbbf24;
+    --code-bg:#070b16; --code-text:#e2e8f0; --key:#3a2f00; --keytext:#ffe58a;
+    --svg-box:#1e2547; --svg-stroke:#8b93ff; --svg-box2:#0f2a22; --svg-stroke2:#34d399;
+    --svg-box3:#2d1c10; --svg-stroke3:#fb923c; --svg-text:#e6e9f2;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header.hero{background:linear-gradient(135deg,#c4161c,#7f1d1d);color:#fff;padding:40px 20px 32px}
+header.hero .wrap{max-width:1100px;margin:auto}
+header.hero h1{margin:0 0 8px;font-size:clamp(26px,4vw,40px)}
+header.hero p{margin:0;opacity:.92;max-width:760px}
+.layout{max-width:1100px;margin:auto;display:grid;grid-template-columns:240px 1fr;gap:28px;padding:24px 16px 80px}
+nav.toc{position:sticky;top:16px;align-self:start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:14px;max-height:calc(100vh - 32px);overflow:auto}
+nav.toc h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+nav.toc a{display:block;padding:5px 8px;border-radius:6px;color:var(--text);text-decoration:none}
+nav.toc a:hover{background:var(--bg);color:var(--accent)}
+main section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+h2{margin:0 0 6px;font-size:26px;border-bottom:3px solid var(--accent);padding-bottom:8px}
+h3{margin:26px 0 8px;font-size:20px;color:var(--accent2)}
+h4{margin:18px 0 6px;font-size:16px}
+p{margin:8px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--bg);border:1px solid var(--line);padding:1px 6px;border-radius:5px}
+pre{background:var(--code-bg);color:var(--code-text);padding:14px 16px;border-radius:10px;overflow:auto;margin:10px 0;position:relative;line-height:1.5}
+pre code{background:none;border:0;padding:0;color:inherit;font-size:13.5px}
+pre .c{color:#7dd3a8}
+.copy{position:absolute;top:8px;right:8px;background:#334155;color:#fff;border:0;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer}
+.copy:hover{background:#475569}
+.kw{background:var(--key);color:var(--keytext);padding:1px 7px;border-radius:999px;font-weight:600;font-size:.9em;white-space:nowrap}
+.keywords{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.callout{border-left:5px solid var(--accent2);background:var(--bg);padding:10px 14px;border-radius:8px;margin:12px 0}
+.callout.warn{border-color:var(--warn)}
+.callout.good{border-color:var(--good)}
+.callout.bad{border-color:var(--bad)}
+.callout b.t{display:block;margin-bottom:2px}
+.scenario{border:2px dashed var(--svg-stroke3);background:var(--svg-box3);border-radius:12px;padding:12px 16px;margin:14px 0}
+.scenario .tag{display:inline-block;background:var(--svg-stroke3);color:#fff;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:6px}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:15px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.fig{margin:16px 0;text-align:center}
+.fig svg{max-width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.fig figcaption{font-size:13px;color:var(--muted);margin-top:4px}
+svg text{fill:var(--svg-text);font-family:system-ui,sans-serif}
+.b1{fill:var(--svg-box);stroke:var(--svg-stroke);stroke-width:2}
+.b2{fill:var(--svg-box2);stroke:var(--svg-stroke2);stroke-width:2}
+.b3{fill:var(--svg-box3);stroke:var(--svg-stroke3);stroke-width:2}
+.ln{stroke:var(--muted);stroke-width:2;fill:none}
+.arrowhead{fill:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}nav.toc{position:static;max-height:none}.two{grid-template-columns:1fr}}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
+.pill.ok{background:var(--good)}.pill.no{background:var(--bad)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding:8px 8px 8px 44px;margin:6px 0;background:var(--bg);border-radius:8px}
+.steps li::before{content:counter(s);position:absolute;left:10px;top:8px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;font-weight:700;line-height:26px}
+/* Quiz */
+.q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--bg)}
+.q .qt{font-weight:700;margin-bottom:8px}
+.q pre{margin:6px 0 10px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font:inherit}
+.opt:hover:not([disabled]){border-color:var(--accent2)}
+.opt.right{background:rgba(21,128,61,.18);border-color:var(--good)}
+.opt.wrong{background:rgba(185,28,28,.18);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;font-size:14px;color:var(--muted)}
+.exp.show{display:block}
+#score{position:sticky;bottom:10px;background:var(--card);border:2px solid var(--accent);border-radius:12px;padding:10px 16px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+button.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:13px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Chapter 1: Shell Scripting and the Command Line</h1>
+    <p>Learn to control the Bash shell, write scripts that do work for you, and make your scripts smart with loops and decisions. Beginner to intermediate, in simple English.</p>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc">
+  <h3>Jump to</h3>
+  <a href="#s11">1.1 Shell Environment</a>
+  <a href="#s12">1.2 Exercise: Environment</a>
+  <a href="#s13">1.3 Writing Bash Scripts</a>
+  <a href="#s14">1.4 Exercise: First Scripts</a>
+  <a href="#s15">1.5 Loops and Conditions</a>
+  <a href="#s16">1.6 Exercise: Loops</a>
+  <a href="#s17">1.7 Lab</a>
+  <a href="#s18">1.8 Summary</a>
+  <a href="#extra">Extra Must-Know</a>
+  <a href="#real">Real-World Scenarios</a>
+  <a href="#mistakes">Common Mistakes</a>
+  <a href="#cheat">Cheat Sheet</a>
+  <a href="#quiz">Quiz (25 MCQ)</a>
+</nav>
+
+<main>
+
+<!-- ============ 1.1 ============ -->
+<section id="s11">
+<h2>1.1 Changing the Shell Environment</h2>
+<p><b>Goal:</b> understand variables, and control how the shell and your programs behave.</p>
+<div class="keywords"><span class="kw">shell</span><span class="kw">variable</span><span class="kw">export</span><span class="kw">environment variable</span><span class="kw">PATH</span><span class="kw">PS1</span><span class="kw">alias</span><span class="kw">~/.bashrc</span></div>
+
+<h3>What is a shell?</h3>
+<p>The <span class="kw">shell</span> is a program that reads the commands you type and asks Linux to run them. On RHEL the default shell is <span class="kw">Bash</span> (Bourne Again SHell). Every terminal window or SSH login starts its own shell.</p>
+
+<h3>What is a variable?</h3>
+<p>A <span class="kw">variable</span> is a named box that holds a value. You put something in once, then use it many times. This saves typing and avoids mistakes.</p>
+<pre><code>NAME=value        <span class="c"># correct: no spaces around =</span>
+COUNT=40
+first_name=John
+full_name='John Smith'   <span class="c"># quotes needed because of the space</span>
+file1=/tmp/abc</code></pre>
+<div class="callout bad"><b class="t">No spaces around the equal sign</b>
+<code>COUNT = 40</code> fails. Bash thinks <code>COUNT</code> is a command and <code>=</code> and <code>40</code> are its arguments.</div>
+
+<h4>Naming rules</h4>
+<ul>
+<li>Use letters, digits and underscore <code>_</code> only.</li>
+<li>Do not start with a digit.</li>
+<li>Names are <b>case-sensitive</b>: <code>Count</code> and <code>COUNT</code> are different.</li>
+<li>System variables are UPPERCASE (<code>HOME</code>, <code>PATH</code>). Use lowercase for your own to avoid clashes.</li>
+</ul>
+
+<h3>Using a variable: expansion with $</h3>
+<pre><code>COUNT=40
+echo COUNT              <span class="c"># prints the word COUNT</span>
+echo $COUNT             <span class="c"># prints 40</span>
+echo "Count is $COUNT"  <span class="c"># Count is 40</span>
+echo 'Count is $COUNT'  <span class="c"># Count is $COUNT  (single quotes = literal)</span>
+echo "Repeat $COUNTx"   <span class="c"># empty! Bash looks for a variable named COUNTx</span>
+echo "Repeat ${COUNT}x" <span class="c"># Repeat 40x  (braces fix it)</span></code></pre>
+
+<div class="callout good"><b class="t">Good habit</b>
+Always write <code>"${var}"</code>: double quotes plus braces. It protects you when values contain spaces or when text sits right after the name.</div>
+
+<h3>Types of data in Bash</h3>
+<table>
+<tr><th>Type</th><th>Example</th><th>Key point</th></tr>
+<tr><td><span class="kw">String</span></td><td><code>name="Asha"</code></td><td>Text. Quotes needed only if there is a space.</td></tr>
+<tr><td><span class="kw">Number</span></td><td><code>five=5</code></td><td>Do math with <code>$(( ))</code>.</td></tr>
+<tr><td><span class="kw">Array</span></td><td><code>colors=(red green blue)</code></td><td>List of items. Index starts at <b>0</b>.</td></tr>
+</table>
+<pre><code>five=5; ten=10
+echo $((five + ten))           <span class="c"># 15</span>
+
+colors=("red" "green" "blue")
+echo "${colors[2]}"            <span class="c"># blue (index 2 = third item)</span>
+echo "${colors[@]}"            <span class="c"># all items</span>
+echo "${#colors[@]}"           <span class="c"># how many items: 3</span></code></pre>
+
+<h3>Quotes: the three tools</h3>
+<table>
+<tr><th>Style</th><th>Variables <code>$x</code></th><th>Commands <code>$(cmd)</code></th><th>Use it when</th></tr>
+<tr><td><code>'single'</code></td><td><span class="pill no">no</span></td><td><span class="pill no">no</span></td><td>You want exact text</td></tr>
+<tr><td><code>"double"</code></td><td><span class="pill ok">yes</span></td><td><span class="pill ok">yes</span></td><td>You want values inside text</td></tr>
+<tr><td><code>\x</code> backslash</td><td colspan="2">Only the <b>one</b> next character is literal</td><td>Escape a single character</td></tr>
+</table>
+
+<h3>Shell variable vs environment variable</h3>
+<table>
+<tr><th></th><th>Shell variable</th><th>Environment variable</th></tr>
+<tr><td>Who can see it</td><td>Only the current shell</td><td>The shell <b>and</b> every program it starts</td></tr>
+<tr><td>How to create</td><td><code>VAR=value</code></td><td><code>export VAR=value</code></td></tr>
+<tr><td>Typical use</td><td>Temporary helper, prompt, history settings</td><td>Settings programs must read: <code>EDITOR</code>, <code>LANG</code>, <code>PATH</code></td></tr>
+</table>
+
+<figure class="fig">
+<svg viewBox="0 0 720 250" width="720" role="img" aria-label="Shell variable versus environment variable">
+  <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="20" y="20" width="300" height="210" rx="12" class="b1"/>
+  <text x="170" y="46" text-anchor="middle" font-size="16" font-weight="700">Your Bash shell (parent)</text>
+  <rect x="40" y="62" width="260" height="38" rx="8" class="b3"/>
+  <text x="170" y="86" text-anchor="middle" font-size="14">PS1, HISTSIZE (shell only)</text>
+  <rect x="40" y="112" width="260" height="38" rx="8" class="b2"/>
+  <text x="170" y="136" text-anchor="middle" font-size="14">EDITOR=vim (exported)</text>
+  <rect x="40" y="162" width="260" height="38" rx="8" class="b2"/>
+  <text x="170" y="186" text-anchor="middle" font-size="14">LANG=en_US.UTF-8 (exported)</text>
+  <line x1="320" y1="150" x2="400" y2="150" class="ln" marker-end="url(#a1)"/>
+  <text x="360" y="140" text-anchor="middle" font-size="12">copies only</text>
+  <text x="360" y="168" text-anchor="middle" font-size="12">exported</text>
+  <rect x="410" y="60" width="290" height="150" rx="12" class="b1"/>
+  <text x="555" y="86" text-anchor="middle" font-size="16" font-weight="700">Program you run (child)</text>
+  <text x="555" y="116" text-anchor="middle" font-size="14">Sees EDITOR=vim</text>
+  <text x="555" y="140" text-anchor="middle" font-size="14">Sees LANG=en_US.UTF-8</text>
+  <text x="555" y="170" text-anchor="middle" font-size="14" fill="#b91c1c">Cannot see PS1</text>
+</svg>
+<figcaption>Only exported variables travel to child programs.</figcaption>
+</figure>
+
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Git opens the wrong editor.</b> You run <code>git commit</code> and it opens <code>vi</code>, but you like <code>nano</code>. Fix: <code>export EDITOR=nano</code>. Git is a <i>child program</i>, so it only sees the variable if you <b>export</b> it. Without <code>export</code>, Git would never know.</p></div>
+
+<h3>Variables that control Bash itself</h3>
+<table>
+<tr><th>Variable</th><th>What it does</th></tr>
+<tr><td><code>HISTFILE</code></td><td>File where command history is saved (default <code>~/.bash_history</code>)</td></tr>
+<tr><td><code>HISTFILESIZE</code></td><td>How many history lines are kept in that file</td></tr>
+<tr><td><code>HISTTIMEFORMAT</code></td><td>Adds date and time to each history line (not set by default)</td></tr>
+<tr><td><code>PS1</code></td><td>Shape of your prompt</td></tr>
+</table>
+<pre><code>HISTTIMEFORMAT="%F %T "
+history | tail -3
+<span class="c">  98  2026-11-01 10:02:11 ls -l
+  99  2026-11-01 10:02:15 df -h
+ 100  2026-11-01 10:02:20 history | tail -3</span></code></pre>
+
+<h4>Prompt codes for PS1</h4>
+<table>
+<tr><th>Code</th><th>Shows</th></tr>
+<tr><td><code>\u</code></td><td>user name</td></tr>
+<tr><td><code>\h</code></td><td>host name (up to first dot)</td></tr>
+<tr><td><code>\W</code></td><td>current folder name only</td></tr>
+<tr><td><code>\w</code></td><td>full current path</td></tr>
+<tr><td><code>\t</code></td><td>time (24 hour)</td></tr>
+<tr><td><code>\$</code></td><td><code>$</code> for normal user, <code>#</code> for root</td></tr>
+</table>
+<pre><code>PS1='[\u@\h \t \w]$ '
+<span class="c">[student@servera 14:45:05 ~]$</span></code></pre>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Avoid disasters on production servers.</b> Many admins show the host name and time in the prompt, and make root's prompt red. When ten terminals are open, a glance tells you "this is the production database, be careful" before you type <code>rm</code> or <code>reboot</code>.</p></div>
+
+<h3>Important environment variables</h3>
+<table>
+<tr><th>Variable</th><th>Meaning</th><th>Example</th></tr>
+<tr><td><code>HOME</code></td><td>Your home folder</td><td><code>/home/student</code></td></tr>
+<tr><td><code>LANG</code></td><td>Language, date and number format, sort order</td><td><code>en_US.UTF-8</code></td></tr>
+<tr><td><code>PATH</code></td><td>Folders searched for commands</td><td><code>/usr/bin:/usr/sbin</code></td></tr>
+<tr><td><code>EDITOR</code></td><td>Default text editor</td><td><code>vim</code></td></tr>
+<tr><td><code>BASH_ENV</code></td><td>File read by non-interactive shells</td><td>not set by default</td></tr>
+</table>
+<pre><code>date                         <span class="c"># Tue May 27 17:04:37 UTC 2025</span>
+export LANG=fr_FR.UTF-8
+date                         <span class="c"># mar. 27 mai 2025 17:04:51 UTC</span></code></pre>
+<p>The language must be installed. Check with <code>locale -a</code>.</p>
+
+<h3>How PATH works</h3>
+<p>When you type <code>ls</code>, Bash looks in each folder of <span class="kw">PATH</span>, from left to right, and runs the <b>first match</b>. That is why you can type <code>ls</code> instead of <code>/usr/bin/ls</code>.</p>
+<figure class="fig">
+<svg viewBox="0 0 720 170" width="720" role="img" aria-label="PATH search order">
+  <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="10" y="55" width="120" height="50" rx="10" class="b3"/>
+  <text x="70" y="85" text-anchor="middle" font-size="15">You type: ls</text>
+  <line x1="130" y1="80" x2="170" y2="80" class="ln" marker-end="url(#a2)"/>
+  <rect x="175" y="45" width="150" height="70" rx="10" class="b1"/>
+  <text x="250" y="72" text-anchor="middle" font-size="13">1. ~/.local/bin</text>
+  <text x="250" y="94" text-anchor="middle" font-size="12" fill="#b91c1c">no ls here</text>
+  <line x1="325" y1="80" x2="360" y2="80" class="ln" marker-end="url(#a2)"/>
+  <rect x="365" y="45" width="150" height="70" rx="10" class="b1"/>
+  <text x="440" y="72" text-anchor="middle" font-size="13">2. ~/bin</text>
+  <text x="440" y="94" text-anchor="middle" font-size="12" fill="#b91c1c">no ls here</text>
+  <line x1="515" y1="80" x2="550" y2="80" class="ln" marker-end="url(#a2)"/>
+  <rect x="555" y="45" width="150" height="70" rx="10" class="b2"/>
+  <text x="630" y="72" text-anchor="middle" font-size="13">3. /usr/bin</text>
+  <text x="630" y="94" text-anchor="middle" font-size="12" fill="#15803d">found! run it</text>
+  <text x="360" y="150" text-anchor="middle" font-size="13">Search stops at the first match</text>
+</svg>
+<figcaption>PATH is searched left to right.</figcaption>
+</figure>
+<pre><code>echo $PATH
+export PATH=${PATH}:/home/user/sbin     <span class="c"># add at the END (lowest priority)</span>
+export PATH=/home/user/sbin:${PATH}     <span class="c"># add at the START (highest priority)</span>
+which ls                                <span class="c"># shows /usr/bin/ls</span></code></pre>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>"command not found" after installing a tool.</b> You install a tool into <code>/opt/mytool/bin</code> and the shell says <code>command not found</code>. The folder is not in <code>PATH</code>. Fix: <code>export PATH=$PATH:/opt/mytool/bin</code>. Put it in <code>~/.bashrc</code> to make it permanent.</p></div>
+
+<h3>Make settings permanent: startup files</h3>
+<p>Changes you type at the prompt vanish when the shell closes. To keep them, write them in a <span class="kw">startup file</span>. Which file Bash reads depends on how the shell was started.</p>
+<table>
+<tr><th>Shell type</th><th>How you get it</th><th>Files read</th></tr>
+<tr><td><span class="kw">Login</span> (interactive)</td><td>Console login, <code>ssh</code></td><td><code>/etc/profile</code>, then <code>~/.bash_profile</code> (which loads <code>~/.bashrc</code>)</td></tr>
+<tr><td><span class="kw">Non-login</span> (interactive)</td><td>Open a terminal in the desktop, or type <code>bash</code></td><td><code>/etc/bashrc</code> and <code>~/.bashrc</code></td></tr>
+<tr><td><span class="kw">Non-interactive</span></td><td>A script runs</td><td>Only the file named in <code>BASH_ENV</code> (empty by default)</td></tr>
+</table>
+<figure class="fig">
+<svg viewBox="0 0 720 260" width="720" role="img" aria-label="Bash startup file flow">
+  <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="20" y="20" width="150" height="46" rx="10" class="b3"/>
+  <text x="95" y="48" text-anchor="middle" font-size="14">SSH / console login</text>
+  <line x1="170" y1="43" x2="215" y2="43" class="ln" marker-end="url(#a3)"/>
+  <rect x="220" y="20" width="130" height="46" rx="10" class="b1"/>
+  <text x="285" y="48" text-anchor="middle" font-size="14">/etc/profile</text>
+  <line x1="350" y1="43" x2="395" y2="43" class="ln" marker-end="url(#a3)"/>
+  <rect x="400" y="20" width="150" height="46" rx="10" class="b1"/>
+  <text x="475" y="48" text-anchor="middle" font-size="14">~/.bash_profile</text>
+  <line x1="550" y1="43" x2="585" y2="43" class="ln" marker-end="url(#a3)"/>
+  <rect x="590" y="20" width="110" height="46" rx="10" class="b2"/>
+  <text x="645" y="48" text-anchor="middle" font-size="14">~/.bashrc</text>
+
+  <rect x="20" y="110" width="150" height="46" rx="10" class="b3"/>
+  <text x="95" y="132" text-anchor="middle" font-size="13">Open terminal in</text>
+  <text x="95" y="148" text-anchor="middle" font-size="13">desktop / type bash</text>
+  <line x1="170" y1="133" x2="215" y2="133" class="ln" marker-end="url(#a3)"/>
+  <rect x="220" y="110" width="130" height="46" rx="10" class="b1"/>
+  <text x="285" y="138" text-anchor="middle" font-size="14">/etc/bashrc</text>
+  <line x1="350" y1="133" x2="395" y2="133" class="ln" marker-end="url(#a3)"/>
+  <rect x="400" y="110" width="150" height="46" rx="10" class="b2"/>
+  <text x="475" y="138" text-anchor="middle" font-size="14">~/.bashrc</text>
+
+  <rect x="20" y="200" width="150" height="46" rx="10" class="b3"/>
+  <text x="95" y="228" text-anchor="middle" font-size="14">A script runs</text>
+  <line x1="170" y1="223" x2="215" y2="223" class="ln" marker-end="url(#a3)"/>
+  <rect x="220" y="200" width="330" height="46" rx="10" class="b1"/>
+  <text x="385" y="228" text-anchor="middle" font-size="14">Only file in $BASH_ENV (if set)</text>
+</svg>
+<figcaption>Which startup files run for each kind of shell.</figcaption>
+</figure>
+<pre><code><span class="c"># ~/.bash_profile</span>
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+export EDITOR=nano</code></pre>
+<div class="callout"><b class="t">Rules of thumb</b>
+Personal settings go in <code>~/.bashrc</code>. Settings for <b>all users</b>: create a <code>.sh</code> file in <code>/etc/profile.d/</code> as root, instead of editing <code>/etc/profile</code>. After editing, load it now with <code>source ~/.bashrc</code>.</div>
+
+<h3>Aliases: your own short commands</h3>
+<pre><code>alias ll='ls -lah'
+alias hello='echo "Hello, this is a long string."'
+hello
+alias            <span class="c"># list all aliases</span>
+unalias hello    <span class="c"># remove one</span></code></pre>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Protect yourself from typos.</b> Many admins add <code>alias rm='rm -i'</code> so <code>rm</code> asks before deleting. Another favourite: <code>alias update='sudo dnf update -y'</code>.</p></div>
+
+<h3>Remove variables</h3>
+<pre><code>unset file1        <span class="c"># delete the variable completely</span>
+export -n PS1      <span class="c"># keep it, but stop sharing it with child programs</span>
+unalias hello      <span class="c"># delete an alias</span></code></pre>
+</section>
+
+<!-- ============ 1.2 ============ -->
+<section id="s12">
+<h2>1.2 Guided Exercise: Change the Shell Environment</h2>
+<div class="keywords"><span class="kw">PS1</span><span class="kw">source</span><span class="kw">export</span><span class="kw">EDITOR</span></div>
+<p><b>You will:</b> change the prompt permanently, use a variable in commands, and export an environment variable.</p>
+<pre><code>lab start scripts-env       <span class="c"># on workstation: prepare the practice</span></code></pre>
+<ol class="steps">
+<li><b>Log in to the server:</b> <code>ssh student@servera</code></li>
+<li><b>Edit the startup file:</b> <code>vim ~/.bashrc</code>. Add this line after <code>export PATH</code>:<pre><code>PS1='[\u@\h \t \w]$ '</code></pre></li>
+<li><b>Load it:</b> <code>source ~/.bashrc</code>. The prompt now shows the time: <code>[student@servera 14:45:05 ~]$</code></li>
+<li><b>Use a variable:</b>
+<pre><code>file=examplefile
+echo $file
+ls -l $file
+rm $file
+ls -l $file     <span class="c"># now shows: No such file or directory</span></code></pre></li>
+<li><b>Export a variable:</b>
+<pre><code>export EDITOR=vim
+echo $EDITOR    <span class="c"># vim</span></code></pre></li>
+<li><b>Leave and clean up:</b> <code>exit</code> then <code>lab finish scripts-env</code></li>
+</ol>
+<div class="callout warn"><b class="t">What you really learned</b>
+Edit file, then <code>source</code> it, then test. That three-step loop is how you change any shell setting safely.</div>
+</section>
+
+<!-- ============ 1.3 ============ -->
+<section id="s13">
+<h2>1.3 Writing Simple Bash Scripts</h2>
+<div class="keywords"><span class="kw">script</span><span class="kw">shebang #!</span><span class="kw">chmod +x</span><span class="kw">$1 $2</span><span class="kw">STDOUT</span><span class="kw">STDERR</span><span class="kw">redirect</span></div>
+
+<h3>What is a script?</h3>
+<p>A <span class="kw">script</span> is a text file full of commands. Instead of typing 20 commands every day, you save them once and run the file. Scripts are faster, repeatable and make fewer mistakes than humans.</p>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Daily health report.</b> Every morning an admin needs disk space, memory, and failed services. A 10-line script runs all three commands and saves a report. Combined with cron it runs by itself at 7 AM.</p></div>
+
+<h3>The shebang line</h3>
+<p>The first line of a script is <code>#!/usr/bin/bash</code>. It is called the <span class="kw">shebang</span> (sharp + bang). It tells Linux which program should read the file.</p>
+<pre><code>#!/usr/bin/bash
+echo "Hello, world"</code></pre>
+<p>Running <code>./script.sh</code> then works like <code>/usr/bin/bash script.sh</code>.</p>
+
+<h3>Create, allow, run</h3>
+<figure class="fig">
+<svg viewBox="0 0 720 130" width="720" role="img" aria-label="Script lifecycle">
+  <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="10" y="30" width="150" height="60" rx="12" class="b1"/>
+  <text x="85" y="55" text-anchor="middle" font-size="14" font-weight="700">1. Write</text>
+  <text x="85" y="76" text-anchor="middle" font-size="12">vim hello.sh</text>
+  <line x1="160" y1="60" x2="200" y2="60" class="ln" marker-end="url(#a4)"/>
+  <rect x="205" y="30" width="150" height="60" rx="12" class="b3"/>
+  <text x="280" y="55" text-anchor="middle" font-size="14" font-weight="700">2. Allow</text>
+  <text x="280" y="76" text-anchor="middle" font-size="12">chmod +x hello.sh</text>
+  <line x1="355" y1="60" x2="395" y2="60" class="ln" marker-end="url(#a4)"/>
+  <rect x="400" y="30" width="150" height="60" rx="12" class="b2"/>
+  <text x="475" y="55" text-anchor="middle" font-size="14" font-weight="700">3. Run</text>
+  <text x="475" y="76" text-anchor="middle" font-size="12">./hello.sh</text>
+  <line x1="550" y1="60" x2="590" y2="60" class="ln" marker-end="url(#a4)"/>
+  <rect x="595" y="30" width="115" height="60" rx="12" class="b1"/>
+  <text x="652" y="55" text-anchor="middle" font-size="14" font-weight="700">4. Check</text>
+  <text x="652" y="76" text-anchor="middle" font-size="12">echo $?</text>
+</svg>
+<figcaption>Four steps for every script.</figcaption>
+</figure>
+<pre><code>chmod +x firstscript.sh     <span class="c"># give execute permission</span>
+./firstscript.sh            <span class="c"># run from the current folder (./ means "here")</span></code></pre>
+
+<h4>Run it by name from anywhere</h4>
+<p>Put the script in a folder that is in <code>PATH</code>, like <code>~/bin</code>:</p>
+<pre><code>mkdir -p ~/bin
+mv hello ~/bin/
+hello               <span class="c"># works from any folder</span>
+which hello         <span class="c"># /home/user/bin/hello</span></code></pre>
+<div class="callout warn"><b class="t">Do not name a script like an existing command</b>
+A script called <code>test</code> or <code>ls</code> can be skipped or can break things. The first match in PATH wins.</div>
+
+<h3>Positional parameters: give input to a script</h3>
+<p>Words you type after the script name become <span class="kw">positional parameters</span>.</p>
+<table>
+<tr><th>Name</th><th>Holds</th></tr>
+<tr><td><code>$0</code></td><td>The script name as you typed it</td></tr>
+<tr><td><code>$1</code></td><td>First word after the script</td></tr>
+<tr><td><code>$2</code></td><td>Second word</td></tr>
+<tr><td><code>${10}</code></td><td>Tenth word. Needs braces from 10 up.</td></tr>
+<tr><td><code>$#</code></td><td>How many words were given</td></tr>
+<tr><td><code>"$@"</code></td><td>All the words, each kept separate</td></tr>
+</table>
+<pre><code>#!/usr/bin/bash
+echo "Script: $0"
+echo "First: $1"
+echo "Tenth (wrong): $10"      <span class="c"># prints $1 then the letter 0</span>
+echo "Tenth (right): ${10}"</code></pre>
+<pre><code>./params.sh 1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th
+<span class="c">Script: ./params.sh
+First: 1st
+Tenth (wrong): 1st0
+Tenth (right): 10th</span></code></pre>
+<p>The <code>set --</code> command can replace all parameters at once, for example <code>set -- "$1" "$2" "$4" "$3"</code> swaps the 3rd and 4th. Any parameter you do not list is dropped.</p>
+<p>For real options like <code>-v</code> or <code>-o yaml</code>, use <code>getopts</code> with a <code>case</code> block.</p>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>A reusable user-creation helper.</b> <code>./adduser.sh priya developers</code> uses <code>$1</code> as the user name and <code>$2</code> as the group. One script, any number of users. If <code>$#</code> is not 2, the script prints a usage message and stops.</p></div>
+
+<h3>Quoting special characters</h3>
+<p>Some characters have special power in Bash: <code>#</code> <code>$</code> <code>*</code> <code>?</code> <code>&amp;</code> <code>;</code> and space. Quotes remove that power when you want the plain character.</p>
+<pre><code>echo # not a comment            <span class="c"># prints an empty line, # starts a comment</span>
+echo \# not a comment           <span class="c"># # not a comment</span>
+echo '# not a comment #'        <span class="c"># # not a comment #</span>
+
+var=$(hostname -s)
+echo "host is ${var}"           <span class="c"># host is host</span>
+echo "Today: $(date +%F)"       <span class="c"># command runs inside double quotes</span>
+echo 'Today: $(date +%F)'       <span class="c"># literal text, nothing runs</span>
+echo "\"Hello, world\""         <span class="c"># "Hello, world"</span></code></pre>
+<div class="callout"><b class="t">Memory trick</b>
+Single quote = "freeze everything". Double quote = "freeze file patterns like *, but still fill in $ values".</div>
+
+<h3>Script output: STDOUT and STDERR</h3>
+<p>Every program has three data channels:</p>
+<figure class="fig">
+<svg viewBox="0 0 720 240" width="720" role="img" aria-label="Standard streams">
+  <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="270" y="60" width="180" height="120" rx="14" class="b1"/>
+  <text x="360" y="115" text-anchor="middle" font-size="16" font-weight="700">Your script</text>
+  <text x="360" y="138" text-anchor="middle" font-size="12">or command</text>
+  <rect x="10" y="85" width="170" height="70" rx="10" class="b3"/>
+  <text x="95" y="112" text-anchor="middle" font-size="14" font-weight="700">STDIN (0)</text>
+  <text x="95" y="132" text-anchor="middle" font-size="12">keyboard / file  &lt;</text>
+  <line x1="180" y1="120" x2="268" y2="120" class="ln" marker-end="url(#a5)"/>
+  <rect x="540" y="20" width="170" height="70" rx="10" class="b2"/>
+  <text x="625" y="47" text-anchor="middle" font-size="14" font-weight="700">STDOUT (1)</text>
+  <text x="625" y="67" text-anchor="middle" font-size="12">screen   &gt;  &gt;&gt;</text>
+  <line x1="450" y1="95" x2="538" y2="60" class="ln" marker-end="url(#a5)"/>
+  <rect x="540" y="150" width="170" height="70" rx="10" class="b3"/>
+  <text x="625" y="177" text-anchor="middle" font-size="14" font-weight="700">STDERR (2)</text>
+  <text x="625" y="197" text-anchor="middle" font-size="12">screen   2&gt;</text>
+  <line x1="450" y1="145" x2="538" y2="180" class="ln" marker-end="url(#a5)"/>
+</svg>
+<figcaption>Normal output and error output travel on separate channels.</figcaption>
+</figure>
+<table>
+<tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr>
+<tr><td><code>&gt;</code></td><td>Send STDOUT to a file, <b>overwrite</b></td><td><code>ls &gt; list.txt</code></td></tr>
+<tr><td><code>&gt;&gt;</code></td><td>Send STDOUT to a file, <b>append</b></td><td><code>date &gt;&gt; log.txt</code></td></tr>
+<tr><td><code>2&gt;</code></td><td>Send errors to a file</td><td><code>cmd 2&gt; err.log</code></td></tr>
+<tr><td><code>&gt;&amp;2</code></td><td>Send this echo to the error channel</td><td><code>echo "bad" &gt;&amp;2</code></td></tr>
+<tr><td><code>&gt; f 2&gt;&amp;1</code></td><td>Both channels into one file</td><td><code>cmd &gt; all.log 2&gt;&amp;1</code></td></tr>
+<tr><td><code>&gt; /dev/null</code></td><td>Throw output away</td><td><code>cmd &gt; /dev/null 2&gt;&amp;1</code></td></tr>
+</table>
+<pre><code>#!/usr/bin/bash
+echo "Hello, world"
+echo "ERROR: Houston, we have a problem." &gt;&amp;2</code></pre>
+<pre><code>hello 2&gt; hello.log      <span class="c"># screen shows Hello, world. File holds the error.</span></code></pre>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Clean logs for support.</b> A nightly backup writes good messages to <code>backup.log</code> and errors to <code>backup.err</code>. When something fails, you open only the small error file instead of scanning 10,000 lines. Also, <code>echo "value is $x"</code> is the simplest debugging tool: print values to see what the script is doing.</p></div>
+</section>
+
+<!-- ============ 1.4 ============ -->
+<section id="s14">
+<h2>1.4 Guided Exercise: Write Simple Bash Scripts</h2>
+<div class="keywords"><span class="kw">#!/usr/bin/bash</span><span class="kw">chmod +x</span><span class="kw">&gt; vs &gt;&gt;</span><span class="kw">lsblk</span><span class="kw">df -h</span></div>
+<pre><code>lab start scripts-write</code></pre>
+<ol class="steps">
+<li><b>Log in:</b> <code>ssh student@servera</code></li>
+<li><b>Create <code>firstscript.sh</code></b> in your home folder:
+<pre><code>#!/usr/bin/bash
+echo "This is my first bash script" &gt; ~/output.txt
+echo "" &gt;&gt; ~/output.txt
+echo "################################################" &gt;&gt; ~/output.txt</code></pre></li>
+<li><b>Make it executable and run it:</b>
+<pre><code>chmod +x firstscript.sh
+./firstscript.sh
+cat output.txt</code></pre></li>
+<li><b>Add system information:</b> extend the script.
+<pre><code>#!/usr/bin/bash
+echo "This is my first bash script" &gt; ~/output.txt
+echo "" &gt;&gt; ~/output.txt
+echo "################################################" &gt;&gt; ~/output.txt
+echo "LIST BLOCK DEVICES" &gt;&gt; ~/output.txt
+echo "" &gt;&gt; ~/output.txt
+lsblk &gt;&gt; ~/output.txt
+echo "" &gt;&gt; ~/output.txt
+echo "################################################" &gt;&gt; ~/output.txt
+echo "FILESYSTEM FREE SPACE STATUS" &gt;&gt; ~/output.txt
+echo "" &gt;&gt; ~/output.txt
+df -h &gt;&gt; ~/output.txt
+echo "################################################" &gt;&gt; ~/output.txt</code></pre></li>
+<li><b>Run and read:</b> <code>./firstscript.sh</code> then <code>cat output.txt</code>. You see disks (<code>lsblk</code>) and free space (<code>df -h</code>).</li>
+<li><b>Finish:</b> <code>exit</code>, then <code>lab finish scripts-write</code></li>
+</ol>
+<div class="callout good"><b class="t">A neater way to write the same script</b>
+Put the file name in a variable and group the commands, so there is one redirect instead of ten:
+<pre><code>#!/usr/bin/bash
+OUT=~/output.txt
+{
+  echo "My report"; echo
+  echo "#### BLOCK DEVICES"; lsblk
+  echo "#### FREE SPACE";    df -h
+} &gt; "$OUT"</code></pre></div>
+<div class="callout warn"><b class="t">Remember</b>
+The first line uses <code>&gt;</code> so the file starts fresh. Every later line uses <code>&gt;&gt;</code> so it adds, not erases.</div>
+</section>
+
+<!-- ============ 1.5 ============ -->
+<section id="s15">
+<h2>1.5 Running Loops and Conditional Commands</h2>
+<div class="keywords"><span class="kw">for</span><span class="kw">while</span><span class="kw">until</span><span class="kw">if / elif / else</span><span class="kw">exit code</span><span class="kw">$?</span><span class="kw">test [[ ]]</span></div>
+
+<h3>The for loop: do it for each item</h3>
+<pre><code>for VARIABLE in LIST; do
+    command using $VARIABLE
+done</code></pre>
+<p>Bash takes one item from LIST at a time, puts it in VARIABLE, and runs the body. It stops after the last item.</p>
+<figure class="fig">
+<svg viewBox="0 0 720 200" width="720" role="img" aria-label="For loop flow">
+  <defs><marker id="a6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="10" y="70" width="130" height="50" rx="10" class="b1"/>
+  <text x="75" y="100" text-anchor="middle" font-size="14">Start</text>
+  <line x1="140" y1="95" x2="180" y2="95" class="ln" marker-end="url(#a6)"/>
+  <polygon points="185,95 270,55 355,95 270,135" class="b3"/>
+  <text x="270" y="92" text-anchor="middle" font-size="13">Items left</text>
+  <text x="270" y="108" text-anchor="middle" font-size="13">in list?</text>
+  <line x1="355" y1="95" x2="400" y2="95" class="ln" marker-end="url(#a6)"/>
+  <text x="378" y="85" text-anchor="middle" font-size="12">yes</text>
+  <rect x="405" y="60" width="150" height="70" rx="10" class="b2"/>
+  <text x="480" y="88" text-anchor="middle" font-size="13">Take next item</text>
+  <text x="480" y="108" text-anchor="middle" font-size="13">run the commands</text>
+  <path d="M480 60 L480 25 L270 25 L270 55" class="ln" marker-end="url(#a6)"/>
+  <text x="375" y="18" text-anchor="middle" font-size="12">repeat</text>
+  <line x1="270" y1="135" x2="270" y2="170" class="ln" marker-end="url(#a6)"/>
+  <text x="292" y="156" font-size="12">no</text>
+  <rect x="215" y="172" width="110" height="26" rx="8" class="b1"/>
+  <text x="270" y="190" text-anchor="middle" font-size="13">Done</text>
+</svg>
+<figcaption>The for loop repeats until the list is finished.</figcaption>
+</figure>
+
+<h4>Ways to build the list</h4>
+<pre><code>for HOST in host1 host2 host3; do echo $HOST; done      <span class="c"># typed words</span>
+for HOST in host{1,2,3};  do echo $HOST; done           <span class="c"># brace list</span>
+for HOST in host{1..3};   do echo $HOST; done           <span class="c"># brace range</span>
+for N in $(seq 2 2 10);   do echo $N;    done           <span class="c"># 2 4 6 8 10</span>
+for F in *.log;           do echo $F;    done           <span class="c"># every .log file</span>
+for U in $(cut -d: -f1 /etc/passwd | head -3); do echo $U; done  <span class="c"># command output</span></code></pre>
+<pre><code><span class="c"># print every kernel package with install date</span>
+for PACKAGE in $(rpm -qa | grep kernel); do
+  echo "$PACKAGE installed on $(date -d @$(rpm -q --qf '%{INSTALLTIME}\n' $PACKAGE))"
+done</code></pre>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Patch 50 servers.</b> Instead of logging in 50 times, loop:
+<code>for h in web{01..50}; do ssh admin@$h "sudo dnf update -y"; done</code>. A task that took a day takes minutes.</p></div>
+
+<h3>Exit codes: how success is reported</h3>
+<p>Every command ends with a number from 0 to 255 called the <span class="kw">exit code</span>.</p>
+<table>
+<tr><th>Code</th><th>Meaning</th></tr>
+<tr><td><span class="pill ok">0</span></td><td>Success</td></tr>
+<tr><td><span class="pill no">1-255</span></td><td>Some kind of failure</td></tr>
+</table>
+<pre><code>ls /etc; echo $?          <span class="c"># 0</span>
+ls /nothing; echo $?      <span class="c"># 2 (or another non-zero)</span>
+/bin/true;  echo $?       <span class="c"># always 0</span>
+/bin/false; echo $?       <span class="c"># always 1</span></code></pre>
+<ul>
+<li><code>$?</code> holds the exit code of the <b>last</b> command. The next command replaces it.</li>
+<li><code>exit 0</code> ends the script with success. <code>exit 3</code> ends it with error code 3.</li>
+<li><code>exit</code> with no number returns the last command's code.</li>
+<li>A script that reaches its end returns 0 (or the last command's code).</li>
+<li><code>errno -l</code> lists standard error numbers.</li>
+</ul>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Monitoring tools run on exit codes.</b> A monitoring system runs your check script. If the script exits <code>0</code> the dashboard stays green. If it exits <code>2</code> the dashboard turns red and pages you. Good scripts always exit with the right number.</p></div>
+
+<h3>Testing conditions</h3>
+<p>Use <code>[[ ... ]]</code> (or the older <code>test</code>). It gives exit code 0 for true and 1 for false.</p>
+<div class="callout bad"><b class="t">Spaces are required</b>
+<code>[[ $x -eq 1 ]]</code> works. <code>[[$x -eq 1]]</code> fails. The bracket is like a command and needs spaces around everything.</div>
+
+<div class="two">
+<div>
+<h4>Number tests</h4>
+<table>
+<tr><th>Test</th><th>Means</th></tr>
+<tr><td><code>-eq</code></td><td>equal</td></tr>
+<tr><td><code>-ne</code></td><td>not equal</td></tr>
+<tr><td><code>-gt</code></td><td>greater than</td></tr>
+<tr><td><code>-ge</code></td><td>greater or equal</td></tr>
+<tr><td><code>-lt</code></td><td>less than</td></tr>
+<tr><td><code>-le</code></td><td>less or equal</td></tr>
+</table>
+</div>
+<div>
+<h4>Text and file tests</h4>
+<table>
+<tr><th>Test</th><th>Means</th></tr>
+<tr><td><code>==</code> or <code>=</code></td><td>text equal</td></tr>
+<tr><td><code>!=</code></td><td>text different</td></tr>
+<tr><td><code>-z "$s"</code></td><td>text is empty</td></tr>
+<tr><td><code>-n "$s"</code></td><td>text is not empty</td></tr>
+<tr><td><code>-f path</code></td><td>is a regular file</td></tr>
+<tr><td><code>-d path</code></td><td>is a directory</td></tr>
+<tr><td><code>-r path</code></td><td>you can read it</td></tr>
+</table>
+</div>
+</div>
+<pre><code>[[ 8 -gt 2 ]];   echo $?      <span class="c"># 0 true</span>
+[[ 2 -lt 2 ]];   echo $?      <span class="c"># 1 false</span>
+[[ abc == abc ]]; echo $?     <span class="c"># 0 true</span>
+STRING=''; [[ -z "$STRING" ]]; echo $?   <span class="c"># 0, it is empty</span></code></pre>
+<div class="callout warn"><b class="t">Use -eq for numbers, == for text</b>
+Mixing them gives wrong answers. Also quote your variables: <code>[[ -z "$name" ]]</code>.</div>
+
+<h3>if / elif / else: make decisions</h3>
+<figure class="fig">
+<svg viewBox="0 0 720 280" width="720" role="img" aria-label="If elif else flow">
+  <defs><marker id="a7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <rect x="10" y="100" width="90" height="46" rx="10" class="b1"/>
+  <text x="55" y="128" text-anchor="middle" font-size="14">Start</text>
+  <line x1="100" y1="123" x2="130" y2="123" class="ln" marker-end="url(#a7)"/>
+  <polygon points="135,123 200,88 265,123 200,158" class="b3"/>
+  <text x="200" y="128" text-anchor="middle" font-size="13">Test 1?</text>
+  <line x1="200" y1="88" x2="200" y2="45" class="ln"/>
+  <line x1="200" y1="45" x2="440" y2="45" class="ln" marker-end="url(#a7)"/>
+  <text x="215" y="40" font-size="12">yes</text>
+  <rect x="445" y="22" width="150" height="46" rx="10" class="b2"/>
+  <text x="520" y="50" text-anchor="middle" font-size="13">Run block 1</text>
+  <line x1="265" y1="123" x2="310" y2="123" class="ln" marker-end="url(#a7)"/>
+  <text x="287" y="115" font-size="12">no</text>
+  <polygon points="315,123 380,88 445,123 380,158" class="b3"/>
+  <text x="380" y="128" text-anchor="middle" font-size="13">Test 2?</text>
+  <line x1="445" y1="123" x2="490" y2="123" class="ln" marker-end="url(#a7)"/>
+  <text x="466" y="115" font-size="12">yes</text>
+  <rect x="495" y="100" width="150" height="46" rx="10" class="b2"/>
+  <text x="570" y="128" text-anchor="middle" font-size="13">Run block 2</text>
+  <line x1="380" y1="158" x2="380" y2="215" class="ln"/>
+  <line x1="380" y1="215" x2="445" y2="215" class="ln" marker-end="url(#a7)"/>
+  <text x="392" y="190" font-size="12">no</text>
+  <rect x="450" y="192" width="190" height="46" rx="10" class="b2"/>
+  <text x="545" y="220" text-anchor="middle" font-size="13">else: run block 3</text>
+  <text x="360" y="268" text-anchor="middle" font-size="13">Only the first true branch runs, then the script continues after fi</text>
+</svg>
+<figcaption>Bash checks the tests in order and stops at the first true one.</figcaption>
+</figure>
+<pre><code>if [[ condition ]]; then
+    commands
+elif [[ other condition ]]; then
+    commands
+else
+    commands
+fi</code></pre>
+<pre><code><span class="c"># start psacct only if it is not running</span>
+systemctl is-active psacct &gt; /dev/null 2&gt;&amp;1
+if [[ $? -ne 0 ]]; then
+    sudo systemctl start psacct
+fi
+
+<span class="c"># shorter: use the command directly as the test</span>
+if ! systemctl is-active --quiet psacct; then
+    sudo systemctl start psacct
+fi
+
+<span class="c"># three-way choice</span>
+systemctl is-active mariadb    &gt; /dev/null 2&gt;&amp;1; MARIA=$?
+systemctl is-active postgresql &gt; /dev/null 2&gt;&amp;1; PG=$?
+if   [[ $MARIA -eq 0 ]]; then mysql
+elif [[ $PG    -eq 0 ]]; then psql
+else                          sqlite3
+fi</code></pre>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Disk space alarm.</b> A script reads disk use as a number. <code>if [[ $USE -ge 90 ]]; then echo "Disk almost full" &gt;&amp;2; exit 2; elif [[ $USE -ge 75 ]]; then echo "Warning"; else echo "OK"; fi</code>. Three levels, one script.</p></div>
+
+<h3>while and until: repeat while a test is true or false</h3>
+<table>
+<tr><th>Loop</th><th>Keeps running while the test is...</th><th>Think</th></tr>
+<tr><td><span class="kw">while</span></td><td>TRUE (exit code 0)</td><td>"as long as"</td></tr>
+<tr><td><span class="kw">until</span></td><td>FALSE (non-zero)</td><td>"until it becomes true"</td></tr>
+</table>
+<p>Both check the test <b>before</b> the first round, so the body may run zero times.</p>
+<pre><code>x=1
+while [[ $x -le 5 ]]; do
+    echo "x is $x"
+    x=$((x + 1))         <span class="c"># without this the loop never ends!</span>
+done
+echo "Finished"
+
+x=5
+until [[ $x -lt 1 ]]; do
+    echo "x is $x"
+    x=$((x - 1))
+done</code></pre>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>Wait for a server to come back after reboot.</b> <code>until ping -c1 -W1 server1 &gt; /dev/null 2&gt;&amp;1; do sleep 5; done; echo "server1 is up"</code>. The script waits and then continues the moment the server answers.</p></div>
+<div class="callout bad"><b class="t">Infinite loop warning</b>
+If the test never changes, the loop never ends. Press <code>Ctrl+C</code> to stop it.</div>
+</section>
+
+<!-- ============ 1.6 ============ -->
+<section id="s16">
+<h2>1.6 Guided Exercise: Run Loops and Conditional Commands</h2>
+<div class="keywords"><span class="kw">for</span><span class="kw">ssh host command</span><span class="kw">if/else</span><span class="kw">~/bin</span></div>
+<pre><code>lab start scripts-loops</code></pre>
+<ol class="steps">
+<li><b>Run a command on another machine without logging in:</b>
+<pre><code>ssh student@servera hostname      <span class="c"># servera</span>
+ssh student@serverb hostname      <span class="c"># serverb</span></code></pre></li>
+<li><b>Loop over both servers:</b>
+<pre><code>for host in servera serverb; do
+    ssh student@${host} hostname
+done</code></pre></li>
+<li><b>Prepare your personal bin folder:</b>
+<pre><code>mkdir -p ~/bin
+echo $PATH          <span class="c"># check /home/student/bin is in the list</span></code></pre></li>
+<li><b>Create <code>~/bin/printhostname.sh</code>:</b>
+<pre><code>#!/usr/bin/bash
+for host in servera serverb; do
+    ssh student@${host} hostname
+    if [[ "${host}" == "servera" ]]; then
+        echo "The host is servera"
+    else
+        echo "The host is not servera"
+    fi
+done</code></pre></li>
+<li><b>Allow, run, check:</b>
+<pre><code>chmod +x ~/bin/printhostname.sh
+printhostname.sh
+echo $?            <span class="c"># 0 means success</span></code></pre>
+<pre><code><span class="c">servera
+The host is servera
+serverb
+The host is not servera</span></code></pre></li>
+<li><b>Finish:</b> <code>lab finish scripts-loops</code></li>
+</ol>
+<div class="callout warn"><b class="t">Variable names are case-sensitive</b>
+If the loop variable is <code>host</code>, you must write <code>${host}</code>. Writing <code>$HOST</code> would be a different, empty variable and the <code>if</code> would never match.</div>
+</section>
+
+<!-- ============ 1.7 ============ -->
+<section id="s17">
+<h2>1.7 Lab: Shell Scripting and the Command Line</h2>
+<div class="keywords"><span class="kw">loop + variables</span><span class="kw">ssh</span><span class="kw">redirect</span><span class="kw">lab grade</span></div>
+<p><b>Task:</b> on <code>workstation</code>, build <code>/home/student/bin/bash-lab.sh</code>. For each server (<code>servera</code>, <code>serverb</code>) collect three facts and save them in <code>/home/student/output-servera</code> and <code>/home/student/output-serverb</code>, with a line of <code>#####</code> between each.</p>
+<table>
+<tr><th>Order</th><th>Command</th><th>How to save</th></tr>
+<tr><td>1</td><td><code>hostname --fqdn</code></td><td><code>&gt;</code> (new file)</td></tr>
+<tr><td>2</td><td><code>echo "#####"</code></td><td><code>&gt;&gt;</code></td></tr>
+<tr><td>3</td><td><code>hostname --ip-address</code></td><td><code>&gt;&gt;</code></td></tr>
+<tr><td>4</td><td><code>echo "#####"</code></td><td><code>&gt;&gt;</code></td></tr>
+<tr><td>5</td><td><code>uname --machine</code></td><td><code>&gt;&gt;</code></td></tr>
+</table>
+<pre><code>lab start scripts-review
+mkdir -p ~/bin
+vim ~/bin/bash-lab.sh
+chmod +x ~/bin/bash-lab.sh</code></pre>
+<h4>Solution</h4>
+<pre><code>#!/usr/bin/bash
+REMOTE_USER='student'
+PREFIX='/home/student/output'
+
+for SERVER in servera serverb; do
+    OUTPUT=${PREFIX}-${SERVER}
+    DESTINATION=${REMOTE_USER}@${SERVER}
+    ssh ${DESTINATION} "hostname --fqdn"       &gt;  ${OUTPUT}
+    echo "#####"                               &gt;&gt; ${OUTPUT}
+    ssh ${DESTINATION} "hostname --ip-address" &gt;&gt; ${OUTPUT}
+    echo "#####"                               &gt;&gt; ${OUTPUT}
+    ssh ${DESTINATION} "uname --machine"       &gt;&gt; ${OUTPUT}
+done</code></pre>
+<p>The loop runs the same 5 steps for two servers. Without a loop you would write 10 nearly identical lines. With 100 servers you only change the list.</p>
+<pre><code>bash-lab.sh
+cat /home/student/output-servera
+<span class="c">servera.lab.example.com
+#####
+172.25.250.10
+#####
+x86_64</span>
+lab grade scripts-review
+lab finish scripts-review</code></pre>
+<div class="callout"><b class="t">If something fails</b>
+<ul>
+<li><code>Permission denied</code>: you forgot <code>chmod +x</code>.</li>
+<li><code>command not found</code>: <code>~/bin</code> is not in PATH, or you typed the wrong name.</li>
+<li>Empty output file: check the server name spelling and that SSH works.</li>
+</ul></div>
+</section>
+
+<!-- ============ 1.8 ============ -->
+<section id="s18">
+<h2>1.8 Summary</h2>
+<ul>
+<li><span class="kw">Shell variable</span> lives in one shell. <span class="kw">export</span> turns it into an <span class="kw">environment variable</span> that child programs can read.</li>
+<li>Put permanent settings in <code>~/.bashrc</code> (user) or <code>/etc/profile.d/*.sh</code> (everyone). Use <code>source</code> to load without logging out.</li>
+<li>A script starts with <span class="kw">#!/usr/bin/bash</span>, needs <span class="kw">chmod +x</span>, and gets input through <span class="kw">$1 $2 ...</span></li>
+<li><span class="kw">Quotes</span> decide what Bash expands: <code>'...'</code> nothing, <code>"..."</code> variables and commands.</li>
+<li>Send normal output to STDOUT and errors to STDERR (<code>&gt;&amp;2</code>).</li>
+<li><span class="kw">for</span>, <span class="kw">while</span>, <span class="kw">until</span> repeat work. <span class="kw">if / elif / else</span> make choices based on <span class="kw">exit codes</span> (0 = success).</li>
+</ul>
+</section>
+
+<!-- ============ EXTRA ============ -->
+<section id="extra">
+<h2>Extra Must-Know Topics</h2>
+<p>These topics are used in almost every real script. Learn them now.</p>
+
+<h3>1. Check that the user gave the right input</h3>
+<pre><code>#!/usr/bin/bash
+if [[ $# -ne 2 ]]; then
+    echo "Usage: $0 &lt;user&gt; &lt;group&gt;" &gt;&amp;2
+    exit 1
+fi
+echo "Creating $1 in group $2"</code></pre>
+
+<h3>2. AND, OR, and chaining</h3>
+<table>
+<tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr>
+<tr><td><code>;</code></td><td>run next, always</td><td><code>cd /tmp; ls</code></td></tr>
+<tr><td><code>&amp;&amp;</code></td><td>run next only if previous <b>succeeded</b></td><td><code>mkdir d &amp;&amp; cd d</code></td></tr>
+<tr><td><code>||</code></td><td>run next only if previous <b>failed</b></td><td><code>ping -c1 h || echo down</code></td></tr>
+<tr><td><code>&amp;&amp;</code> in <code>[[ ]]</code></td><td>both tests true</td><td><code>[[ -f f &amp;&amp; -r f ]]</code></td></tr>
+<tr><td><code>||</code> in <code>[[ ]]</code></td><td>either test true</td><td><code>[[ $a -eq 1 || $b -eq 1 ]]</code></td></tr>
+</table>
+
+<h3>3. case: tidy multiple choices</h3>
+<pre><code>case "$1" in
+    start)   echo "Starting..."  ;;
+    stop)    echo "Stopping..."  ;;
+    restart) echo "Restarting..." ;;
+    *)       echo "Usage: $0 {start|stop|restart}" &gt;&amp;2; exit 1 ;;
+esac</code></pre>
+<p>Use <code>case</code> when you compare one variable against many fixed values. It is easier to read than a long <code>elif</code> chain.</p>
+
+<h3>4. Ask the user a question</h3>
+<pre><code>read -p "Enter your name: " name
+echo "Hello, $name"</code></pre>
+
+<h3>5. Read a file line by line</h3>
+<pre><code>while read -r line; do
+    echo "Line: $line"
+done &lt; /etc/hosts</code></pre>
+<div class="callout warn"><b class="t">SSH inside a while-read loop</b>
+Use <code>ssh -n</code> there. Plain <code>ssh</code> eats the rest of the file and the loop stops after the first line.</div>
+
+<h3>6. Loop controls</h3>
+<pre><code>for ((i=1; i&lt;=5; i++)); do
+    [[ $i -eq 2 ]] &amp;&amp; continue     <span class="c"># skip this round</span>
+    [[ $i -eq 4 ]] &amp;&amp; break        <span class="c"># leave the loop</span>
+    echo $i                         <span class="c"># prints 1 and 3</span>
+done</code></pre>
+
+<h3>7. Loop over an array safely</h3>
+<pre><code>servers=(web01 web02 db01)
+for s in "${servers[@]}"; do
+    echo "Checking $s"
+done</code></pre>
+
+<h3>8. Functions: name a block of code</h3>
+<pre><code>log() { echo "[$(date +%T)] $*"; }
+log "Backup started"
+log "Backup finished"</code></pre>
+
+<h3>9. Safer scripts</h3>
+<pre><code>#!/usr/bin/bash
+set -euo pipefail</code></pre>
+<table>
+<tr><th>Option</th><th>Effect</th></tr>
+<tr><td><code>-e</code></td><td>stop at the first failing command</td></tr>
+<tr><td><code>-u</code></td><td>error if you use an unset variable (catches typos)</td></tr>
+<tr><td><code>-o pipefail</code></td><td>a pipeline fails if any part fails</td></tr>
+</table>
+<div class="scenario"><span class="tag">REAL WORLD</span>
+<p><b>The famous cleanup bug.</b> <code>rm -rf "$DIR/"*</code> with <code>DIR</code> accidentally empty becomes <code>rm -rf /*</code>. With <code>set -u</code> the script stops because <code>DIR</code> is unset. One line saves your server.</p></div>
+
+<h3>10. Debug your script</h3>
+<pre><code>bash -x script.sh      <span class="c"># show every command as it runs</span>
+bash -n script.sh      <span class="c"># check syntax only, do not run</span>
+shellcheck script.sh   <span class="c"># finds common mistakes (install from EPEL)</span></code></pre>
+
+<h3>11. Useful variable tricks</h3>
+<pre><code>echo "${name:-guest}"      <span class="c"># use "guest" if name is empty</span>
+echo "${#name}"            <span class="c"># length of the text</span>
+readonly PI=3.14           <span class="c"># cannot be changed later</span>
+today=$(date +%F)          <span class="c"># save command output in a variable</span></code></pre>
+
+<h3>12. Where script output files should go</h3>
+<pre><code>TMP=$(mktemp)              <span class="c"># safe unique temporary file</span>
+trap 'rm -f "$TMP"' EXIT   <span class="c"># delete it when the script ends</span></code></pre>
+
+<h3>13. Run scripts automatically</h3>
+<p>Use <code>cron</code> (<code>crontab -e</code>) or a systemd timer to run a script on a schedule. A cron line like <code>0 2 * * * /home/student/bin/backup.sh</code> runs it every day at 2 AM. Always use the full path in cron, because cron has a very small PATH.</p>
+</section>
+
+<!-- ============ REAL ============ -->
+<section id="real">
+<h2>Real-World Scenarios</h2>
+
+<div class="scenario"><span class="tag">SCENARIO 1</span>
+<h4>Create 20 new employee accounts</h4>
+<p>HR sends a text file <code>newusers.txt</code> with one user name per line.</p>
+<pre><code>#!/usr/bin/bash
+while read -r user; do
+    if id "$user" &gt; /dev/null 2&gt;&amp;1; then
+        echo "$user already exists, skipping"
+    else
+        sudo useradd -m "$user" &amp;&amp; echo "Created $user"
+    fi
+done &lt; newusers.txt</code></pre>
+<p><b>Uses:</b> while read loop, if/else, exit code, redirect to /dev/null.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 2</span>
+<h4>Morning health report of many servers</h4>
+<pre><code>#!/usr/bin/bash
+REPORT=~/report-$(date +%F).txt
+for h in web01 web02 db01; do
+    {
+      echo "===== $h ====="
+      ssh -n "$h" "uptime; df -h /; free -m"
+    } &gt;&gt; "$REPORT" 2&gt;&amp;1
+done
+echo "Report saved in $REPORT"</code></pre>
+<p><b>Uses:</b> for loop, variables, command substitution, grouped redirect.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 3</span>
+<h4>Safe backup with a check</h4>
+<pre><code>#!/usr/bin/bash
+set -u
+SRC=/etc
+DEST=/backup
+if [[ ! -d "$DEST" ]]; then
+    echo "Backup folder missing" &gt;&amp;2
+    exit 1
+fi
+tar -czf "$DEST/etc-$(date +%F).tar.gz" "$SRC" 2&gt; /tmp/backup.err
+if [[ $? -eq 0 ]]; then
+    echo "Backup OK"
+else
+    echo "Backup FAILED, see /tmp/backup.err" &gt;&amp;2
+    exit 2
+fi</code></pre>
+<p><b>Uses:</b> file test <code>-d</code>, STDERR, exit codes, date in file names.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 4</span>
+<h4>Restart a service only if it is down</h4>
+<pre><code>#!/usr/bin/bash
+SERVICE=${1:-httpd}
+if systemctl is-active --quiet "$SERVICE"; then
+    echo "$SERVICE is running"
+else
+    echo "$SERVICE is down, restarting" &gt;&amp;2
+    sudo systemctl restart "$SERVICE"
+fi</code></pre>
+<p><b>Uses:</b> positional parameter with default value, if/else, exit code of a command.</p></div>
+
+<div class="scenario"><span class="tag">SCENARIO 5</span>
+<h4>Rename 100 photos</h4>
+<pre><code>n=1
+for f in *.jpg; do
+    mv -- "$f" "holiday-$(printf '%03d' $n).jpg"
+    n=$((n + 1))
+done</code></pre>
+<p><b>Uses:</b> file glob in for loop, arithmetic, command substitution.</p></div>
+</section>
+
+<!-- ============ MISTAKES ============ -->
+<section id="mistakes">
+<h2>Common Mistakes and Fixes</h2>
+<table>
+<tr><th>Problem</th><th>Why</th><th>Fix</th></tr>
+<tr><td><code>VAR = 5</code> gives "command not found"</td><td>Spaces around <code>=</code></td><td><code>VAR=5</code></td></tr>
+<tr><td><code>Permission denied</code> when running script</td><td>No execute permission</td><td><code>chmod +x script.sh</code></td></tr>
+<tr><td><code>command not found</code> for your script</td><td>Folder not in PATH</td><td>Use <code>./script.sh</code> or add folder to PATH</td></tr>
+<tr><td><code>$10</code> prints wrong value</td><td>Bash reads <code>$1</code> then "0"</td><td><code>${10}</code></td></tr>
+<tr><td>Variable prints nothing</td><td>Typo or wrong case</td><td>Check spelling, use <code>set -u</code></td></tr>
+<tr><td>Variable not seen by a program</td><td>Not exported</td><td><code>export VAR</code></td></tr>
+<tr><td>Prompt change lost after logout</td><td>Typed at prompt only</td><td>Add to <code>~/.bashrc</code></td></tr>
+<tr><td><code>[[$x -eq 1]]</code> fails</td><td>Missing spaces</td><td><code>[[ $x -eq 1 ]]</code></td></tr>
+<tr><td>File with spaces breaks the loop</td><td>Unquoted variable</td><td><code>"$file"</code></td></tr>
+<tr><td>Output file keeps only last line</td><td>Used <code>&gt;</code> each time</td><td>Use <code>&gt;&gt;</code> after the first</td></tr>
+<tr><td>Loop never ends</td><td>Counter never changes</td><td>Update the variable inside the loop</td></tr>
+<tr><td>Script works by hand, fails in cron</td><td>Small PATH in cron</td><td>Use full paths like <code>/usr/bin/tar</code></td></tr>
+</table>
+</section>
+
+<!-- ============ CHEAT ============ -->
+<section id="cheat">
+<h2>Quick Cheat Sheet</h2>
+<pre><code><span class="c"># VARIABLES</span>
+VAR=value        export VAR        export VAR=value
+echo "${VAR}"    unset VAR         export -n VAR
+set | less       env               printenv VAR
+
+<span class="c"># STARTUP</span>
+~/.bashrc  (user)     /etc/profile.d/x.sh  (everyone)     source ~/.bashrc
+
+<span class="c"># SCRIPT</span>
+#!/usr/bin/bash       chmod +x s.sh       ./s.sh       echo $?
+$0 $1 ${10} $# "$@"   echo "err" &gt;&amp;2      exit 0
+
+<span class="c"># REDIRECT</span>
+&gt; overwrite   &gt;&gt; append   2&gt; errors   &gt; f 2&gt;&amp;1 both   &gt; /dev/null discard
+
+<span class="c"># TESTS</span>
+[[ $a -eq $b ]]   [[ $s == "x" ]]   [[ -z "$s" ]]   [[ -f file ]]   [[ -d dir ]]
+
+<span class="c"># CONTROL</span>
+for i in a b c; do ...; done
+while [[ test ]]; do ...; done
+until [[ test ]]; do ...; done
+if [[ t ]]; then ...; elif [[ t ]]; then ...; else ...; fi
+case "$x" in a) ...;; b) ...;; *) ...;; esac</code></pre>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz">
+<h2>Practice Quiz: 25 MCQs</h2>
+<p>Click an answer. You see right or wrong at once, with a short reason. Your score updates at the bottom.</p>
+<div id="quizbox"></div>
+<div id="score"><span id="scoretext">Score: 0 / 25</span><button class="btn" id="resetq">Restart quiz</button></div>
+</section>
+
+</main>
+</div>
+
+<footer>Chapter 1 &middot; Shell Scripting and the Command Line</footer>
+
+<script>
+/* copy buttons */
+document.querySelectorAll('pre').forEach(function(p){
+  var b=document.createElement('button');b.className='copy';b.textContent='Copy';
+  b.onclick=function(){
+    var t=p.querySelector('code')?p.querySelector('code').innerText:p.innerText;
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1200)})}
+  };
+  p.appendChild(b);
+});
+
+/* quiz */
+var Q=[
+{q:"You run: COUNT = 40  and Bash says 'COUNT: command not found'. What is wrong?",o:["The number is too small","There are spaces around the equal sign","COUNT must be lowercase","You forgot export"],a:1,e:"Variable assignment must have no spaces around =. With spaces, Bash treats COUNT as a command."},
+{q:"A variable is set with VAR=hello (no export). Which can read it?",o:["Only the current shell","The shell and all programs it starts","Every user on the system","Every shell on the server"],a:0,e:"Without export, the variable stays a shell variable. Only exported variables are copied to child programs."},
+{q:"COUNT=40. What does this print?   echo \"Repeat $COUNTx\"",o:["Repeat 40x","Repeat $COUNTx","Repeat (empty value)","An error message"],a:2,e:"Bash looks for a variable named COUNTx, which does not exist, so it expands to nothing. Use ${COUNT}x."},
+{q:"Which command prints the text  Total: $5  exactly as typed, with no expansion?",o:["echo \"Total: $5\"","echo 'Total: $5'","echo Total: $(5)","echo Total: ${5}"],a:1,e:"Single quotes stop all expansion. In double quotes, $5 would be replaced by positional parameter 5."},
+{q:"You want your own tool in /opt/tools/bin to run by name. What is the best temporary fix?",o:["alias PATH=/opt/tools/bin","export PATH=$PATH:/opt/tools/bin","chmod 777 /opt/tools/bin","unset PATH"],a:1,e:"PATH is the list of folders Bash searches for commands. Add the folder to it and export it."},
+{q:"PATH is /usr/local/bin:/usr/bin. Both folders contain a program named tool. Which runs?",o:["The one in /usr/bin","The one in /usr/local/bin","Both, one after another","Neither, it is an error"],a:1,e:"Bash searches left to right and runs the first match."},
+{q:"Which file is read for an interactive login shell such as an SSH login?",o:["Only ~/.bashrc","/etc/profile then ~/.bash_profile","Only /etc/bashrc","$BASH_ENV only"],a:1,e:"Login shells read /etc/profile and then ~/.bash_profile, which normally loads ~/.bashrc."},
+{q:"You edited ~/.bashrc. How do you apply it to the current shell without logging out?",o:["reboot","export ~/.bashrc","source ~/.bashrc","chmod +x ~/.bashrc"],a:2,e:"source (or a dot) runs the file inside the current shell, so the changes apply now."},
+{q:"Which PS1 value shows [user@host ~]$ style with a trailing space?",o:["PS1=\"[\\u@\\h \\W]\\$ \"","PS1=[\\u@\\h \\W]","PS1 = '[\\u@\\h]'","PS1=user@host"],a:0,e:"\\u is user, \\h is host, \\W is the current folder, \\$ is $ or #, and the trailing space keeps typing separate."},
+{q:"What does   export -n PS1   do?",o:["Deletes PS1","Stops exporting PS1 but keeps its value in the shell","Exports PS1 twice","Makes PS1 read-only"],a:1,e:"export -n removes the export flag. The variable still exists in the shell."},
+{q:"What is the job of the first line  #!/usr/bin/bash  in a script?",o:["It is a comment with no effect","It names the program that should run the script","It makes the file executable","It sets the PATH"],a:1,e:"The shebang tells Linux which interpreter to use when the script is run directly."},
+{q:"You wrote hello.sh but ./hello.sh gives 'Permission denied'. What is the fix?",o:["chmod +x hello.sh","export hello.sh","source hello","mv hello.sh /etc"],a:0,e:"A script needs execute permission to run as a normal command."},
+{q:"Script run as:  ./params.sh a b c d e f g h i j   What does  echo $10  print?",o:["j","a0","10","Nothing"],a:1,e:"Without braces Bash reads $1 followed by the character 0, giving a0. Use ${10} to get j."},
+{q:"Which line sends an error message to the error channel (STDERR)?",o:["echo \"failed\" > 2","echo \"failed\" >&2","echo \"failed\" 2>","echo \"failed\" | 2"],a:1,e:">&2 redirects the echo output to file descriptor 2, which is STDERR."},
+{q:"What is the difference between > and >> ?",o:["No difference","> overwrites the file, >> appends to it","> appends, >> overwrites","> is for errors, >> is for output"],a:1,e:"A single > creates or empties the file first. Double >> adds to the end."},
+{q:"A command succeeded. Which value does $? hold right after it?",o:["0","1","255","true"],a:0,e:"Exit code 0 means success. Any non-zero number means some kind of failure."},
+{q:"Which test checks that the number in variable n is greater than 10?",o:["[[ $n > 10 ]]","[[ $n -gt 10 ]]","[[ $n == 10 ]]","[[ n -gt 10 ]]"],a:1,e:"-gt is the numeric 'greater than' operator. Use $n to read the value."},
+{q:"Which line is written correctly?",o:["[[$x -eq 1]]","[[ $x -eq 1 ]]","[[ $x-eq 1 ]]","[[ $x - eq 1 ]]"],a:1,e:"[[ is like a command and needs spaces around the brackets and every part of the test."},
+{q:"Which loop runs its body as long as the test is FALSE?",o:["for","while","until","case"],a:2,e:"until repeats until the test becomes true. while repeats while the test is true."},
+{q:"What does this print?   for h in host{1..3}; do echo $h; done",o:["host{1..3}","host1 host2 host3, each on its own line","host 1 2 3","Only host3"],a:1,e:"Brace expansion creates host1 host2 host3, and the loop prints one per line."},
+{q:"You write:  x=1; while [[ $x -le 3 ]]; do echo $x; done   What happens?",o:["Prints 1 2 3 and stops","Prints 1 forever (infinite loop)","Prints nothing","Syntax error"],a:1,e:"x never changes, so the test stays true. You must add x=$((x + 1)) inside the loop."},
+{q:"In an if/elif/else block two conditions are true. How many branches run?",o:["All true branches","Only the first true branch","Only the last true branch","The else branch"],a:1,e:"Bash tests in order, runs the first true branch, and skips the rest."},
+{q:"A script ends with the line:  exit 3   What does the calling program see?",o:["Success","Exit code 3, which means an error","Nothing","The script ran 3 times"],a:1,e:"Any non-zero exit code means failure. The number can tell the caller what kind of failure."},
+{q:"You want a command to run only if the previous command succeeded. Which operator?",o:[";","&&","||","&"],a:1,e:"&& runs the next command only when the previous one returns exit code 0. || runs it only on failure."},
+{q:"Which line in a script helps stop dangerous mistakes, like using an unset variable in rm -rf \"$DIR\"/* ?",o:["set -u","set +u","alias rm=ls","export DIR"],a:0,e:"set -u makes Bash stop with an error when an unset variable is used."}
+];
+var box=document.getElementById('quizbox'),score=0,done=0;
+function render(){
+  box.innerHTML='';score=0;done=0;upd();
+  Q.forEach(function(item,i){
+    var d=document.createElement('div');d.className='q';
+    var t=document.createElement('div');t.className='qt';t.textContent=(i+1)+'. '+item.q;d.appendChild(t);
+    var ex=document.createElement('div');ex.className='exp';
+    item.o.forEach(function(txt,j){
+      var b=document.createElement('button');b.className='opt';b.textContent=String.fromCharCode(65+j)+'. '+txt;
+      b.onclick=function(){
+        var all=d.querySelectorAll('.opt');
+        all.forEach(function(x){x.disabled=true});
+        all[item.a].classList.add('right');
+        if(j===item.a){score++;ex.textContent='Correct. '+item.e}
+        else{b.classList.add('wrong');ex.textContent='Not quite. Correct answer: '+String.fromCharCode(65+item.a)+'. '+item.e}
+        ex.classList.add('show');done++;upd();
+      };
+      d.appendChild(b);
+    });
+    d.appendChild(ex);box.appendChild(d);
+  });
+}
+function upd(){
+  var s='Score: '+score+' / '+Q.length+'  (answered '+done+')';
+  if(done===Q.length){
+    var p=Math.round(score/Q.length*100);
+    s+=' - '+p+'% '+(p>=80?'Great job!':p>=60?'Good, review the missed topics.':'Re-read the sections and try again.');
+  }
+  document.getElementById('scoretext').textContent=s;
+}
+document.getElementById('resetq').onclick=function(){render();document.getElementById('quiz').scrollIntoView()};
+render();
+</script>
+</body>
+</html>
