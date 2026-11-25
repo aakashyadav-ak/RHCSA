@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 09: Tuning System Performance</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#7a5ad6;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 09 &middot; RHEL 10</small><h1>Tuning System Performance</h1><p>A server is slow? <mark>tuned</mark> applies a ready-made performance profile in one command, and <mark>nice</mark> / <mark>renice</mark> decide which process gets the CPU first.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Why tuning</a><a href="#tuned">tuned-adm</a><a href="#nice">nice and renice</a><a href="#scen">Scenario</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Why tuning?</h2><div class="why"><b>Why?</b> A database server needs different settings than a laptop. <b>Tuning</b> adjusts kernel and disk settings for the job. Doing it by hand is hard, so Red Hat gives ready profiles through the <mark>tuned</mark> service.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">tuned service</text><text x="103" y="84" text-anchor="middle">runs in background</text><text class="sm" x="103" y="106" text-anchor="middle"></text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#ma)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">Profile</text><text x="334" y="84" text-anchor="middle">set of settings</text><text class="sm" x="334" y="106" text-anchor="middle"></text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#ma)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">Kernel / disk / CPU</text><text x="565" y="84" text-anchor="middle">settings applied</text><text class="sm" x="565" y="106" text-anchor="middle"></text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#ma)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">Better speed or saving</text><text x="796" y="84" text-anchor="middle"></text><text class="sm" x="796" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">You pick a profile. tuned applies the many small settings.</text></svg><div class="note"><b>Full form</b><b>tuned</b> = tuning daemon. <b>nice</b> is just a name: a "nice" process is kind to others, so it gets less CPU. <b>renice</b> = change the nice value of a running process.</div></section>
+<section id="tuned"><h2><span class="n">2</span>tuned and tuned-adm</h2><div class="why"><b>Why?</b> <code>tuned-adm</code> (tuned administration) is the one command you use to see, choose and check profiles.</div><pre class="term"><span class="p">$ </span>sudo dnf install -y tuned
+<span class="p">$ </span>sudo systemctl enable --now tuned
+<span class="p">$ </span>tuned-adm active
+<span class="o">Current active profile: virtual-guest</span>
+<span class="p">$ </span>tuned-adm list
+<span class="o">Available profiles:</span>
+<span class="o">- accelerator-performance     - Throughput performance based tuning with disabled higher latency STOP states</span>
+<span class="o">- balanced                    - General non-specialized TuneD profile</span>
+<span class="o">- desktop                     - Optimize for the desktop use-case</span>
+<span class="o">- latency-performance         - Optimize for deterministic performance at the cost of increased power consumption</span>
+<span class="o">- network-latency             - Optimize for deterministic performance at the cost of increased power consumption, focused on low latency network performance</span>
+<span class="o">- network-throughput          - Optimize for streaming network throughput</span>
+<span class="o">- powersave                   - Optimize for low power consumption</span>
+<span class="o">- throughput-performance      - Broadly applicable tuning that provides excellent performance across a variety of common server workloads</span>
+<span class="o">- virtual-guest               - Optimize for running inside a virtual guest</span>
+<span class="o">- virtual-host                - Optimize for running KVM guests</span>
+<span class="o">Current active profile: virtual-guest</span></pre><div class="tblwrap"><table class=""><tr><th>Profile</th><th>Use when</th></tr><tr><td><code>balanced</code></td><td>general default, saves some power</td></tr><tr><td><code>throughput-performance</code></td><td>servers, maximum data throughput</td></tr><tr><td><code>latency-performance</code></td><td>low and stable response time</td></tr><tr><td><code>network-latency</code></td><td>trading, low latency network</td></tr><tr><td><code>powersave</code></td><td>laptops, save power</td></tr><tr><td><code>virtual-guest</code></td><td>default inside a VM</td></tr><tr><td><code>virtual-host</code></td><td>a host that runs VMs</td></tr></table></div><h3>Recommend, change, verify</h3><pre class="term"><span class="p">$ </span>tuned-adm recommend
+<span class="o">virtual-guest</span>
+<span class="p">$ </span>sudo tuned-adm profile throughput-performance
+<span class="p">$ </span>tuned-adm active
+<span class="o">Current active profile: throughput-performance</span>
+<span class="p">$ </span>sudo tuned-adm verify
+<span class="o">Verification succeeded, current system settings match the preset profile.</span>
+<span class="o">See TuneD log file ('/var/log/tuned/tuned.log') for details.</span>
+<span class="p">$ </span>sudo tuned-adm off</pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>tuned-adm list</code></td><td>all profiles</td></tr><tr><td><code>tuned-adm active</code></td><td>current profile</td></tr><tr><td><code>tuned-adm recommend</code></td><td>profile that fits this hardware</td></tr><tr><td><code>tuned-adm profile NAME</code></td><td>switch (permanent, saved)</td></tr><tr><td><code>tuned-adm verify</code></td><td>check settings really match</td></tr><tr><td><code>tuned-adm off</code></td><td>turn all tuning off</td></tr></table></div><div class="note"><b>Where is the profile saved?</b>The active profile name is stored in <code>/etc/tuned/active_profile</code>. Profile files are in <code>/usr/lib/tuned/profiles/</code> and your own in <code>/etc/tuned/profiles/</code>.</div><div class="tip"><b>tuned must be running</b>If <code>tuned-adm</code> says it cannot talk to the daemon, run <code>systemctl enable --now tuned</code>.</div></section>
+<section id="nice"><h2><span class="n">3</span>Process priority: nice and renice</h2><div class="why"><b>Why?</b> When many programs want the CPU, a heavy backup can slow your web server. <b>Priority</b> tells the scheduler who goes first.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="mb" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="263" height="95" rx="12"/><text class="bd" x="141" y="58" text-anchor="middle">-20</text><text x="141" y="84" text-anchor="middle">highest priority</text><text class="sm" x="141" y="106" text-anchor="middle"></text><line class="ar" x1="275" y1="72" x2="316" y2="72" marker-end="url(#mb)"/><rect class="bx" x="318" y="25" width="263" height="95" rx="12"/><text class="bd" x="449" y="58" text-anchor="middle">0</text><text x="449" y="84" text-anchor="middle">default</text><text class="sm" x="449" y="106" text-anchor="middle"></text><line class="ar" x1="583" y1="72" x2="624" y2="72" marker-end="url(#mb)"/><rect class="ok" x="626" y="25" width="263" height="95" rx="12"/><text class="bd" x="757" y="58" text-anchor="middle">+19</text><text x="757" y="84" text-anchor="middle">lowest priority</text><text class="sm" x="757" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Nice value: lower number = MORE important. Range -20 to 19.</text></svg><pre class="term"><span class="p">$ </span>ps -o pid,ni,comm -C sleep
+<span class="o">    PID  NI COMMAND</span>
+<span class="o">   5120   0 sleep</span>
+<span class="p">$ </span>nice -n 10 tar -czf /tmp/big.tar.gz /var &amp;
+<span class="o">[1] 5301</span>
+<span class="p">$ </span>ps -o pid,ni,comm -p 5301
+<span class="o">    PID  NI COMMAND</span>
+<span class="o">   5301  10 tar</span></pre><ul><li><code>nice -n VALUE command</code> starts a new process with that nice value.</li><li>A normal user can only <b>raise</b> the number (lower priority).</li><li>Only <b>root</b> can use negative values (higher priority).</li></ul><h3>renice: change a running process</h3><pre class="term"><span class="p">$ </span>renice -n 15 -p 5301
+<span class="o">5301 (process ID) old priority 10, new priority 15</span>
+<span class="p">$ </span>sudo renice -n -5 -p 1450
+<span class="o">1450 (process ID) old priority 0, new priority -5</span>
+<span class="p">$ </span>renice -n 5 -u student</pre><div class="tblwrap"><table class=""><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>-p PID</code></td><td>a process id</td></tr><tr><td><code>-u USER</code></td><td>all processes of a user</td></tr><tr><td><code>-g GID</code></td><td>a process group</td></tr></table></div><h3>See it in top</h3><pre class="term"><span class="p">$ </span>top
+<span class="o">  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM</span>
+<span class="o"> 5301 student   30  10  210236   3568   3144 R  45.0   0.1 tar</span></pre><p>The <mark>NI</mark> column is the nice value. <mark>PR</mark> is the kernel priority (PR = 20 + NI for normal processes).</p><div class="warn"><b>Nice does not limit CPU</b>It only matters when the CPU is busy. On an idle server a nice 19 process still uses 100% CPU.</div></section>
+<section id="scen"><h2><span class="n">4</span>Real scenario: nightly backup slows the web server</h2><ol class="steps"><li><span>Notice the slowness: <code>top</code> shows <code>tar</code> using high CPU.</span></li><li><span>Find the PID: <code>pgrep tar</code>.</span></li><li><span>Lower its priority: <code>sudo renice -n 15 -p PID</code>.</span></li><li><span>Make the cron job nice from now: put <code>nice -n 15</code> in the crontab line.</span></li><li><span>If the whole server is for throughput, set <code>tuned-adm profile throughput-performance</code>.</span></li></ol><div class="file"><b>crontab -e</b><pre><span class="add">0 2 * * * nice -n 15 /usr/bin/tar -czf /backup/www.tar.gz /var/www &gt;&gt; /var/log/backup.log 2&gt;&amp;1</span></pre></div></section>
+<section id="cheat"><h2><span class="n">5</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>systemctl enable --now tuned</code></td><td>start tuned</td></tr><tr><td><code>tuned-adm list</code></td><td>list profiles</td></tr><tr><td><code>tuned-adm active</code></td><td>show active</td></tr><tr><td><code>tuned-adm recommend</code></td><td>best match</td></tr><tr><td><code>tuned-adm profile NAME</code></td><td>switch</td></tr><tr><td><code>tuned-adm verify</code></td><td>check</td></tr><tr><td><code>nice -n 10 CMD</code></td><td>start with low priority</td></tr><tr><td><code>renice -n 10 -p PID</code></td><td>change running process</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">6</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 09 &middot; Tuning System Performance</footer></div>
+<script>
+const Q=[{"q": "What does the tuned service do?", "o": ["Formats disks", "Applies performance profiles", "Schedules jobs", "Manages users"], "a": 1, "e": "tuned applies ready-made tuning profiles."}, {"q": "Which command shows the current profile?", "o": ["tuned-adm active", "tuned show", "tuned-adm status-all", "tuned-adm now"], "a": 0, "e": "tuned-adm active."}, {"q": "Which command lists all profiles?", "o": ["tuned-adm list", "tuned-adm profiles -a", "tuned-adm all", "systemctl tuned"], "a": 0, "e": "tuned-adm list."}, {"q": "Which profile fits a general server workload with best throughput?", "o": ["powersave", "balanced always", "throughput-performance", "desktop"], "a": 2, "e": "throughput-performance is for broad server workloads."}, {"q": "Which profile saves battery on a laptop?", "o": ["network-latency", "virtual-host", "latency-performance", "powersave"], "a": 3, "e": "powersave."}, {"q": "Which command asks tuned what fits this hardware?", "o": ["tuned-adm recommend", "tuned-adm suggest", "tuned-adm guess", "tuned-adm best"], "a": 0, "e": "tuned-adm recommend."}, {"q": "How do you switch to the latency-performance profile?", "o": ["tuned latency-performance", "tuned-adm use latency-performance", "tuned-adm set latency-performance", "tuned-adm profile latency-performance"], "a": 3, "e": "tuned-adm profile NAME."}, {"q": "What does <code>tuned-adm verify</code> do?", "o": ["Reboots", "Checks if the system settings match the profile", "Deletes profile", "Lists processes"], "a": 1, "e": "It compares current settings with the profile."}, {"q": "tuned-adm cannot connect to the daemon. What do you do?", "o": ["Reboot RHEL", "Delete /etc/tuned", "Run renice", "systemctl enable --now tuned"], "a": 3, "e": "The tuned service is not running."}, {"q": "Which default profile is common inside a virtual machine?", "o": ["powersave", "virtual-guest", "virtual-host", "desktop"], "a": 1, "e": "virtual-guest."}, {"q": "What is the range of nice values?", "o": ["0 to 100", "-10 to 10", "-20 to 19", "1 to 99"], "a": 2, "e": "-20 (highest priority) to 19 (lowest)."}, {"q": "A process has nice 15 and another has nice 0. Which gets CPU first?", "o": ["nice 0", "The older one only", "nice 15", "Both equal"], "a": 0, "e": "Lower nice value = higher priority."}, {"q": "Which command starts a backup with low priority?", "o": ["tuned-adm nice tar", "renice 10 tar ...", "nice -n 10 tar ...", "priority 10 tar"], "a": 2, "e": "nice -n 10 command."}, {"q": "Which command changes the priority of a running process 5301?", "o": ["renice -n 10 -p 5301", "ps -n 5301", "nice -p 5301", "tuned-adm -p 5301"], "a": 0, "e": "renice -n VALUE -p PID."}, {"q": "A normal user tries <code>renice -n -5 -p 5301</code>. What happens?", "o": ["Value is set to 0", "Process is killed", "Denied, only root can lower the nice value below the current one", "Works"], "a": 2, "e": "Only root can increase priority (negative values)."}, {"q": "Which top column shows the nice value?", "o": ["NI", "S", "VIRT", "PR"], "a": 0, "e": "NI = nice."}, {"q": "On an idle CPU, does nice 19 slow a process?", "o": ["It crashes", "It stops", "No, it still gets the CPU it needs", "Yes, a lot"], "a": 2, "e": "Nice only matters when processes compete."}, {"q": "Where is the active tuned profile name saved?", "o": ["/etc/profile", "/etc/tuned/active_profile", "/boot/tuned", "/var/tuned"], "a": 1, "e": "/etc/tuned/active_profile."}, {"q": "Which option of renice changes all processes of a user?", "o": ["-u", "-a", "-all", "-s"], "a": 0, "e": "renice -n 5 -u USER."}, {"q": "What command turns off all tuning?", "o": ["tuned-adm disable", "tuned-adm reset", "tuned-adm off", "tuned-adm stop"], "a": 2, "e": "tuned-adm off."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

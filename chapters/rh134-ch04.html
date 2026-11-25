@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 04: Scheduling System Tasks</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#e0702c;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 04 &middot; RHEL 10</small><h1>Scheduling System Tasks</h1><p>System jobs run as root for the whole server: system cron files, <mark>anacron</mark>, <mark>systemd timers</mark>, and temp-file cleanup. Plus a checklist when a job does not run.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Big picture</a><a href="#crond">/etc/cron.d</a><a href="#daily">cron.daily</a><a href="#anacron">anacron</a><a href="#timers">systemd timers</a><a href="#tmpfiles">tmpfiles</a><a href="#trouble">Troubleshooting</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>User jobs vs system jobs</h2><div class="why"><b>Why?</b> User cron jobs belong to one user. System jobs (log cleanup, backups, updates) belong to the server, so they live in system files that admins and packages manage.</div><div class="two"><div class="box"><h3>User jobs (chapter 3)</h3><ul><li><code>crontab -e</code></li><li>stored in <code>/var/spool/cron/USER</code></li><li>5 time fields + command</li><li>runs as that user</li></ul></div><div class="box"><h3>System jobs (this chapter)</h3><ul><li>files in <code>/etc/cron.d/</code></li><li>scripts in <code>/etc/cron.daily/</code> etc.</li><li>6th field = <b>user name</b></li><li>also systemd timers</li></ul></div></div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">/etc/cron.d</text><text x="103" y="84" text-anchor="middle">exact time</text><text class="sm" x="103" y="106" text-anchor="middle">user field needed</text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#ma)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">cron.hourly/daily</text><text x="334" y="84" text-anchor="middle">scripts folders</text><text class="sm" x="334" y="106" text-anchor="middle">run by run-parts</text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#ma)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">anacron</text><text x="565" y="84" text-anchor="middle">catches missed jobs</text><text class="sm" x="565" y="106" text-anchor="middle">after downtime</text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#ma)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">systemd timer</text><text x="796" y="84" text-anchor="middle">modern way</text><text class="sm" x="796" y="106" text-anchor="middle">unit files</text><text class="sm" x="450" y="170" text-anchor="middle">Four ways to schedule a system job</text></svg></section>
+<section id="crond"><h2><span class="n">2</span>System cron: /etc/crontab and /etc/cron.d</h2><div class="why"><b>Why?</b> Packages and admins need to add system jobs without touching a user crontab. The system format has one extra field: <b>who runs the job</b>.</div><div class="file"><b>/etc/crontab  (reference only, comments + empty by default)</b><pre>SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+# .---- minute (0 - 59)
+# | .-- hour (0 - 23)
+# | | .- day of month (1 - 31)
+# | | | .- month (1 - 12)
+# | | | | .- day of week (0 - 6)
+# | | | | |
+# * * * * * user-name  command to be executed</pre></div><div class="warn"><b>Do not edit /etc/crontab</b>A package update can overwrite it. Create your own file inside <code>/etc/cron.d/</code> instead.</div><h3>Create a system job: exact file and line</h3><ol class="steps"><li><span>Create the file <code>/etc/cron.d/diskreport</code> (any name, no dot in name).</span></li><li><span>Add the line below. Note the <mark>root</mark> user field.</span></li><li><span>Save. No reload needed, crond reads the folder by itself.</span></li></ol><div class="file"><b>/etc/cron.d/diskreport</b><pre>MAILTO=root
+<span class="add">0 4 * * 1  root  /usr/bin/df -h &gt;&gt; /var/log/diskreport.log 2&gt;&amp;1</span></pre></div><pre class="term"><span class="p">$ </span>ls -l /etc/cron.d/
+<span class="o">-rw-r--r--. 1 root root 128 Nov 20 09:10 0hourly</span>
+<span class="o">-rw-r--r--. 1 root root 101 Nov 20 09:12 diskreport</span></pre><div class="note"><b>Rule</b>Files in <code>/etc/cron.d</code> must be owned by root, not writable by others, and the file name must not contain a dot (a name like <code>job.bak</code> is ignored).</div></section>
+<section id="daily"><h2><span class="n">3</span>cron.hourly, cron.daily, weekly, monthly</h2><div class="why"><b>Why?</b> For simple jobs you do not need time fields. Put an executable script in a folder and the system runs it at that interval.</div><div class="tblwrap"><table class=""><tr><th>Folder</th><th>Runs</th></tr><tr><td><code>/etc/cron.hourly/</code></td><td>every hour (at minute 1 past, via <code>/etc/cron.d/0hourly</code>)</td></tr><tr><td><code>/etc/cron.daily/</code></td><td>once a day</td></tr><tr><td><code>/etc/cron.weekly/</code></td><td>once a week</td></tr><tr><td><code>/etc/cron.monthly/</code></td><td>once a month</td></tr></table></div><pre class="term"><span class="p">$ </span>sudo vim /etc/cron.daily/cleanup
+<span class="p">$ </span>sudo cat /etc/cron.daily/cleanup
+<span class="c">#!/bin/bash</span>
+<span class="o">find /var/tmp/reports -type f -mtime +7 -delete</span>
+<span class="p">$ </span>sudo chmod 755 /etc/cron.daily/cleanup</pre><div class="warn"><b>Scripts, not crontab lines</b>These folders hold <b>executable shell scripts</b> only. Without <code>chmod +x</code> (or a bad shebang) the script is skipped. A file name with a dot is skipped too.</div><h3>How the daily run really works</h3><p><code>/etc/cron.d/0hourly</code> runs <code>run-parts /etc/cron.hourly</code> every hour. One of those hourly scripts starts <mark>anacron</mark>, and anacron decides when the daily, weekly and monthly folders run.</p></section>
+<section id="anacron"><h2><span class="n">4</span>anacron and /etc/anacrontab</h2><div class="why"><b>Why?</b> A laptop or VM may be switched off at 3 AM. Normal cron would skip the job. <b>anacron</b> (anachronistic cron) runs missed jobs when the system is back.</div><div class="file"><b>/etc/anacrontab</b><pre>SHELL=/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+RANDOM_DELAY=45
+START_HOURS_RANGE=3-22
+#period  delay  job-identifier  command
+1        5      cron.daily      nice run-parts /etc/cron.daily
+7        25     cron.weekly     nice run-parts /etc/cron.weekly
+@monthly 45     cron.monthly    nice run-parts /etc/cron.monthly</pre></div><div class="tblwrap"><table class=""><tr><th>Field</th><th>Meaning</th></tr><tr><td><b>period</b></td><td>in days: 1 = daily, 7 = weekly, <code>@monthly</code></td></tr><tr><td><b>delay</b></td><td>minutes to wait after anacron starts</td></tr><tr><td><b>job-identifier</b></td><td>unique name, also the timestamp file name</td></tr><tr><td><b>command</b></td><td>what to run</td></tr></table></div><ul><li>Timestamps are kept in <code>/var/spool/anacron/</code>. Anacron compares today with the stored date.</li><li><code>RANDOM_DELAY=45</code> adds up to 45 minutes of random delay, so many servers do not start together.</li><li><code>START_HOURS_RANGE=3-22</code> means jobs start only between 03:00 and 22:00.</li></ul><pre class="term"><span class="p">$ </span>sudo ls /var/spool/anacron
+<span class="o">cron.daily  cron.monthly  cron.weekly</span>
+<span class="p">$ </span>sudo cat /var/spool/anacron/cron.daily
+<span class="o">20261120</span></pre></section>
+<section id="timers"><h2><span class="n">5</span>systemd timers</h2><div class="why"><b>Why?</b> systemd can also schedule jobs. A <mark>timer unit</mark> starts a matching <mark>service unit</mark>. Benefits: logs in the journal, dependencies, and easy status checks.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="mc" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="263" height="95" rx="12"/><text class="bd" x="141" y="58" text-anchor="middle">name.timer</text><text x="141" y="84" text-anchor="middle">says WHEN</text><text class="sm" x="141" y="106" text-anchor="middle"></text><line class="ar" x1="275" y1="72" x2="316" y2="72" marker-end="url(#mc)"/><rect class="bx" x="318" y="25" width="263" height="95" rx="12"/><text class="bd" x="449" y="58" text-anchor="middle">starts</text><text x="449" y="84" text-anchor="middle"></text><text class="sm" x="449" y="106" text-anchor="middle"></text><line class="ar" x1="583" y1="72" x2="624" y2="72" marker-end="url(#mc)"/><rect class="ok" x="626" y="25" width="263" height="95" rx="12"/><text class="bd" x="757" y="58" text-anchor="middle">name.service</text><text x="757" y="84" text-anchor="middle">says WHAT to run</text><text class="sm" x="757" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Same base name: backup.timer starts backup.service</text></svg><h3>See existing timers</h3><pre class="term"><span class="p">$ </span>systemctl list-timers
+<span class="o">NEXT                        LEFT     LAST                        PASSED  UNIT                         ACTIVATES</span>
+<span class="o">Sat 2026-11-21 00:00:00 IST 2h 14min Fri 2026-11-20 00:00:01 IST 21h ago logrotate.timer              logrotate.service</span>
+<span class="o">Sat 2026-11-21 09:35:12 IST 11h left Fri 2026-11-20 09:35:12 IST 12h ago systemd-tmpfiles-clean.timer systemd-tmpfiles-clean.service</span></pre><h3>Create your own timer: 3 steps</h3><p>Scenario: run a disk report every day at 05:00.</p><div class="file"><b>1) /etc/systemd/system/diskreport.service</b><pre>[Unit]
+Description=Disk report
+
+[Service]
+Type=oneshot
+<span class="add">ExecStart=/usr/bin/bash -c "df -h &gt;&gt; /var/log/diskreport.log"</span></pre></div><div class="file"><b>2) /etc/systemd/system/diskreport.timer</b><pre>[Unit]
+Description=Run disk report daily
+
+[Timer]
+OnCalendar=*-*-* 05:00:00
+<span class="add">Persistent=true</span>
+<span class="add"></span>
+[Install]
+WantedBy=timers.target</pre></div><pre class="term"><span class="p">$ </span>sudo systemctl daemon-reload
+<span class="p">$ </span>sudo systemctl enable --now diskreport.timer
+<span class="o">Created symlink '/etc/systemd/system/timers.target.wants/diskreport.timer' -&gt; '/etc/systemd/system/diskreport.timer'.</span>
+<span class="p">$ </span>systemctl list-timers diskreport.timer
+<span class="o">NEXT                        LEFT    LAST PASSED UNIT             ACTIVATES</span>
+<span class="o">Sat 2026-11-21 05:00:00 IST 7h left -    -      diskreport.timer diskreport.service</span></pre><div class="warn"><b>Enable the .timer, not the .service</b>You start and enable <code>diskreport.timer</code>. The service is started by the timer.</div><div class="tblwrap"><table class=""><tr><th>Timer line</th><th>Meaning</th></tr><tr><td><code>OnCalendar=daily</code></td><td>every day at 00:00</td></tr><tr><td><code>OnCalendar=Mon *-*-* 08:30:00</code></td><td>every Monday 08:30</td></tr><tr><td><code>OnBootSec=15min</code></td><td>15 minutes after boot</td></tr><tr><td><code>OnUnitActiveSec=1h</code></td><td>1 hour after the service last ran</td></tr><tr><td><code>Persistent=true</code></td><td>run at next start if a run was missed (like anacron)</td></tr></table></div><div class="tip"><b>Test a calendar time</b><code>systemd-analyze calendar "Mon *-*-* 08:30"</code> prints the next run time. Use it before you enable the timer.</div><pre class="term"><span class="p">$ </span>systemd-analyze calendar "Mon *-*-* 08:30"
+<span class="o">  Original form: Mon *-*-* 08:30</span>
+<span class="o">Normalized form: Mon *-*-* 08:30:00</span>
+<span class="o">    Next elapse: Mon 2026-11-23 08:30:00 IST</span></pre><h3>Check the result</h3><pre class="term"><span class="p">$ </span>systemctl status diskreport.service
+<span class="p">$ </span>journalctl -u diskreport.service --since today</pre></section>
+<section id="tmpfiles"><h2><span class="n">6</span>systemd-tmpfiles: temporary files</h2><div class="why"><b>Why?</b> /tmp and /var/tmp fill up with old files. <b>systemd-tmpfiles</b> (temporary files) creates and cleans them by rules, run by a timer.</div><div class="tblwrap"><table class=""><tr><th>Config folder</th><th>Who writes it</th></tr><tr><td><code>/usr/lib/tmpfiles.d/</code></td><td>packages (do not edit)</td></tr><tr><td><code>/etc/tmpfiles.d/</code></td><td>admin rules, win over packages</td></tr><tr><td><code>/run/tmpfiles.d/</code></td><td>volatile rules</td></tr></table></div><div class="file"><b>/etc/tmpfiles.d/reports.conf</b><pre># Type Path               Mode UID  GID  Age
+<span class="add">d      /run/reports       0750 root root 30d</span></pre></div><ul><li><b>d</b> = create the directory if it does not exist, and clean files older than <b>Age</b>.</li><li>Mode <code>0750</code>, owner root, group root. Age <code>30d</code> = 30 days.</li></ul><pre class="term"><span class="p">$ </span>sudo systemd-tmpfiles --create /etc/tmpfiles.d/reports.conf
+<span class="p">$ </span>ls -ld /run/reports
+<span class="o">drwxr-x---. 2 root root 40 Nov 20 10:05 /run/reports</span>
+<span class="p">$ </span>sudo systemd-tmpfiles --clean</pre><div class="note"><b>Who runs the clean?</b><code>systemd-tmpfiles-clean.timer</code> runs <code>systemd-tmpfiles --clean</code> about 15 minutes after boot and then every day. Default age for /tmp is 10 days, for /var/tmp 30 days.</div></section>
+<section id="trouble"><h2><span class="n">7</span>Cron troubleshooting</h2><div class="why"><b>Why?</b> A scheduled job that silently fails is dangerous. This checklist finds the problem in order.</div><ol class="steps"><li><span>Is the service running? <code>systemctl status crond</code> (or <code>atd</code>).</span></li><li><span>Is the line there and correct? <code>crontab -l</code> or <code>cat /etc/cron.d/NAME</code>.</span></li><li><span>Did cron try to run it? <code>grep CRON /var/log/cron</code> or <code>journalctl -u crond</code>.</span></li><li><span>Is the script executable with full paths? <code>ls -l script.sh</code>.</span></li><li><span>Run the exact command by hand as the same user.</span></li><li><span>Read the output file or mail (<code>2&gt;&amp;1</code> in the line).</span></li></ol><pre class="term"><span class="p">$ </span>sudo systemctl status crond | head -4
+<span class="o">● crond.service - Command Scheduler</span>
+<span class="o">     Loaded: loaded (/usr/lib/systemd/system/crond.service; enabled)</span>
+<span class="o">     Active: active (running) since Fri 2026-11-20 08:01:12 IST</span>
+<span class="p">$ </span>sudo tail -2 /var/log/cron
+<span class="o">Nov 20 10:00:01 server CROND[3105]: (root) CMD (/usr/bin/df -h &gt;&gt; /var/log/diskreport.log 2&gt;&amp;1)</span></pre><div class="tblwrap"><table class=""><tr><th>Symptom</th><th>Likely cause</th></tr><tr><td>Job never starts</td><td>crond stopped, or file name with a dot in /etc/cron.d</td></tr><tr><td>Runs but command not found</td><td>short PATH, use the full path</td></tr><tr><td>Works by hand, fails in cron</td><td>no environment, aliases and variables missing</td></tr><tr><td>Script in cron.daily skipped</td><td>no execute bit or bad file name</td></tr><tr><td>Wrong time</td><td>wrong field order, or server time zone differs (<code>timedatectl</code>)</td></tr></table></div></section>
+<section id="cheat"><h2><span class="n">8</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>ls /etc/cron.d</code></td><td>system cron files</td></tr><tr><td><code>cat /etc/anacrontab</code></td><td>anacron settings</td></tr><tr><td><code>systemctl list-timers</code></td><td>all timers and next run</td></tr><tr><td><code>systemctl enable --now X.timer</code></td><td>start a timer forever</td></tr><tr><td><code>systemd-analyze calendar "..."</code></td><td>test OnCalendar</td></tr><tr><td><code>systemd-tmpfiles --clean</code></td><td>clean old temp files</td></tr><tr><td><code>journalctl -u crond</code></td><td>cron log</td></tr><tr><td><code>tail /var/log/cron</code></td><td>cron log file</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">9</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 04 &middot; Scheduling System Tasks</footer></div>
+<script>
+const Q=[{"q": "Which extra field does a system cron line have compared to a user crontab?", "o": ["year", "priority", "user name", "mail address"], "a": 2, "e": "System files (/etc/cron.d) have the user name before the command."}, {"q": "Where should you put your own system cron job?", "o": ["/etc/crontab", "/var/spool/cron/root", "/usr/lib/cron/", "/etc/cron.d/"], "a": 3, "e": "/etc/cron.d is safe. /etc/crontab can be overwritten by updates."}, {"q": "A file /etc/cron.d/backup.old is never run. Why?", "o": ["The file name has a dot", "crond is off", "It is not 6 fields", "Too old"], "a": 0, "e": "Names with a dot are ignored by cron."}, {"q": "What goes inside /etc/cron.daily/?", "o": ["Executable scripts", "Timer units", "Log files", "crontab lines"], "a": 0, "e": "These folders hold executable scripts, not crontab lines."}, {"q": "What is anacron mainly used for?", "o": ["Run missed jobs after the system was off", "Remove old users", "Run jobs every second", "Schedule one-time jobs"], "a": 0, "e": "anacron catches up jobs missed during downtime."}, {"q": "In /etc/anacrontab, what does the first field mean?", "o": ["Delay in minutes", "User", "Period in days", "Job name"], "a": 2, "e": "Period = days between runs (1 = daily, 7 = weekly)."}, {"q": "Where does anacron store its last-run timestamps?", "o": ["/var/spool/anacron/", "/var/log/anacron.stamp", "/etc/anacron/", "/tmp/anacron/"], "a": 0, "e": "/var/spool/anacron/ has one file per job id."}, {"q": "Which unit actually says WHAT to run in a systemd timer setup?", "o": ["the .socket", "the .service", "the .target", "the .timer"], "a": 1, "e": "The .service has ExecStart. The .timer only says when."}, {"q": "Which command lists all active timers and their next run?", "o": ["atq", "crontab -l", "systemctl list-timers", "systemctl list-units"], "a": 2, "e": "systemctl list-timers."}, {"q": "Which line in a timer makes it run daily at 05:00?", "o": ["OnCalendar=*-*-* 05:00:00", "OnBootSec=5h", "OnUnitActiveSec=05:00", "Persistent=05:00"], "a": 0, "e": "OnCalendar takes a calendar expression."}, {"q": "What does <code>Persistent=true</code> do in a timer?", "o": ["Runs a missed job at next start", "Makes the service restart on failure", "Hides the timer", "Keeps the timer running as root"], "a": 0, "e": "It works like anacron: a missed run is done when the system returns."}, {"q": "After creating new unit files, which command do you run first?", "o": ["daemon-restart", "systemctl daemon-reload", "udevadm settle", "systemctl reboot"], "a": 1, "e": "daemon-reload makes systemd read the new files."}, {"q": "Which should you enable for a scheduled job: the .timer or the .service?", "o": ["Both with --now", "Neither", "The .timer", "The .service"], "a": 2, "e": "Enable the .timer. It starts the service."}, {"q": "Which command tests when an OnCalendar expression will run next?", "o": ["cron -t", "systemd-analyze calendar", "timedatectl test", "systemctl calendar"], "a": 1, "e": "systemd-analyze calendar prints the next elapse time."}, {"q": "What does systemd-tmpfiles do?", "o": ["Formats a disk", "Creates and cleans temporary files by rules", "Mounts /tmp", "Deletes all users"], "a": 1, "e": "It manages temp files and folders from tmpfiles.d rules."}, {"q": "Which folder holds YOUR tmpfiles rules (they override package rules)?", "o": ["/usr/lib/tmpfiles.d/", "/etc/tmpfiles.d/", "/tmp/rules/", "/var/tmpfiles/"], "a": 1, "e": "/etc/tmpfiles.d has priority over /usr/lib/tmpfiles.d."}, {"q": "In tmpfiles.d, what does type <code>d</code> do?", "o": ["Disable cleaning", "Delete the file", "Duplicate a file", "Create the directory and clean it by age"], "a": 3, "e": "d = directory, created if missing and cleaned by age."}, {"q": "A cron job works in the terminal but fails from cron. Most likely cause?", "o": ["Cron has a short PATH and no environment", "Cron is faster", "Wrong disk", "The clock is wrong by 1 second"], "a": 0, "e": "Use full paths and set needed variables."}, {"q": "Which log file shows cron job runs?", "o": ["/etc/cron.log", "/var/log/cron", "/boot/cron", "/var/log/dnf.log"], "a": 1, "e": "CROND lines are in /var/log/cron (and the journal)."}, {"q": "Why do admins avoid editing /etc/crontab?", "o": ["It needs a reboot", "It does not exist", "It is read-only forever", "Updates may overwrite it"], "a": 3, "e": "Use /etc/cron.d so package updates do not overwrite your job."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 07: Archiving Files</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#2f9e5b;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 07 &middot; RHEL 10</small><h1>Archiving Files</h1><p>Pack many files into one archive with <mark>tar</mark>, shrink it with <mark>gzip</mark>, <mark>bzip2</mark> or <mark>xz</mark>, and bring the files back. Includes zip for Windows users.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Why archive</a><a href="#tar">tar basics</a><a href="#comp">gzip, bzip2, xz</a><a href="#one">One file and exclude</a><a href="#tools">Compression tools</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Why archive and compress?</h2><div class="why"><b>Why?</b> Backups, log bundles and file transfers are easier as ONE small file. An <b>archive</b> joins many files into one. <b>Compression</b> makes that file smaller. They are two different jobs.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">Many files</text><text x="103" y="84" text-anchor="middle">/etc/ folder</text><text class="sm" x="103" y="106" text-anchor="middle"></text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#ma)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">tar</text><text x="334" y="84" text-anchor="middle">archive (join)</text><text class="sm" x="334" y="106" text-anchor="middle"></text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#ma)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">gzip / xz</text><text x="565" y="84" text-anchor="middle">compress (shrink)</text><text class="sm" x="565" y="106" text-anchor="middle"></text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#ma)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">backup.tar.gz</text><text x="796" y="84" text-anchor="middle">one small file</text><text class="sm" x="796" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">tar = Tape ARchive. It joins files. Compression is done on top.</text></svg><div class="note"><b>Full forms</b><b>tar</b> = Tape ARchive. <b>gzip</b> = GNU zip. <b>bzip2</b> = block-sorting compressor. <b>xz</b> = the .xz format (LZMA2 algorithm).</div></section>
+<section id="tar"><h2><span class="n">2</span>tar: -c -x -t -v -f</h2><div class="why"><b>Why?</b> <code>tar</code> is the standard tool. Learn 5 letters and you can do 90% of the work.</div><div class="tblwrap"><table class=""><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>-c</code></td><td><b>c</b>reate a new archive</td></tr><tr><td><code>-x</code></td><td>e<b>x</b>tract files</td></tr><tr><td><code>-t</code></td><td>lis<b>t</b> the content (no extraction)</td></tr><tr><td><code>-v</code></td><td><b>v</b>erbose, show file names</td></tr><tr><td><code>-f FILE</code></td><td><b>f</b>ile name of the archive. Always right after the letters</td></tr><tr><td><code>-C DIR</code></td><td>change to DIR (extract there)</td></tr><tr><td><code>-p</code></td><td>keep permissions</td></tr></table></div><div class="warn"><b>Only one of c, x, t at a time</b>And <code>-f</code> must be followed by the archive name: <code>tar -cvf backup.tar /etc</code> is right. <code>tar -cfv backup.tar</code> breaks because <code>v</code> becomes the file name.</div><pre class="term"><span class="p">$ </span>tar -cvf etc-backup.tar /etc/hostname /etc/hosts
+<span class="o">tar: Removing leading `/' from member names</span>
+<span class="o">/etc/hostname</span>
+<span class="o">/etc/hosts</span>
+<span class="p">$ </span>tar -tf etc-backup.tar
+<span class="o">etc/hostname</span>
+<span class="o">etc/hosts</span>
+<span class="p">$ </span>mkdir /tmp/restore
+<span class="p">$ </span>tar -xvf etc-backup.tar -C /tmp/restore
+<span class="o">etc/hostname</span>
+<span class="o">etc/hosts</span>
+<span class="p">$ </span>ls /tmp/restore/etc
+<span class="o">hostname  hosts</span></pre><div class="note"><b>Why "Removing leading /"</b>tar removes the first <code>/</code> so that extracting never overwrites real system files by accident. The files come back relative to the current folder (or <code>-C</code>).</div></section>
+<section id="comp"><h2><span class="n">3</span>tar with gzip, bzip2, xz</h2><div class="why"><b>Why?</b> Add one more letter and tar compresses while it archives. Better compression = smaller file but slower.</div><div class="tblwrap"><table class=""><tr><th>Option</th><th>Extension</th><th>Speed</th><th>Size</th></tr><tr><td><code>-z</code> gzip</td><td><code>.tar.gz</code> or <code>.tgz</code></td><td>fast</td><td>medium</td></tr><tr><td><code>-j</code> bzip2</td><td><code>.tar.bz2</code></td><td>slower</td><td>smaller</td></tr><tr><td><code>-J</code> xz</td><td><code>.tar.xz</code></td><td>slowest</td><td>smallest</td></tr></table></div><pre class="term"><span class="p">$ </span>tar -czvf logs.tar.gz /var/log/dnf.log /var/log/cron
+<span class="p">$ </span>tar -cjvf logs.tar.bz2 /var/log/dnf.log /var/log/cron
+<span class="p">$ </span>tar -cJvf logs.tar.xz  /var/log/dnf.log /var/log/cron
+<span class="p">$ </span>ls -lh logs.tar.*
+<span class="o">-rw-r--r--. 1 student student 41K Nov 20 10:20 logs.tar.bz2</span>
+<span class="o">-rw-r--r--. 1 student student 47K Nov 20 10:20 logs.tar.gz</span>
+<span class="o">-rw-r--r--. 1 student student 38K Nov 20 10:20 logs.tar.xz</span></pre><div class="tip"><b>Extract: tar detects the type for you</b><code>tar -xvf logs.tar.xz</code> works for all three. You do not need z, j or J when extracting (but it is fine to use them).</div><p>Reading a name: <code>-czvf</code> = <b>c</b>reate, g<b>z</b>ip, <b>v</b>erbose, <b>f</b>ile.</p></section>
+<section id="one"><h2><span class="n">4</span>Extract one file, exclude files, add to an archive</h2><div class="why"><b>Why?</b> Real work: restore ONE lost file from a big backup, or skip junk while backing up.</div><h3>List first, then extract only one file</h3><pre class="term"><span class="p">$ </span>tar -tzf logs.tar.gz
+<span class="o">var/log/dnf.log</span>
+<span class="o">var/log/cron</span>
+<span class="p">$ </span>tar -xzvf logs.tar.gz var/log/cron -C /tmp/restore
+<span class="o">var/log/cron</span>
+<span class="p">$ </span>ls /tmp/restore/var/log
+<span class="o">cron</span></pre><p>Type the path <b>exactly</b> as <code>-t</code> shows it (no leading <code>/</code>).</p><h3>Exclude files</h3><pre class="term"><span class="p">$ </span>tar -czvf home-backup.tar.gz --exclude='*.iso' --exclude='Downloads' /home/student</pre><h3>Add to an existing plain archive</h3><pre class="term"><span class="p">$ </span>tar -rvf etc-backup.tar /etc/fstab
+<span class="p">$ </span>tar -tf etc-backup.tar
+<span class="o">etc/hostname</span>
+<span class="o">etc/hosts</span>
+<span class="o">etc/fstab</span></pre><div class="note"><b>-r works only on uncompressed .tar</b>You cannot append to a .tar.gz. Make a new archive instead.</div><h3>Keep permissions, owners and SELinux labels (system backup)</h3><pre class="term"><span class="p">$ </span>sudo tar --selinux --acls --xattrs -czpf /backup/etc.tar.gz /etc</pre></section>
+<section id="tools"><h2><span class="n">5</span>Compression tools: gzip, bzip2, xz, zip</h2><div class="why"><b>Why?</b> Sometimes you compress a <b>single</b> file, for example a big log, without tar. These tools replace the file with a compressed one.</div><div class="tblwrap"><table class=""><tr><th>Compress</th><th>Uncompress</th><th>Result</th></tr><tr><td><code>gzip file</code></td><td><code>gunzip file.gz</code></td><td><code>file.gz</code></td></tr><tr><td><code>bzip2 file</code></td><td><code>bunzip2 file.bz2</code></td><td><code>file.bz2</code></td></tr><tr><td><code>xz file</code></td><td><code>unxz file.xz</code></td><td><code>file.xz</code></td></tr></table></div><pre class="term"><span class="p">$ </span>ls -lh access.log
+<span class="o">-rw-r--r--. 1 student student 12M Nov 20 10:30 access.log</span>
+<span class="p">$ </span>gzip access.log
+<span class="p">$ </span>ls -lh access.log.gz
+<span class="o">-rw-r--r--. 1 student student 1.1M Nov 20 10:30 access.log.gz</span>
+<span class="p">$ </span>gunzip access.log.gz
+<span class="p">$ </span>gzip -k access.log      # -k keeps the original file</pre><ul><li>The original file disappears unless you use <code>-k</code>.</li><li><code>zcat file.gz</code>, <code>bzcat</code>, <code>xzcat</code> read a compressed file without extracting.</li><li><code>gzip -l file.gz</code> shows compressed and original size.</li></ul><h3>zip and unzip (also opens on Windows)</h3><pre class="term"><span class="p">$ </span>zip -r project.zip project/
+<span class="o">  adding: project/ (stored 0%)</span>
+<span class="o">  adding: project/notes.txt (deflated 45%)</span>
+<span class="p">$ </span>unzip -l project.zip
+<span class="p">$ </span>unzip project.zip -d /tmp/out</pre><div class="note"><b>zip vs tar</b><code>zip</code> archives and compresses in one tool and works on Windows. <code>tar</code> keeps Linux permissions and owners, so it is the right tool for Linux backups.</div></section>
+<section id="cheat"><h2><span class="n">6</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>tar -cvf a.tar DIR</code></td><td>create archive</td></tr><tr><td><code>tar -tvf a.tar</code></td><td>list</td></tr><tr><td><code>tar -xvf a.tar -C DIR</code></td><td>extract to DIR</td></tr><tr><td><code>tar -czvf a.tar.gz DIR</code></td><td>create gzip archive</td></tr><tr><td><code>tar -cJvf a.tar.xz DIR</code></td><td>create xz archive</td></tr><tr><td><code>tar -xzvf a.tar.gz path/file</code></td><td>extract one file</td></tr><tr><td><code>tar --exclude=PATTERN</code></td><td>skip files</td></tr><tr><td><code>gzip -k file</code></td><td>compress, keep original</td></tr><tr><td><code>zip -r a.zip DIR</code></td><td>zip a folder</td></tr><tr><td><code>unzip a.zip</code></td><td>unzip</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">7</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 07 &middot; Archiving Files</footer></div>
+<script>
+const Q=[{"q": "What is the full form of tar?", "o": ["Transfer ARchive", "Tape ARchive", "Text And Raw", "Total Archive"], "a": 1, "e": "tar = Tape ARchive."}, {"q": "What is the main job of tar?", "o": ["Copy over network", "Compress only", "Join many files into one archive", "Encrypt files"], "a": 2, "e": "tar archives. Compression is an extra step."}, {"q": "Which option creates an archive?", "o": ["-x", "-t", "-c", "-r"], "a": 2, "e": "-c = create."}, {"q": "Which command lists the content of backup.tar without extracting?", "o": ["tar -lf backup.tar", "tar -xf backup.tar", "tar -tf backup.tar", "tar -cf backup.tar"], "a": 2, "e": "-t lists."}, {"q": "Which command is correct?", "o": ["tar a.tar -cvf /etc", "tar -cvf a.tar /etc", "tar -cfv a.tar /etc", "tar -fcv /etc a.tar"], "a": 1, "e": "-f must come last in the letters because the next word is the file name."}, {"q": "What does the message <code>Removing leading /</code> protect you from?", "o": ["A bad disk", "Wrong permissions", "Slow backup", "Overwriting real system files on extract"], "a": 3, "e": "Paths are stored relative, so extract does not touch / by accident."}, {"q": "Which option adds gzip compression?", "o": ["-j", "-g", "-J", "-z"], "a": 3, "e": "-z = gzip."}, {"q": "Which option makes a .tar.xz archive?", "o": ["-z", "-j", "-x", "-J"], "a": 3, "e": "-J (capital) = xz. -j = bzip2."}, {"q": "Which compression gives the smallest file but is the slowest?", "o": ["xz", "none", "bzip2", "gzip"], "a": 0, "e": "xz is smallest and slowest."}, {"q": "Which command extracts everything to /tmp/restore?", "o": ["tar -cvf a.tar /tmp/restore", "tar -xvf a.tar -C /tmp/restore", "tar -tvf a.tar /tmp/restore", "tar -x /tmp/restore"], "a": 1, "e": "-C changes the target directory."}, {"q": "You need ONE file from a big archive. What is the first step?", "o": ["Delete the archive", "Extract everything", "Run gunzip", "List with tar -tf to see the exact path"], "a": 3, "e": "List first, then extract the path exactly as shown."}, {"q": "Which option skips files while creating an archive?", "o": ["--ignore", "--skip", "-X only", "--exclude"], "a": 3, "e": "--exclude=PATTERN."}, {"q": "Which command can append a file to an existing archive?", "o": ["tar -z", "tar -r", "tar -t", "tar -J"], "a": 1, "e": "-r appends, but only to an uncompressed .tar."}, {"q": "What happens to the original file after <code>gzip file.txt</code>?", "o": ["It is encrypted", "It is replaced by file.txt.gz", "It stays", "It is moved to /tmp"], "a": 1, "e": "gzip replaces the file. Use -k to keep it."}, {"q": "Which command uncompresses file.gz?", "o": ["zip -d file.gz", "gunzip file.gz", "unxz file.gz", "tar -t file.gz"], "a": 1, "e": "gunzip (or gzip -d)."}, {"q": "Which command reads a .gz file without extracting it?", "o": ["tar -s", "zcat", "gzip -r", "cat -z"], "a": 1, "e": "zcat prints the uncompressed content."}, {"q": "Which tool creates a .zip file of a folder?", "o": ["tar -zip DIR", "gzip -r DIR", "xz -z DIR", "zip -r a.zip DIR"], "a": 3, "e": "zip -r for recursive."}, {"q": "Why is tar better than zip for a Linux system backup?", "o": ["tar is always smaller", "zip does not exist on Linux", "tar keeps permissions, owners and labels", "tar needs no disk space"], "a": 2, "e": "tar can keep owners, permissions, ACLs and SELinux labels."}, {"q": "What does <code>-czvf</code> stand for?", "o": ["copy, zip, verify, force", "create, zero, verbose, fix", "create, gzip, verbose, file", "check, zero, view, find"], "a": 2, "e": "c=create, z=gzip, v=verbose, f=file."}, {"q": "Which command extracts logs.tar.xz?", "o": ["tar -cvf logs.tar.xz", "tar -xvf logs.tar.xz", "gunzip logs.tar.xz", "zip logs.tar.xz"], "a": 1, "e": "tar detects the compression automatically."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 16: Installing Red Hat Enterprise Linux</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#b5651d;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 16 &middot; RHEL 10</small><h1>Installing Red Hat Enterprise Linux</h1><p>Install RHEL with the <mark>Anaconda</mark> installer, and automate it for many servers with a <mark>Kickstart</mark> file. This is mostly theory plus one file to read and validate.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Big picture</a><a href="#steps">Installer steps</a><a href="#ks">Kickstart basics</a><a href="#use">inst.ks</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Installation: the big picture</h2><div class="why"><b>Why?</b> A company may build 50 servers. Doing every install by hand is slow and each server comes out a little different. The installer can follow a saved answer file, so all servers are identical.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">Boot media</text><text x="103" y="84" text-anchor="middle">ISO / USB / network</text><text class="sm" x="103" y="106" text-anchor="middle"></text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#ma)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">Anaconda</text><text x="334" y="84" text-anchor="middle">the installer</text><text class="sm" x="334" y="106" text-anchor="middle"></text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#ma)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">Settings</text><text x="565" y="84" text-anchor="middle">disk, user, software</text><text class="sm" x="565" y="106" text-anchor="middle"></text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#ma)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">Installed RHEL</text><text x="796" y="84" text-anchor="middle">first boot</text><text class="sm" x="796" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Manual install: you click. Kickstart install: a file answers for you.</text></svg><div class="tblwrap"><table class=""><tr><th>Word</th><th>Meaning</th></tr><tr><td><b>ISO</b></td><td>a disk image file of the installation media</td></tr><tr><td><b>Anaconda</b></td><td>the RHEL graphical and text installer</td></tr><tr><td><b>Kickstart</b></td><td>a text file with all installer answers</td></tr><tr><td><b>%packages</b></td><td>Kickstart section listing the software to install</td></tr><tr><td><b>/root/anaconda-ks.cfg</b></td><td>an automatic Kickstart file created from your last install</td></tr></table></div></section>
+<section id="steps"><h2><span class="n">2</span>Installer steps (what you choose)</h2><div class="why"><b>Why?</b> Know the choices, because in an interview or at work you must explain each one.</div><ol class="steps"><li><span>Boot from the ISO or USB and choose <b>Install Red Hat Enterprise Linux</b>.</span></li><li><span>Language and keyboard.</span></li><li><span><b>Installation Destination</b>: pick the disk. Choose automatic or custom partitioning (<code>/boot</code>, <code>/</code>, swap, LVM).</span></li><li><span><b>Software Selection</b>: for example *Server* or *Minimal Install*.</span></li><li><span><b>Network and Host Name</b>: IP (DHCP or static) and the hostname.</span></li><li><span><b>Time and Date</b>: time zone, and NTP.</span></li><li><span><b>Root password and user</b>: create an admin user with sudo rights, lock root over SSH.</span></li><li><span><b>Connect to Red Hat</b> (subscription) if needed. Click <b>Begin Installation</b>, then reboot.</span></li></ol><div class="tblwrap"><table class=""><tr><th>Typical layout</th><th>Why</th></tr><tr><td><code>/boot</code> 1 GiB (xfs)</td><td>kernel and GRUB files</td></tr><tr><td><code>/boot/efi</code> 600 MiB</td><td>needed on UEFI systems</td></tr><tr><td><code>/</code> (root) on LVM</td><td>system, grows with LVM</td></tr><tr><td><code>swap</code></td><td>memory overflow</td></tr><tr><td><code>/home</code>, <code>/var</code> separate (optional)</td><td>stop logs or users filling the whole disk</td></tr></table></div><div class="note"><b>Minimal install</b>For servers pick <b>Minimal Install</b>. Fewer packages = fewer updates and a smaller attack surface.</div></section>
+<section id="ks"><h2><span class="n">3</span>Kickstart file basics</h2><div class="why"><b>Why?</b> Kickstart answers every installer question in advance. The same file builds the same server again and again, even without anyone sitting at the screen.</div><p>After every manual install RHEL saves your choices in <code>/root/anaconda-ks.cfg</code>. Copy it and edit it. That is the easiest way to start.</p><div class="file"><b>/root/anaconda-ks.cfg (shortened)</b><pre><span class="add">text</span>
+lang en_US.UTF-8
+keyboard us
+timezone Asia/Kolkata --utc
+network --bootproto=dhcp --hostname=server1.example.com
+rootpw --lock
+user --name=student --groups=wheel --plaintext --password=redhat
+zerombr
+clearpart --all --initlabel
+autopart --type=lvm
+reboot
+
+%packages
+@^minimal-environment
+vim-enhanced
+%end</pre></div><div class="tblwrap"><table class=""><tr><th>Line</th><th>Meaning</th></tr><tr><td><code>text</code></td><td>text mode installer</td></tr><tr><td><code>lang</code>, <code>keyboard</code>, <code>timezone</code></td><td>basic locale settings</td></tr><tr><td><code>network --bootproto=dhcp</code></td><td>network setup</td></tr><tr><td><code>rootpw --lock</code></td><td>root login locked</td></tr><tr><td><code>user --name=student --groups=wheel</code></td><td>admin user (wheel group = sudo)</td></tr><tr><td><code>clearpart --all --initlabel</code></td><td><b>erase all disks</b> and create new labels</td></tr><tr><td><code>autopart --type=lvm</code></td><td>automatic partitions with LVM</td></tr><tr><td><code>reboot</code></td><td>reboot after install</td></tr><tr><td><code>%packages ... %end</code></td><td>software list. <code>@name</code> = group, <code>@^name</code> = environment</td></tr><tr><td><code>%post ... %end</code></td><td>script that runs after install</td></tr></table></div><div class="warn"><b>clearpart wipes disks</b>A wrong Kickstart on a server with data erases everything. Test it in a VM first.</div><h3>Check the syntax before using it</h3><pre class="term"><span class="p">$ </span>sudo dnf install -y pykickstart
+<span class="p">$ </span>ksvalidator /root/anaconda-ks.cfg
+<span class="p">$ </span>echo $?
+<span class="o">0</span>
+<span class="p">$ </span>ksvalidator bad.cfg
+<span class="o">The following problem occurred on line 7 of the kickstart file:</span>
+<span class="o">Unknown command: autopar</span></pre><ul><li>No output and exit code <code>0</code> = the file is valid.</li><li><code>ksverdiff</code> compares the syntax of two RHEL versions.</li></ul></section>
+<section id="use"><h2><span class="n">4</span>Use the Kickstart file: inst.ks=</h2><div class="why"><b>Why?</b> The installer must know where the file is. You tell it with a boot option.</div><ol class="steps"><li><span>Put the file on a web server, FTP, NFS or USB.</span></li><li><span>Boot the installer. At the GRUB menu press <mark>Tab</mark> (BIOS) or <mark>e</mark> (UEFI).</span></li><li><span>Add the <code>inst.ks=</code> option at the end of the boot line.</span></li><li><span>Press <code>Ctrl+X</code> (UEFI) or <code>Enter</code> (BIOS) to start.</span></li></ol><div class="tblwrap"><table class=""><tr><th>Option</th><th>Where the file is</th></tr><tr><td><code>inst.ks=http://server/ks.cfg</code></td><td>web server</td></tr><tr><td><code>inst.ks=ftp://server/ks.cfg</code></td><td>FTP</td></tr><tr><td><code>inst.ks=nfs:server:/dir/ks.cfg</code></td><td>NFS</td></tr><tr><td><code>inst.ks=hd:sdb1:/ks.cfg</code></td><td>a local disk or USB</td></tr><tr><td><code>inst.ks=cdrom:/ks.cfg</code></td><td>CD or DVD</td></tr></table></div><div class="file"><b>Boot line (end)</b><pre><span class="add">vmlinuz initrd=initrd.img inst.stage2=hd:LABEL=RHEL-10-0-BaseOS-x86_64 quiet inst.ks=http://192.168.1.10/ks.cfg</span></pre></div><div class="tip"><b>Serve the file with a quick web server</b><code>cd /var/www/html &amp;&amp; cp ~/ks.cfg .</code> on a server with Apache, or <code>python3 -m http.server 8080</code> for a test.</div></section>
+<section id="cheat"><h2><span class="n">5</span>All keywords in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Item</th><th>Use</th></tr><tr><td><code>/root/anaconda-ks.cfg</code></td><td>Kickstart from the last install</td></tr><tr><td><code>ksvalidator FILE</code></td><td>check syntax</td></tr><tr><td><code>inst.ks=URL</code></td><td>tell the installer the file location</td></tr><tr><td><code>clearpart --all</code></td><td>erase disks</td></tr><tr><td><code>autopart --type=lvm</code></td><td>automatic LVM layout</td></tr><tr><td><code>%packages</code></td><td>software list</td></tr><tr><td><code>rootpw --lock</code></td><td>lock root</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">6</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 16 &middot; Installing Red Hat Enterprise Linux</footer></div>
+<script>
+const Q=[{"q": "What is Anaconda in RHEL?", "o": ["The firewall", "The installer", "A snake package", "A backup tool"], "a": 1, "e": "Anaconda is the RHEL installer."}, {"q": "What is Kickstart?", "o": ["A boot menu", "A tuning profile", "A file system", "A text file that answers installer questions automatically"], "a": 3, "e": "It automates the installation."}, {"q": "Where does RHEL save the Kickstart of the last install?", "o": ["/boot/ks", "/var/ks.cfg", "/root/anaconda-ks.cfg", "/etc/kickstart"], "a": 2, "e": "/root/anaconda-ks.cfg."}, {"q": "Which tool checks Kickstart syntax?", "o": ["anaconda -t", "kscheck", "ksfix", "ksvalidator"], "a": 3, "e": "ksvalidator from pykickstart."}, {"q": "ksvalidator prints nothing and returns 0. What does that mean?", "o": ["The file is empty", "The file is valid", "The disk is erased", "The tool is broken"], "a": 1, "e": "No output means no syntax errors."}, {"q": "Which boot option points the installer to a Kickstart file?", "o": ["inst.ks=", "boot.ks=", "ks.file=", "kickstart="], "a": 0, "e": "inst.ks=URL."}, {"q": "Which of these is a valid Kickstart location?", "o": ["inst.ks=http://server/ks.cfg", "inst.ks=ssh:ks", "inst.ks=pxe", "inst.ks=smb//ks"], "a": 0, "e": "HTTP, FTP, NFS, hd: and cdrom: are supported."}, {"q": "What does <code>clearpart --all --initlabel</code> do?", "o": ["Lists partitions", "Keeps all data", "Erases all partitions and creates new disk labels", "Mounts disks"], "a": 2, "e": "It wipes the disks."}, {"q": "What does <code>autopart --type=lvm</code> do?", "o": ["Creates automatic partitions with LVM", "Mounts a USB", "Removes LVM", "Creates swap only"], "a": 0, "e": "Automatic partitioning on LVM."}, {"q": "Which section lists the software to install?", "o": ["%disk", "%post", "%pre", "%packages"], "a": 3, "e": "%packages ... %end."}, {"q": "Which section runs a script after installation?", "o": ["%run", "%end", "%post", "%after"], "a": 2, "e": "%post."}, {"q": "What does <code>rootpw --lock</code> do?", "o": ["Locks root login", "Removes the user", "Unlocks root", "Sets an empty password"], "a": 0, "e": "Root account is locked."}, {"q": "Which group gives an admin user sudo rights on RHEL?", "o": ["admin", "wheel", "sudoers-group", "root"], "a": 1, "e": "The wheel group."}, {"q": "Which install type is best for a small, secure server?", "o": ["Everything", "Workstation with GUI", "Minimal Install", "Gaming"], "a": 2, "e": "Fewer packages, fewer risks."}, {"q": "Why must you test Kickstart in a VM first?", "o": ["Kickstart needs VMs", "The file changes names", "VMs are faster", "It can erase the real disk"], "a": 3, "e": "clearpart can wipe data."}, {"q": "Which partition is needed on a UEFI system?", "o": ["/srv", "/boot/efi", "/mnt", "/opt"], "a": 1, "e": "The EFI System Partition."}, {"q": "Which key do you press at the UEFI GRUB menu to edit the boot line?", "o": ["Tab", "e", "Esc only", "F1"], "a": 1, "e": "e on UEFI, Tab on BIOS."}, {"q": "Why use Kickstart for 50 servers?", "o": ["It removes the need for disks", "Identical and fast installs", "It is the only way to install", "It disables SELinux"], "a": 1, "e": "Repeatable, consistent installs."}, {"q": "What is the ISO file?", "o": ["A log file", "A user account", "A disk image of the installation media", "A network card"], "a": 2, "e": "An image of the installer disk."}, {"q": "Which file do you copy and edit to start your own Kickstart?", "o": ["/etc/passwd", "/etc/fstab", "/root/anaconda-ks.cfg", "/boot/grub2/grub.cfg"], "a": 2, "e": "The generated file from the last install."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

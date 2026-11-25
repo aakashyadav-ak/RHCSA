@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 03: Scheduling User Tasks</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#e0702c;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 03 &middot; RHEL 10</small><h1>Scheduling User Tasks</h1><p>Run a command later with <mark>at</mark>, or again and again with <mark>cron</mark>. You will learn the exact commands, the time fields, and how to see the output of a job.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Why and big picture</a><a href="#at">at</a><a href="#atq2">allow and deny</a><a href="#cron">crontab commands</a><a href="#fields">Time fields</a><a href="#out">Output and MAILTO</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Why scheduling? Two kinds of jobs</h2><div class="why"><b>Why?</b> Admins cannot sit at the server all night. Scheduling lets Linux run backups, cleanups and reports by itself, at the right time.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="263" height="95" rx="12"/><text class="bd" x="141" y="58" text-anchor="middle">at</text><text x="141" y="84" text-anchor="middle">run ONE time</text><text class="sm" x="141" y="106" text-anchor="middle">e.g. tonight 11 PM</text><line class="ar" x1="275" y1="72" x2="316" y2="72" marker-end="url(#ma)"/><rect class="bx" x="318" y="25" width="263" height="95" rx="12"/><text class="bd" x="449" y="58" text-anchor="middle">cron</text><text x="449" y="84" text-anchor="middle">run AGAIN and AGAIN</text><text class="sm" x="449" y="106" text-anchor="middle">e.g. every day 2 AM</text><line class="ar" x1="583" y1="72" x2="624" y2="72" marker-end="url(#ma)"/><rect class="ok" x="626" y="25" width="263" height="95" rx="12"/><text class="bd" x="757" y="58" text-anchor="middle">Output</text><text x="757" y="84" text-anchor="middle">saved in a file</text><text class="sm" x="757" y="106" text-anchor="middle">or sent as mail</text><text class="sm" x="450" y="170" text-anchor="middle">Pick the tool by one question: one time or repeating?</text></svg><div class="tblwrap"><table class=""><tr><th></th><th>at (one time)</th><th>cron (repeating)</th></tr><tr><td>Edit with</td><td><code>at TIME</code> then type commands</td><td><code>crontab -e</code></td></tr><tr><td>Service (daemon)</td><td><code>atd</code></td><td><code>crond</code></td></tr><tr><td>See jobs</td><td><code>atq</code></td><td><code>crontab -l</code></td></tr><tr><td>Remove job</td><td><code>atrm NUMBER</code></td><td><code>crontab -r</code> or delete the line</td></tr><tr><td>Package</td><td><code>at</code></td><td><code>cronie</code></td></tr></table></div><div class="note"><b>Full forms</b><b>cron</b> comes from Greek *chronos* = time. <b>crontab</b> = cron table (the list of jobs). <b>atq</b> = at queue. <b>atrm</b> = at remove. <b>crond</b> = cron daemon (a daemon is a background service).</div></section>
+<section id="at"><h2><span class="n">2</span>at: run a job one time</h2><div class="why"><b>Why?</b> You want a command to run once at a future time, for example a heavy report at midnight. <code>at</code> reads commands from you and runs them later.</div><p>First make sure the <mark>atd</mark> service is running. On a fresh RHEL 10 server you may have to install it.</p><pre class="term"><span class="p">$ </span>sudo dnf install -y at
+<span class="p">$ </span>sudo systemctl enable --now atd
+<span class="p">$ </span>systemctl is-active atd
+<span class="o">active</span></pre><h3>Schedule a job (type commands, finish with Ctrl+D)</h3><pre class="term"><span class="p">$ </span>at now +5 minutes
+<span class="o">warning: commands will be executed using /bin/sh</span>
+<span class="o">at&gt; date &gt;&gt; /tmp/at-test.txt</span>
+<span class="o">at&gt; echo "backup done" &gt;&gt; /tmp/at-test.txt</span>
+<span class="o">at&gt; &lt;EOT&gt;</span>
+<span class="o">job 3 at Fri Nov 20 22:35:00 2026</span></pre><p><code>&lt;EOT&gt;</code> appears when you press <mark>Ctrl+D</mark>. The number (<b>3</b>) is the job id. Remember it, you need it to remove the job.</p><div class="tblwrap"><table class=""><tr><th>Time format</th><th>Meaning</th></tr><tr><td><code>at now +10 minutes</code></td><td>10 minutes from now</td></tr><tr><td><code>at 22:30</code></td><td>today 10:30 PM (tomorrow if time has passed)</td></tr><tr><td><code>at 22:30 tomorrow</code></td><td>tomorrow 10:30 PM</td></tr><tr><td><code>at 02:00 Dec 25</code></td><td>a given date</td></tr><tr><td><code>at teatime</code></td><td>4 PM (also <code>noon</code>, <code>midnight</code>)</td></tr><tr><td><code>at -f /root/job.sh 23:00</code></td><td>run commands from a file</td></tr></table></div><h3>See and remove jobs</h3><pre class="term"><span class="p">$ </span>atq
+<span class="o">3       Fri Nov 20 22:35:00 2026 a student</span>
+<span class="o">4       Sat Nov 21 02:00:00 2026 a student</span>
+<span class="p">$ </span>at -c 3
+<span class="c">#!/bin/sh</span>
+<span class="c"># atrun uid=1000 gid=1000</span>
+<span class="o">cd /home/student || exit 1</span>
+<span class="o">date &gt;&gt; /tmp/at-test.txt</span>
+<span class="o">echo "backup done" &gt;&gt; /tmp/at-test.txt</span>
+<span class="p">$ </span>atrm 4
+<span class="p">$ </span>atq
+<span class="o">3       Fri Nov 20 22:35:00 2026 a student</span></pre><ul><li><code>atq</code> columns: job id, date and time, queue letter (<b>a</b>), owner.</li><li><code>at -c ID</code> prints the full job, including saved environment. Use it to check what will run.</li><li><code>atrm ID</code> deletes a job. A normal user sees only own jobs. root sees all.</li></ul><h3>Real scenario: safety job while changing the firewall</h3><p>You change firewall rules on a remote server. If you lock yourself out, the old config must come back. Schedule a rollback first, and cancel it only if everything works.</p><pre class="term"><span class="p">$ </span>sudo at now +10 minutes
+<span class="o">at&gt; firewall-cmd --reload</span>
+<span class="o">at&gt; &lt;EOT&gt;</span>
+<span class="o">job 5 at Fri Nov 20 22:45:00 2026</span>
+<span class="c"># ...test the new rules. If all is fine, cancel the rollback:</span>
+<span class="p">$ </span>sudo atrm 5</pre><div class="warn"><b>Output of at jobs</b>at has no screen to print on. Output of the commands is sent as <b>mail</b> to the user. If you want to keep it, redirect it yourself: <code>command &gt;&gt; /tmp/file.log 2&gt;&amp;1</code>.</div></section>
+<section id="atq2"><h2><span class="n">3</span>Who may use at and cron</h2><div class="why"><b>Why?</b> The admin must be able to stop ordinary users from scheduling jobs on a shared server.</div><div class="tblwrap"><table class=""><tr><th>File</th><th>Rule</th></tr><tr><td><code>/etc/at.allow</code></td><td>only users listed here may use at</td></tr><tr><td><code>/etc/at.deny</code></td><td>everyone may use at except the listed users</td></tr><tr><td><code>/etc/cron.allow</code></td><td>only users listed here may use crontab</td></tr><tr><td><code>/etc/cron.deny</code></td><td>everyone may use crontab except the listed users</td></tr></table></div><div class="note"><b>Order of checking</b>The <code>allow</code> file is read first. If it exists, <code>deny</code> is ignored. root is always allowed.</div><pre class="term"><span class="p">$ </span>echo "student" | sudo tee -a /etc/cron.allow
+<span class="o">student</span>
+<span class="p">$ </span>crontab -e      # as user john, who is NOT in cron.allow
+<span class="o">You (john) are not allowed to use this program (crontab)</span>
+<span class="o">See crontab(1) for more information</span></pre></section>
+<section id="cron"><h2><span class="n">4</span>cron: crontab -e, -l, -r</h2><div class="why"><b>Why?</b> Some tasks repeat: nightly backup, hourly cleanup. You write the job once in a <mark>crontab</mark> (cron table) and <code>crond</code> runs it forever.</div><pre class="term"><span class="p">$ </span>sudo dnf install -y cronie
+<span class="p">$ </span>sudo systemctl enable --now crond
+<span class="p">$ </span>systemctl is-active crond
+<span class="o">active</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>What it does</th></tr><tr><td><code>crontab -e</code></td><td>edit YOUR crontab in the default editor (vim). Saved on quit.</td></tr><tr><td><code>crontab -l</code></td><td>list your jobs</td></tr><tr><td><code>crontab -r</code></td><td>remove ALL your jobs. No question asked!</td></tr><tr><td><code>crontab -ri</code></td><td>remove all, but ask first (safer)</td></tr><tr><td><code>crontab -u john -e</code></td><td>root only: edit the crontab of user john</td></tr><tr><td><code>crontab file.txt</code></td><td>replace your crontab with a prepared file</td></tr></table></div><div class="warn"><b>-r is dangerous</b><code>crontab -r</code> and <code>crontab -e</code> are next to each other on the keyboard. One wrong letter deletes every job without a warning. Keep a copy: <code>crontab -l &gt; ~/crontab.bak</code>.</div><h3>Add a job step by step</h3><ol class="steps"><li><span>Run <code>crontab -e</code>.</span></li><li><span>Press <code>i</code>, then type the job line (below).</span></li><li><span>Press Esc, type <code>:wq</code> and Enter.</span></li><li><span>Check with <code>crontab -l</code>.</span></li></ol><div class="file"><b>Line to add in crontab -e (file lives in /var/spool/cron/student)</b><pre># minute hour day-of-month month day-of-week  command
+<span class="add">30 2 * * * /home/student/backup.sh &gt;&gt; /home/student/backup.log 2&gt;&amp;1</span></pre></div><pre class="term"><span class="p">$ </span>crontab -e
+<span class="o">crontab: installing new crontab</span>
+<span class="p">$ </span>crontab -l
+<span class="c"># minute hour day-of-month month day-of-week  command</span>
+<span class="o">30 2 * * * /home/student/backup.sh &gt;&gt; /home/student/backup.log 2&gt;&amp;1</span>
+<span class="p">$ </span>sudo ls /var/spool/cron/
+<span class="o">student</span></pre><div class="tip"><b>Where is it stored?</b>Every user crontab is a file named after the user in <code>/var/spool/cron/</code>. Never edit it by hand. Always use <code>crontab -e</code>, it checks the syntax.</div></section>
+<section id="fields"><h2><span class="n">5</span>Cron time fields</h2><div class="why"><b>Why?</b> The 5 fields tell cron exactly when to run. If you read them in the wrong order, the job runs at the wrong time.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="mb" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="140" height="95" rx="12"/><text class="bd" x="80" y="58" text-anchor="middle">Minute</text><text x="80" y="84" text-anchor="middle">0-59</text><text class="sm" x="80" y="106" text-anchor="middle"></text><line class="ar" x1="152" y1="72" x2="193" y2="72" marker-end="url(#mb)"/><rect class="bx" x="195" y="25" width="140" height="95" rx="12"/><text class="bd" x="265" y="58" text-anchor="middle">Hour</text><text x="265" y="84" text-anchor="middle">0-23</text><text class="sm" x="265" y="106" text-anchor="middle"></text><line class="ar" x1="337" y1="72" x2="378" y2="72" marker-end="url(#mb)"/><rect class="bx" x="380" y="25" width="140" height="95" rx="12"/><text class="bd" x="450" y="58" text-anchor="middle">Day of month</text><text x="450" y="84" text-anchor="middle">1-31</text><text class="sm" x="450" y="106" text-anchor="middle"></text><line class="ar" x1="522" y1="72" x2="563" y2="72" marker-end="url(#mb)"/><rect class="bx" x="565" y="25" width="140" height="95" rx="12"/><text class="bd" x="635" y="58" text-anchor="middle">Month</text><text x="635" y="84" text-anchor="middle">1-12</text><text class="sm" x="635" y="106" text-anchor="middle"></text><line class="ar" x1="707" y1="72" x2="748" y2="72" marker-end="url(#mb)"/><rect class="ok" x="750" y="25" width="140" height="95" rx="12"/><text class="bd" x="820" y="58" text-anchor="middle">Day of week</text><text x="820" y="84" text-anchor="middle">0-7 (0 or 7 = Sun)</text><text class="sm" x="820" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Order: MIN HOUR DOM MON DOW   then the command</text></svg><div class="tblwrap"><table class=""><tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr><tr><td><code>*</code></td><td>every value</td><td><code>* * * * *</code> = every minute</td></tr><tr><td><code>,</code></td><td>list</td><td><code>0 8,20 * * *</code> = 8 AM and 8 PM</td></tr><tr><td><code>-</code></td><td>range</td><td><code>0 9 * * 1-5</code> = 9 AM, Monday to Friday</td></tr><tr><td><code>/</code></td><td>step</td><td><code>*/15 * * * *</code> = every 15 minutes</td></tr></table></div><div class="tblwrap"><table class=""><tr><th>Line</th><th>Runs</th></tr><tr><td><code>30 2 * * *</code></td><td>every day at 02:30</td></tr><tr><td><code>0 */2 * * *</code></td><td>every 2 hours, at minute 0</td></tr><tr><td><code>15 18 * * 5</code></td><td>every Friday at 18:15</td></tr><tr><td><code>0 0 1 * *</code></td><td>1st of every month at midnight</td></tr><tr><td><code>0 6 1 1 *</code></td><td>every 1 January at 06:00</td></tr><tr><td><code>@reboot</code></td><td>once, when the system starts</td></tr><tr><td><code>@daily</code></td><td>same as <code>0 0 * * *</code> (also @hourly, @weekly, @monthly)</td></tr></table></div><div class="warn"><b>Common mistakes</b>1) <code>* 5 * * *</code> runs <b>every minute</b> of hour 5 (60 times). Use <code>0 5 * * *</code>. 2) A <code>%</code> in a command means new line in cron. Write <code>\%</code>. 3) If both day-of-month and day-of-week are set, the job runs when <b>either</b> matches.</div><h3>Environment inside cron</h3><p>Cron runs with a very small environment: short <mark>PATH</mark>, no aliases, home directory as start folder. So always use the <b>full path</b> of commands and scripts.</p><div class="file"><b>crontab -e  (variables at the top apply to all jobs below)</b><pre><span class="add">SHELL=/bin/bash</span>
+<span class="add">PATH=/usr/local/bin:/usr/bin:/bin</span>
+0 3 * * * /usr/bin/dnf -q check-update &gt; /tmp/updates.txt</pre></div></section>
+<section id="out"><h2><span class="n">6</span>Cron output and MAILTO</h2><div class="why"><b>Why?</b> A cron job has no terminal. If it prints something or fails, the output has to go somewhere. By default cron mails it to the job owner.</div><div class="file"><b>crontab -e</b><pre><span class="add">MAILTO=student</span>
+0 1 * * * /home/student/report.sh</pre></div><ul><li>Anything the job prints (output or error) is mailed to the owner, or to the user in <code>MAILTO</code>.</li><li><code>MAILTO=""</code> (empty) = send no mail at all.</li><li>Mail needs a mail system. On a minimal server nobody reads it, so most admins write to a log file.</li></ul><pre class="term"><span class="p">$ </span>mail
+<span class="o">Heap mailbox '/var/spool/mail/student': 1 message</span>
+<span class="o">&gt;N  1 root@server  Fri Nov 20 01:00  25/812  "Cron &lt;student@server&gt; /home/student/report.sh"</span></pre><h3>Best practice: write to a log file</h3><div class="file"><b>crontab -e</b><pre><span class="add">0 1 * * * /home/student/report.sh &gt;&gt; /home/student/report.log 2&gt;&amp;1</span>
+<span class="add">0 2 * * * /home/student/clean.sh &gt; /dev/null 2&gt;&amp;1</span></pre></div><div class="tblwrap"><table class=""><tr><th>Part</th><th>Meaning</th></tr><tr><td><code>&gt;&gt;</code></td><td>append output to file (<code>&gt;</code> would overwrite)</td></tr><tr><td><code>2&gt;&amp;1</code></td><td>send errors (2) to the same place as output (1)</td></tr><tr><td><code>&gt; /dev/null 2&gt;&amp;1</code></td><td>throw everything away (silent job)</td></tr></table></div><h3>Did my job run? Check the log</h3><pre class="term"><span class="p">$ </span>sudo journalctl -u crond --since today
+<span class="o">Nov 20 02:30:01 server CROND[2210]: (student) CMD (/home/student/backup.sh &gt;&gt; /home/student/backup.log 2&gt;&amp;1)</span>
+<span class="p">$ </span>sudo grep CROND /var/log/cron | tail -3</pre><div class="tip"><b>Troubleshooting checklist</b>Job not running? 1) <code>systemctl status crond</code> 2) <code>crontab -l</code> shows the line 3) script has <code>chmod +x</code> and full path 4) look in <code>/var/log/cron</code> 5) test the exact command by hand.</div></section>
+<section id="cheat"><h2><span class="n">7</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>at TIME</code></td><td>schedule one-time job</td></tr><tr><td><code>atq</code></td><td>list at jobs</td></tr><tr><td><code>at -c ID</code></td><td>show a job</td></tr><tr><td><code>atrm ID</code></td><td>remove a job</td></tr><tr><td><code>crontab -e</code></td><td>edit own cron jobs</td></tr><tr><td><code>crontab -l</code></td><td>list cron jobs</td></tr><tr><td><code>crontab -r</code></td><td>remove all cron jobs</td></tr><tr><td><code>crontab -u USER -l</code></td><td>list another user (root)</td></tr><tr><td><code>systemctl enable --now atd</code></td><td>start at service</td></tr><tr><td><code>systemctl enable --now crond</code></td><td>start cron service</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">8</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 03 &middot; Scheduling User Tasks</footer></div>
+<script>
+const Q=[{"q": "What is the difference between at and cron?", "o": ["at runs a job once, cron repeats a job", "at is faster than cron", "at is for root, cron is for users", "They are the same"], "a": 0, "e": "at = one time. cron = repeating."}, {"q": "Which service must run for at jobs?", "o": ["atd", "chronyd", "systemd-timesyncd", "crond"], "a": 0, "e": "atd is the at daemon. crond is for cron."}, {"q": "How do you finish typing commands at the at> prompt?", "o": ["Ctrl+Z", "Ctrl+D", "Esc then :wq", "Ctrl+C"], "a": 1, "e": "Ctrl+D sends EOT and saves the job."}, {"q": "Which command lists pending at jobs?", "o": ["jobs -a", "at -l", "atq", "crontab -l"], "a": 2, "e": "atq = at queue. (at -l also works, but atq is the main one.)"}, {"q": "Which command removes at job number 7?", "o": ["crontab -r 7", "atrm 7", "at -d 7 && rm", "atq 7"], "a": 1, "e": "atrm removes an at job by id."}, {"q": "What does <code>at 22:30 tomorrow</code> mean?", "o": ["Run every day at 22:30", "Run at 22:30 minutes", "Run at 10:30 PM tomorrow", "Run at 2:30 PM"], "a": 2, "e": "It is a one-time job for tomorrow 10:30 PM."}, {"q": "A normal user runs <code>crontab -e</code>. Which file stores the jobs?", "o": ["/home/USERNAME/.crontab", "/etc/crontab", "/etc/cron.d/USERNAME", "/var/spool/cron/USERNAME"], "a": 3, "e": "User crontabs live in /var/spool/cron/ named after the user."}, {"q": "Which command deletes ALL your cron jobs without asking?", "o": ["crontab -d", "crontab -x", "crontab -c", "crontab -r"], "a": 3, "e": "crontab -r removes everything. Use -ri to be asked first."}, {"q": "In which order are the 5 cron time fields?", "o": ["second minute hour day month", "day month year hour minute", "minute hour day-of-month month day-of-week", "hour minute day month weekday"], "a": 2, "e": "MIN HOUR DOM MON DOW."}, {"q": "When does <code>0 9 * * 1-5</code> run?", "o": ["9 AM on 1 May", "Every 9 minutes", "Every minute of 9 AM", "9 AM every Monday to Friday"], "a": 3, "e": "Minute 0, hour 9, any day or month, weekday 1 to 5."}, {"q": "What does <code>*/15 * * * *</code> mean?", "o": ["On day 15", "At minute 15 only", "Every 15 minutes", "Every 15 hours"], "a": 2, "e": "*/15 in the minute field = every 15 minutes."}, {"q": "What is wrong with <code>* 5 * * * /root/job.sh</code> if you want one run at 5 AM?", "o": ["Nothing", "It never runs", "It runs every minute from 5:00 to 5:59", "It runs at 5 PM"], "a": 2, "e": "The minute field is *. Use 0 5 * * *."}, {"q": "Why use the full path /usr/bin/dnf in a cron job?", "o": ["It is faster", "Relative paths are illegal in Linux", "Cron has a very short PATH", "Cron cannot run dnf"], "a": 2, "e": "Cron runs with a minimal environment, so use full paths."}, {"q": "What does <code>@reboot</code> do in a crontab?", "o": ["Runs the job every reboot hour", "Disables the job", "Reboots the server", "Runs the job once at system start"], "a": 3, "e": "@reboot runs the command once when the system starts."}, {"q": "By default, what happens to the output of a cron job?", "o": ["It is saved in /var/log/messages", "It is mailed to the job owner", "It is deleted", "It is shown on the screen"], "a": 1, "e": "Cron mails output to the owner or to MAILTO."}, {"q": "Which line stops cron from sending any mail?", "o": ["NOMAIL=1", "MAILTO=root", "MAILTO=\"\"", "MAIL=off"], "a": 2, "e": "An empty MAILTO means no mail."}, {"q": "What does <code>2>&1</code> do?", "o": ["Runs the job twice", "Deletes errors", "Redirects input", "Sends errors to the same place as normal output"], "a": 3, "e": "File descriptor 2 (errors) is sent to where 1 (output) goes."}, {"q": "Where can you check whether a cron job ran?", "o": ["/etc/crontab", "/proc/cron", "/var/log/cron or journalctl -u crond", "fdisk -l"], "a": 2, "e": "Both show CROND log lines for each run."}, {"q": "User john must NOT use cron, everyone else may. Which file do you edit?", "o": ["/etc/cron.deny", "/etc/crontab", "/etc/at.allow", "/etc/cron.allow"], "a": 0, "e": "List john in /etc/cron.deny. (No cron.allow file must exist.)"}, {"q": "Which command lets root list the cron jobs of user mary?", "o": ["crontab -u mary -l", "cron -l mary", "atq mary", "crontab -l mary"], "a": 0, "e": "crontab -u USER -l."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 08: Transferring Files</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#2f9e5b;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 08 &middot; RHEL 10</small><h1>Transferring Files</h1><p>Copy files between two Linux servers with <mark>scp</mark>, <mark>sftp</mark> and <mark>rsync</mark> (all over SSH), and download from the web with <mark>wget</mark> and <mark>curl</mark>.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Why and which tool</a><a href="#scp">scp</a><a href="#sftp">sftp</a><a href="#rsync">rsync</a><a href="#dl">wget and curl</a><a href="#ssh">SSH keys</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Why transfer tools? Which one to use</h2><div class="why"><b>Why?</b> Servers are remote. You must move backups, configs and logs between machines safely. All three main tools use <mark>SSH</mark>, so the data is encrypted on the way.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">scp</text><text x="103" y="84" text-anchor="middle">copy one time</text><text class="sm" x="103" y="106" text-anchor="middle">simple, like cp</text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#ma)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">sftp</text><text x="334" y="84" text-anchor="middle">interactive</text><text class="sm" x="334" y="106" text-anchor="middle">like a small FTP shell</text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#ma)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">rsync</text><text x="565" y="84" text-anchor="middle">smart sync</text><text class="sm" x="565" y="106" text-anchor="middle">only changed data</text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#ma)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">wget / curl</text><text x="796" y="84" text-anchor="middle">download</text><text class="sm" x="796" y="106" text-anchor="middle">from a URL</text><text class="sm" x="450" y="170" text-anchor="middle">Rule: simple copy = scp, repeated backup = rsync</text></svg><div class="tblwrap"><table class=""><tr><th>Tool</th><th>Full form</th><th>Best for</th></tr><tr><td><code>scp</code></td><td>Secure CP (copy)</td><td>quick copy of a file or folder</td></tr><tr><td><code>sftp</code></td><td>SSH File Transfer Protocol</td><td>browse remote files, many small tasks</td></tr><tr><td><code>rsync</code></td><td>Remote SYNChronization</td><td>backup, mirror, resume, only send changes</td></tr><tr><td><code>wget</code></td><td>Web GET</td><td>download a file from a URL</td></tr><tr><td><code>curl</code></td><td>Client URL</td><td>test URLs and APIs, also download</td></tr></table></div><div class="note"><b>Before you start</b>You need SSH access to the other server (port 22) and a user name. Key-based login (<code>ssh-keygen</code>, <code>ssh-copy-id</code>) saves typing the password every time.</div></section>
+<section id="scp"><h2><span class="n">2</span>scp: secure copy</h2><div class="why"><b>Why?</b> <code>scp</code> works like <code>cp</code>, but one side can be a remote server. Pattern: <code>scp SOURCE DESTINATION</code>, where the remote side is written <code>user@host:path</code>.</div><pre class="term"><span class="p">$ </span>scp /home/student/report.txt student@192.168.1.20:/tmp/
+<span class="o">student@192.168.1.20's password:</span>
+<span class="o">report.txt                         100%   12KB   4.1MB/s   00:00</span>
+<span class="p">$ </span>scp student@192.168.1.20:/etc/hostname /tmp/hostname-server2
+<span class="p">$ </span>scp -r /home/student/project student@192.168.1.20:/home/student/
+<span class="p">$ </span>scp -P 2222 file.txt student@server2:/tmp/</pre><div class="tblwrap"><table class=""><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>-r</code></td><td><b>r</b>ecursive, needed for folders</td></tr><tr><td><code>-P PORT</code></td><td><b>capital P</b> = SSH port (small <code>-p</code> keeps timestamps)</td></tr><tr><td><code>-p</code></td><td>preserve times and modes</td></tr><tr><td><code>-i key</code></td><td>use a specific private key</td></tr><tr><td><code>-C</code></td><td>compress while sending</td></tr></table></div><div class="warn"><b>Colon is the secret</b><code>server2:/tmp/</code> = remote path. Without the colon, <code>scp file server2</code> just makes a LOCAL copy named <code>server2</code>. A very common mistake.</div><div class="warn"><b>scp overwrites without asking</b>If the destination file exists, scp replaces it silently. For safe repeated copies use rsync.</div></section>
+<section id="sftp"><h2><span class="n">3</span>sftp: interactive transfer</h2><div class="why"><b>Why?</b> When you do not remember the exact file name, <code>sftp</code> lets you look around on the remote server, then download or upload.</div><pre class="term"><span class="p">$ </span>sftp student@192.168.1.20
+<span class="o">student@192.168.1.20's password:</span>
+<span class="o">Connected to 192.168.1.20.</span>
+<span class="o">sftp&gt; pwd</span>
+<span class="o">Remote working directory: /home/student</span>
+<span class="o">sftp&gt; ls</span>
+<span class="o">Documents  report.txt</span>
+<span class="o">sftp&gt; get report.txt</span>
+<span class="o">Fetching /home/student/report.txt to report.txt</span>
+<span class="o">sftp&gt; lpwd</span>
+<span class="o">Local working directory: /home/student</span>
+<span class="o">sftp&gt; put backup.tar.gz /tmp</span>
+<span class="o">Uploading backup.tar.gz to /tmp/backup.tar.gz</span>
+<span class="o">sftp&gt; bye</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>ls</code>, <code>cd</code>, <code>pwd</code></td><td>work on the <b>remote</b> side</td></tr><tr><td><code>lls</code>, <code>lcd</code>, <code>lpwd</code></td><td><b>l</b>ocal side (letter l in front)</td></tr><tr><td><code>get FILE</code></td><td>download</td></tr><tr><td><code>put FILE</code></td><td>upload</td></tr><tr><td><code>get -r DIR</code>, <code>put -r DIR</code></td><td>folder</td></tr><tr><td><code>mkdir</code>, <code>rm</code></td><td>remote folder / delete</td></tr><tr><td><code>bye</code> or <code>exit</code></td><td>quit</td></tr></table></div></section>
+<section id="rsync"><h2><span class="n">4</span>rsync: -avz and --delete</h2><div class="why"><b>Why?</b> <code>rsync</code> compares both sides and sends only what changed. A 10 GB backup that changed 50 MB sends 50 MB. It can also resume a broken copy.</div><pre class="term"><span class="p">$ </span>rsync -avz /home/student/project/ student@192.168.1.20:/backup/project/
+<span class="o">sending incremental file list</span>
+<span class="o">./</span>
+<span class="o">notes.txt</span>
+<span class="o">src/main.py</span>
+<span class="o"></span>
+<span class="o">sent 4,215 bytes  received 62 bytes  8,554.00 bytes/sec</span>
+<span class="o">total size is 11,901  speedup is 2.78</span></pre><div class="tblwrap"><table class=""><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>-a</code></td><td><b>a</b>rchive: recursive + keeps permissions, owner, times, links</td></tr><tr><td><code>-v</code></td><td><b>v</b>erbose</td></tr><tr><td><code>-z</code></td><td>compress during transfer</td></tr><tr><td><code>-n</code></td><td><b>n</b>o action: dry run (test first!)</td></tr><tr><td><code>-P</code></td><td>progress + keep partial file (resume)</td></tr><tr><td><code>--delete</code></td><td>delete files on the destination that no longer exist in the source</td></tr><tr><td><code>-e "ssh -p 2222"</code></td><td>set the SSH command or port</td></tr><tr><td><code>--exclude=PATTERN</code></td><td>skip files</td></tr></table></div><div class="warn"><b>Trailing slash matters!</b><code>rsync -a /src/ /dest/</code> copies the <b>content</b> of src into dest. <code>rsync -a /src /dest/</code> creates <code>/dest/src/</code>. Always check with <code>-n</code> first.</div><h3>Safe mirror: dry run, then real run</h3><pre class="term"><span class="p">$ </span>rsync -avzn --delete /data/ student@server2:/backup/data/
+<span class="o">deleting old-report.txt</span>
+<span class="o">./</span>
+<span class="o">new-file.txt</span>
+<span class="p">$ </span>rsync -avz --delete /data/ student@server2:/backup/data/</pre><h3>rsync over ssh with a different port</h3><pre class="term"><span class="p">$ </span>rsync -avz -e "ssh -p 2222" /data/ student@server2:/backup/data/</pre><div class="tip"><b>Local to local also works</b><code>rsync -av /etc/ /backup/etc/</code> is a good local backup too. SSH is only used when a <code>host:</code> is present.</div><h3>Real scenario: nightly backup with cron</h3><div class="file"><b>crontab -e</b><pre><span class="add">30 1 * * * rsync -az /var/www/ student@backup01:/backup/www/ &gt;&gt; /var/log/rsync-www.log 2&gt;&amp;1</span></pre></div></section>
+<section id="dl"><h2><span class="n">5</span>Downloads: wget and curl</h2><div class="why"><b>Why?</b> Sometimes you need a file from a web or FTP URL: an ISO, a script, a repo file. <code>wget</code> and <code>curl</code> do it from the terminal.</div><pre class="term"><span class="p">$ </span>wget https://example.com/files/app.tar.gz
+<span class="o">--2026-11-20 10:40:11--  https://example.com/files/app.tar.gz</span>
+<span class="o">Saving to: 'app.tar.gz'</span>
+<span class="o">app.tar.gz          100%[=====================&gt;]   2.1M  3.0MB/s    in 0.7s</span>
+<span class="p">$ </span>wget -O /tmp/new.tar.gz https://example.com/files/app.tar.gz
+<span class="p">$ </span>wget -c https://example.com/big.iso      # -c continue a broken download
+<span class="p">$ </span>curl -O https://example.com/files/app.tar.gz
+<span class="p">$ </span>curl -o /tmp/new.tar.gz https://example.com/files/app.tar.gz
+<span class="p">$ </span>curl -I https://example.com               # only the headers</pre><div class="tblwrap"><table class=""><tr><th></th><th>wget</th><th>curl</th></tr><tr><td>Save with remote name</td><td>default</td><td><code>-O</code> (capital)</td></tr><tr><td>Save with own name</td><td><code>-O name</code></td><td><code>-o name</code></td></tr><tr><td>Resume</td><td><code>-c</code></td><td><code>-C -</code></td></tr><tr><td>Show headers only</td><td><code>--spider</code></td><td><code>-I</code></td></tr><tr><td>Best at</td><td>plain downloads</td><td>testing URLs, APIs, headers</td></tr></table></div><div class="note"><b>curl prints to the screen by default</b><code>curl URL</code> shows the page on screen. Use <code>-O</code> or <code>-o</code> to save it.</div></section>
+<section id="ssh"><h2><span class="n">6</span>Make transfers easier: SSH keys</h2><div class="why"><b>Why?</b> Typing the password for every scp is slow and cannot be used in cron. A key pair fixes both.</div><pre class="term"><span class="p">$ </span>ssh-keygen -t ed25519
+<span class="o">Generating public/private ed25519 key pair.</span>
+<span class="o">Enter file in which to save the key (/home/student/.ssh/id_ed25519):</span>
+<span class="p">$ </span>ssh-copy-id student@192.168.1.20
+<span class="o">Number of key(s) added: 1</span>
+<span class="p">$ </span>scp report.txt student@192.168.1.20:/tmp/
+<span class="o">report.txt                         100%   12KB   4.1MB/s   00:00</span></pre></section>
+<section id="cheat"><h2><span class="n">7</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>scp FILE user@host:/path/</code></td><td>upload a file</td></tr><tr><td><code>scp user@host:/path/FILE .</code></td><td>download a file</td></tr><tr><td><code>scp -r DIR user@host:/path/</code></td><td>copy a folder</td></tr><tr><td><code>sftp user@host</code></td><td>interactive session</td></tr><tr><td><code>rsync -avz SRC/ user@host:DEST/</code></td><td>sync to remote</td></tr><tr><td><code>rsync -avzn --delete SRC/ DEST/</code></td><td>dry run mirror</td></tr><tr><td><code>wget URL</code></td><td>download</td></tr><tr><td><code>curl -O URL</code></td><td>download with remote name</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">8</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 08 &middot; Transferring Files</footer></div>
+<script>
+const Q=[{"q": "All of scp, sftp and rsync (over ssh) send data...", "o": ["in plain text", "encrypted through SSH", "only on port 80", "only inside one server"], "a": 1, "e": "They use SSH, so data is encrypted."}, {"q": "What is the full form of rsync?", "o": ["Remote SYNChronization", "Read Sync", "Remote Sync", "Real Sync"], "a": 0, "e": "rsync = Remote SYNChronization."}, {"q": "Which command correctly uploads report.txt to /tmp on server2?", "o": ["scp report.txt student@server2:/tmp/", "scp -r report.txt /tmp", "scp report.txt server2 /tmp", "scp student@server2 report.txt"], "a": 0, "e": "The remote side needs user@host:path with a colon."}, {"q": "What happens with <code>scp file.txt server2</code> (no colon)?", "o": ["Error: no host", "Uploads to server2", "Makes a local copy named server2", "Deletes file.txt"], "a": 2, "e": "Without a colon, it is just a local copy."}, {"q": "Which scp option copies a whole folder?", "o": ["-r", "-d", "-f", "-a"], "a": 0, "e": "-r = recursive."}, {"q": "How do you set a custom SSH port in scp?", "o": ["-p 2222", "-s 2222", "--port 2222", "-P 2222"], "a": 3, "e": "scp uses capital -P. Small -p preserves times."}, {"q": "In sftp, which command downloads a file?", "o": ["pull", "get", "put", "fetch"], "a": 1, "e": "get downloads, put uploads."}, {"q": "In sftp, what does <code>lpwd</code> show?", "o": ["Last password", "Local directory", "Remote directory", "List of files"], "a": 1, "e": "A leading l means local."}, {"q": "Which tool sends only the changed data?", "o": ["rsync", "sftp", "scp", "wget"], "a": 0, "e": "rsync compares both sides."}, {"q": "What does <code>-a</code> do in rsync -a?", "o": ["Archive mode: recursive and keep permissions, owner, times", "Append only", "Ask before copy", "Compress"], "a": 0, "e": "-a = archive mode."}, {"q": "Which rsync option makes a dry run?", "o": ["-n", "-d", "-q", "-t"], "a": 0, "e": "-n shows what would happen, without doing it."}, {"q": "What does <code>--delete</code> do in rsync?", "o": ["Deletes files on the destination that are missing in the source", "Deletes all files", "Deletes the log", "Deletes the source"], "a": 0, "e": "It makes the destination an exact mirror."}, {"q": "Difference between <code>rsync -a /data/ /bk/</code> and <code>rsync -a /data /bk/</code>?", "o": ["The second is faster", "The first deletes files", "The first copies the content, the second creates /bk/data/", "None"], "a": 2, "e": "The trailing slash on the source means 'the content of'."}, {"q": "How do you use rsync with SSH on port 2222?", "o": ["rsync --port-ssh 2222", "rsync -e \"ssh -p 2222\"", "rsync -P 2222 only", "rsync -p 2222"], "a": 1, "e": "-e sets the remote shell command."}, {"q": "Which command resumes a broken wget download?", "o": ["wget -O", "wget -q", "wget -r", "wget -c"], "a": 3, "e": "-c = continue."}, {"q": "Which curl option saves with the remote file name?", "o": ["-O", "-s", "-I", "-o"], "a": 0, "e": "Capital -O keeps the remote name. Small -o needs your own name."}, {"q": "What does <code>curl https://example.com</code> do without options?", "o": ["Prints the page to the screen", "Starts a download manager", "Opens a browser", "Saves index.html"], "a": 0, "e": "curl writes to standard output."}, {"q": "Which curl option shows only the HTTP headers?", "o": ["-I", "-H", "-h", "-O"], "a": 0, "e": "curl -I (HEAD request)."}, {"q": "Why use SSH keys with scp and rsync in cron?", "o": ["Keys compress the data", "Faster network", "No password prompt is possible in cron", "Keys are required by tar"], "a": 2, "e": "Cron cannot type a password."}, {"q": "Which tool is best for an interactive session where you browse remote files?", "o": ["sftp", "scp", "tar", "wget"], "a": 0, "e": "sftp has ls, cd, get and put."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

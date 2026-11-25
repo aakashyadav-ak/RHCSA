@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 06: SELinux</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#d6455d;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 06 &middot; RHEL 10</small><h1>SELinux</h1><p><mark>SELinux</mark> is a second lock on every file, process and port. This chapter covers modes, contexts, booleans, and how to read a denial and fix it.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">What is SELinux</a><a href="#modes">Modes and status</a><a href="#ctx">Contexts</a><a href="#fcontext">fcontext and restorecon</a><a href="#bool">Booleans</a><a href="#deny">Denials</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>What SELinux is and why we need it</h2><div class="why"><b>Why?</b> Normal permissions (rwx) only check the user. If a web server is hacked, it runs as apache and can read anything apache may read. <b>SELinux</b> (Security-Enhanced Linux) adds rules for what each program may touch, so a hacked service stays locked in its own box.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="263" height="95" rx="12"/><text class="bd" x="141" y="58" text-anchor="middle">Process</text><text x="141" y="84" text-anchor="middle">httpd_t</text><text class="sm" x="141" y="106" text-anchor="middle">the web server</text><line class="ar" x1="275" y1="72" x2="316" y2="72" marker-end="url(#ma)"/><rect class="bx" x="318" y="25" width="263" height="95" rx="12"/><text class="bd" x="449" y="58" text-anchor="middle">SELinux rule</text><text x="449" y="84" text-anchor="middle">allowed?</text><text class="sm" x="449" y="106" text-anchor="middle">policy in kernel</text><line class="ar" x1="583" y1="72" x2="624" y2="72" marker-end="url(#ma)"/><rect class="ok" x="626" y="25" width="263" height="95" rx="12"/><text class="bd" x="757" y="58" text-anchor="middle">File</text><text x="757" y="84" text-anchor="middle">httpd_sys_content_t</text><text class="sm" x="757" y="106" text-anchor="middle">label on the file</text><text class="sm" x="450" y="170" text-anchor="middle">Process label + file label + policy rule = allow or deny</text></svg><div class="tblwrap"><table class=""><tr><th></th><th>DAC (normal permissions)</th><th>MAC (SELinux)</th></tr><tr><td>Full form</td><td>Discretionary Access Control</td><td>Mandatory Access Control</td></tr><tr><td>Checks</td><td>user, group, rwx</td><td>labels (contexts) and policy</td></tr><tr><td>Can the owner change it?</td><td>yes</td><td>no, only the admin policy</td></tr><tr><td>Order</td><td>checked first</td><td>checked after DAC; both must allow</td></tr></table></div><div class="note"><b>Remember</b>If rwx says yes but SELinux says no, the access is <b>denied</b>. The error looks like a normal "Permission denied", which confuses beginners.</div></section>
+<section id="modes"><h2><span class="n">2</span>Modes and status: getenforce, setenforce, sestatus</h2><div class="why"><b>Why?</b> You must know if SELinux is blocking, only warning, or off. Permissive mode is the safe way to test.</div><div class="tblwrap"><table class=""><tr><th>Mode</th><th>Behaviour</th></tr><tr><td><b>Enforcing</b></td><td>rules are applied, violations are blocked and logged</td></tr><tr><td><b>Permissive</b></td><td>nothing is blocked, violations are only logged (for testing)</td></tr><tr><td><b>Disabled</b></td><td>SELinux is off (needs reboot to change, avoid it)</td></tr></table></div><pre class="term"><span class="p">$ </span>getenforce
+<span class="o">Enforcing</span>
+<span class="p">$ </span>sudo setenforce 0
+<span class="p">$ </span>getenforce
+<span class="o">Permissive</span>
+<span class="p">$ </span>sudo setenforce 1
+<span class="p">$ </span>sestatus
+<span class="o">SELinux status:                 enabled</span>
+<span class="o">SELinuxfs mount:                /sys/fs/selinux</span>
+<span class="o">Loaded policy name:             targeted</span>
+<span class="o">Current mode:                   enforcing</span>
+<span class="o">Mode from config file:          enforcing</span>
+<span class="o">Policy MLS status:              enabled</span>
+<span class="o">Policy deny_unknown status:     allowed</span></pre><ul><li><code>getenforce</code> = get enforcing mode (one word answer).</li><li><code>setenforce 0|1</code> changes the mode <b>now</b>, lost after reboot. 0 = Permissive, 1 = Enforcing.</li><li><code>sestatus</code> = status, shows current mode and the mode in the config file.</li></ul><h3>Make it permanent: /etc/selinux/config</h3><div class="file"><b>/etc/selinux/config</b><pre><span class="add">SELINUX=enforcing</span>
+SELINUXTYPE=targeted</pre></div><p>Change the word after <code>SELINUX=</code> to <code>enforcing</code>, <code>permissive</code> or <code>disabled</code>, then reboot. The <code>targeted</code> policy protects network services and is the default.</p><div class="warn"><b>Do not disable SELinux</b>Interviewers ask: "A service fails, what do you do?" The wrong answer is "turn SELinux off". Use <b>permissive</b> to test, then fix the context or boolean.</div></section>
+<section id="ctx"><h2><span class="n">3</span>Contexts: ls -Z and ps -Z</h2><div class="why"><b>Why?</b> SELinux decides using a <b>label</b> (context) on every file, process and port. To fix a denial you must read the labels first.</div><pre class="term"><span class="p">$ </span>ls -Z /var/www/html/index.html
+<span class="o">unconfined_u:object_r:httpd_sys_content_t:s0 /var/www/html/index.html</span>
+<span class="p">$ </span>ps -Z -C httpd
+<span class="o">LABEL                             PID TTY          TIME CMD</span>
+<span class="o">system_u:system_r:httpd_t:s0     1450 ?        00:00:00 httpd</span>
+<span class="p">$ </span>id -Z
+<span class="o">unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023</span></pre><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="mb" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">user</text><text x="103" y="84" text-anchor="middle">unconfined_u</text><text class="sm" x="103" y="106" text-anchor="middle"></text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#mb)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">role</text><text x="334" y="84" text-anchor="middle">object_r</text><text class="sm" x="334" y="106" text-anchor="middle"></text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#mb)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">type</text><text x="565" y="84" text-anchor="middle">httpd_sys_content_t</text><text class="sm" x="565" y="106" text-anchor="middle"></text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#mb)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">level</text><text x="796" y="84" text-anchor="middle">s0</text><text class="sm" x="796" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Format  user : role : type : level  - the TYPE (3rd part) matters most</text></svg><div class="tblwrap"><table class=""><tr><th>Part</th><th>Meaning</th></tr><tr><td>user (<code>_u</code>)</td><td>SELinux user</td></tr><tr><td>role (<code>_r</code>)</td><td>role</td></tr><tr><td><b>type (<code>_t</code>)</b></td><td>the important part. Rules say "type httpd_t may read type httpd_sys_content_t"</td></tr><tr><td>level</td><td>MLS/MCS security level, ignore at this stage</td></tr></table></div><h3>Common types</h3><div class="tblwrap"><table class=""><tr><th>Type</th><th>Used for</th></tr><tr><td><code>httpd_sys_content_t</code></td><td>web server files in /var/www/html</td></tr><tr><td><code>user_home_t</code></td><td>files in /home</td></tr><tr><td><code>tmp_t</code></td><td>files in /tmp</td></tr><tr><td><code>ssh_port_t</code></td><td>SSH port 22</td></tr></table></div><div class="note"><b>New files inherit the label of the folder they are created in</b><b>Copying</b> a file creates a new file, so it takes the target folder label. <b>Moving</b> (<code>mv</code>) keeps the old label. This is the #1 cause of "my website gives 403 after mv".</div></section>
+<section id="fcontext"><h2><span class="n">4</span>Fix a wrong context: semanage fcontext and restorecon</h2><div class="why"><b>Why?</b> The label is wrong, so SELinux blocks the service. Two steps: save the correct rule (<code>semanage fcontext</code>), then apply it (<code>restorecon</code>). Without the first step the fix is lost on a full relabel.</div><p>Scenario: you made a web folder <code>/web</code> instead of <code>/var/www/html</code>. Apache gets 403 Forbidden.</p><pre class="term"><span class="p">$ </span>sudo mkdir /web
+<span class="p">$ </span>echo "Hello" | sudo tee /web/index.html
+<span class="p">$ </span>ls -Zd /web /web/index.html
+<span class="o">unconfined_u:object_r:default_t:s0 /web</span>
+<span class="o">unconfined_u:object_r:default_t:s0 /web/index.html</span></pre><ol class="steps"><li><span>Add the rule: <code>semanage fcontext -a -t httpd_sys_content_t "/web(/.*)?"</code></span></li><li><span>Apply it: <code>restorecon -Rv /web</code></span></li><li><span>Check: <code>ls -Z /web</code></span></li></ol><pre class="term"><span class="p">$ </span>sudo semanage fcontext -a -t httpd_sys_content_t "/web(/.*)?"
+<span class="p">$ </span>sudo restorecon -Rv /web
+<span class="o">Relabeled /web from unconfined_u:object_r:default_t:s0 to unconfined_u:object_r:httpd_sys_content_t:s0</span>
+<span class="o">Relabeled /web/index.html from unconfined_u:object_r:default_t:s0 to unconfined_u:object_r:httpd_sys_content_t:s0</span>
+<span class="p">$ </span>ls -Z /web
+<span class="o">unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span></pre><div class="tblwrap"><table class=""><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>semanage fcontext -a -t TYPE "PATH(/.*)?"</code></td><td>-a add rule, -t type. The pattern means the folder and everything inside</td></tr><tr><td><code>semanage fcontext -l | grep web</code></td><td>list saved rules</td></tr><tr><td><code>semanage fcontext -d "PATH(/.*)?"</code></td><td>delete a rule</td></tr><tr><td><code>restorecon -Rv PATH</code></td><td>-R recursive, -v show changes</td></tr><tr><td><code>touch /.autorelabel</code> and reboot</td><td>relabel the whole system</td></tr></table></div><div class="tip"><b>Shortcut: copy the label of a good folder</b><code>chcon -R -t httpd_sys_content_t /web</code> changes the label <b>now</b> but it is temporary and is lost on a relabel. Use <code>semanage fcontext</code> + <code>restorecon</code> for a permanent fix.</div><div class="note"><b>If semanage is missing</b>Install the tools: <code>sudo dnf install -y policycoreutils-python-utils</code>.</div></section>
+<section id="bool"><h2><span class="n">5</span>Booleans: getsebool and setsebool -P</h2><div class="why"><b>Why?</b> A <b>boolean</b> is an on/off switch for one allowed behaviour (for example "may httpd connect to the network?"). It is safer than writing new rules.</div><pre class="term"><span class="p">$ </span>getsebool -a | grep httpd_can
+<span class="o">httpd_can_check_spam --&gt; off</span>
+<span class="o">httpd_can_network_connect --&gt; off</span>
+<span class="o">httpd_can_sendmail --&gt; off</span>
+<span class="p">$ </span>sudo setsebool httpd_can_network_connect on
+<span class="p">$ </span>sudo setsebool -P httpd_can_network_connect on
+<span class="p">$ </span>getsebool httpd_can_network_connect
+<span class="o">httpd_can_network_connect --&gt; on</span></pre><ul><li><code>getsebool -a</code> lists all booleans. Filter with <code>grep</code>.</li><li><code>setsebool NAME on</code> is temporary (lost at reboot).</li><li><code>setsebool -P NAME on</code> -P = <b>P</b>ermanent (saved in the policy). Takes a few seconds.</li><li><code>semanage boolean -l</code> shows each boolean with a description.</li></ul><pre class="term"><span class="p">$ </span>sudo semanage boolean -l | grep httpd_enable_homedirs
+<span class="o">httpd_enable_homedirs   (off  ,  off)  Allow httpd to enable homedirs</span></pre></section>
+<section id="deny"><h2><span class="n">6</span>Reading denials: ausearch and sealert</h2><div class="why"><b>Why?</b> When SELinux blocks something it writes the reason in the audit log. Reading it tells you whether the fix is a label, a boolean or a port.</div><pre class="term"><span class="p">$ </span>sudo ausearch -m AVC -ts recent
+<span class="o">type=AVC msg=audit(1763634010.120:412): avc:  denied  { read } for  pid=1450 comm="httpd" name="index.html" dev="vda1" ino=1048700 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:default_t:s0 tclass=file permissive=0</span></pre><div class="tblwrap"><table class=""><tr><th>Word in log</th><th>Meaning</th></tr><tr><td><code>denied { read }</code></td><td>the blocked action</td></tr><tr><td><code>comm="httpd"</code></td><td>the program</td></tr><tr><td><code>scontext</code></td><td>source (process) context: httpd_t</td></tr><tr><td><code>tcontext</code></td><td>target (file) context: default_t. <b>Wrong type here = the cause</b></td></tr><tr><td><code>tclass=file</code></td><td>object kind (file, dir, tcp_socket)</td></tr><tr><td><code>AVC</code></td><td>Access Vector Cache = the denial message</td></tr></table></div><h3>sealert gives the fix in plain English</h3><pre class="term"><span class="p">$ </span>sudo dnf install -y setroubleshoot-server
+<span class="p">$ </span>sudo sealert -a /var/log/audit/audit.log
+<span class="o">SELinux is preventing /usr/sbin/httpd from read access on the file index.html.</span>
+<span class="o">*****  Plugin catchall_labels (83.8 confidence) suggests  *****</span>
+<span class="o">If you want to allow httpd to have read access on the index.html file</span>
+<span class="o">Then you need to change the label on index.html</span>
+<span class="o">Do</span>
+<span class="c"># semanage fcontext -a -t FILE_TYPE '/web/index.html'</span>
+<span class="c"># restorecon -v '/web/index.html'</span></pre><pre class="term"><span class="p">$ </span>sudo journalctl -t setroubleshoot --since today</pre><h3>The fix workflow</h3><ol class="steps"><li><span>Service fails but rwx looks fine? Suspect SELinux. <code>getenforce</code>.</span></li><li><span>Read the denial: <code>ausearch -m AVC -ts recent</code> or <code>sealert</code>.</span></li><li><span>Wrong file label? <code>semanage fcontext</code> + <code>restorecon</code>.</span></li><li><span>Missing permission? <code>setsebool -P</code>.</span></li><li><span>Wrong port? <code>semanage port</code> (chapter 14).</span></li><li><span>Test again. Do not leave SELinux in permissive.</span></li></ol></section>
+<section id="cheat"><h2><span class="n">7</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>getenforce</code></td><td>show mode</td></tr><tr><td><code>setenforce 0 / 1</code></td><td>permissive / enforcing now</td></tr><tr><td><code>sestatus</code></td><td>full status</td></tr><tr><td><code>ls -Z</code>, <code>ps -Z</code>, <code>id -Z</code></td><td>show contexts</td></tr><tr><td><code>semanage fcontext -a -t T "P(/.*)?"</code></td><td>save a file label rule</td></tr><tr><td><code>restorecon -Rv P</code></td><td>apply saved labels</td></tr><tr><td><code>chcon -t T file</code></td><td>temporary label</td></tr><tr><td><code>getsebool -a</code></td><td>list booleans</td></tr><tr><td><code>setsebool -P N on</code></td><td>permanent boolean</td></tr><tr><td><code>ausearch -m AVC -ts recent</code></td><td>find denials</td></tr><tr><td><code>sealert -a /var/log/audit/audit.log</code></td><td>explain denials</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">8</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 06 &middot; SELinux</footer></div>
+<script>
+const Q=[{"q": "What is the full form of SELinux?", "o": ["Safe Environment Linux", "System Enforced Linux", "Secure Edition Linux", "Security-Enhanced Linux"], "a": 3, "e": "SELinux = Security-Enhanced Linux."}, {"q": "Which access control type is SELinux?", "o": ["Discretionary (DAC)", "Password based", "Mandatory (MAC)", "Role only"], "a": 2, "e": "SELinux is Mandatory Access Control. Normal rwx is Discretionary."}, {"q": "Which mode logs violations but does NOT block them?", "o": ["Targeted", "Disabled", "Permissive", "Enforcing"], "a": 2, "e": "Permissive = warn only. Good for testing."}, {"q": "Which command shows the current SELinux mode in one word?", "o": ["sestatus -v", "getenforce", "selinux-mode", "setenforce"], "a": 1, "e": "getenforce prints Enforcing, Permissive or Disabled."}, {"q": "What does <code>setenforce 0</code> do?", "o": ["Disables SELinux forever", "Sets permissive until reboot", "Relabels files", "Sets enforcing"], "a": 1, "e": "0 = Permissive now, not permanent."}, {"q": "Which file makes the SELinux mode permanent?", "o": ["/etc/selinux/config", "/var/log/audit/audit.log", "/boot/selinux", "/etc/sysconfig/selinux.conf"], "a": 0, "e": "Edit SELINUX= in /etc/selinux/config and reboot."}, {"q": "Which option shows SELinux contexts in ls?", "o": ["-l", "-Z", "-C", "-s"], "a": 1, "e": "ls -Z shows the context."}, {"q": "In user_u:role_r:type_t:s0, which part is most important for the targeted policy?", "o": ["user", "type", "level", "role"], "a": 1, "e": "The type (_t) decides what is allowed."}, {"q": "You moved index.html with <code>mv</code> from /home into /var/www/html and get 403. Why?", "o": ["mv keeps the old label", "Apache is off", "DNS problem", "The file is too big"], "a": 0, "e": "mv keeps the user_home_t label. Fix with restorecon."}, {"q": "Which command applies the saved default labels to a folder?", "o": ["chcon -d", "restorecon -Rv", "semanage -r", "setenforce"], "a": 1, "e": "restorecon -Rv resets labels to the saved rules."}, {"q": "Which command saves a permanent label rule for /web?", "o": ["semanage fcontext -a -t", "restorecon -a", "chcon -t", "setsebool -P"], "a": 0, "e": "semanage fcontext -a -t TYPE saves the rule."}, {"q": "What is wrong with using only <code>chcon</code> for a permanent fix?", "o": ["It needs reboot", "The change is lost on relabel", "It deletes the file", "It is slow"], "a": 1, "e": "chcon is temporary. Use semanage fcontext + restorecon."}, {"q": "Which command lists all booleans?", "o": ["sestatus -b", "semanage list", "getenforce -a", "getsebool -a"], "a": 3, "e": "getsebool -a."}, {"q": "What does the <code>-P</code> in setsebool -P mean?", "o": ["Permanent", "Policy test", "Port", "Print"], "a": 0, "e": "-P saves the boolean permanently."}, {"q": "Which log has the SELinux denial messages?", "o": ["/var/log/audit/audit.log", "/var/log/messages only", "/etc/selinux/log", "/var/log/boot.log"], "a": 0, "e": "AVC denials go to the audit log."}, {"q": "In an AVC message, which field shows the label of the FILE?", "o": ["scontext", "comm", "pid", "tcontext"], "a": 3, "e": "tcontext = target context (the file). scontext = process."}, {"q": "Which tool explains a denial and suggests a fix in plain English?", "o": ["sealert", "fdisk", "tuned-adm", "chronyc"], "a": 0, "e": "sealert (from setroubleshoot-server)."}, {"q": "A service fails and rwx permissions look right. What do you check first?", "o": ["Change the hostname", "Delete the file", "SELinux denial in the audit log", "Reinstall RHEL"], "a": 2, "e": "Check ausearch or sealert for AVC denials."}, {"q": "What is the best way to find out whether SELinux is the cause?", "o": ["Switch to permissive and test", "Delete /etc/selinux", "Disable it permanently", "Reboot ten times"], "a": 0, "e": "setenforce 0 for a test, then switch back and fix properly."}, {"q": "Which command relabels the whole system at next boot?", "o": ["touch /.autorelabel", "semanage reset", "restorecon -a /", "setenforce relabel"], "a": 0, "e": "Create /.autorelabel and reboot."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 12: Controlling and Troubleshooting the Boot Process</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#b5651d;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 12 &middot; RHEL 10</small><h1>Controlling and Troubleshooting the Boot Process</h1><p>What happens from power button to login prompt, how to change the <mark>target</mark> (text or graphical), and how to use <mark>rescue mode</mark>, edit <mark>GRUB</mark> and fix a broken <mark>fstab</mark>.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Boot steps</a><a href="#targets">Targets</a><a href="#rescue">Rescue mode</a><a href="#grub">grubby and GRUB</a><a href="#fstab">Fix fstab</a><a href="#logs">dmesg, journalctl</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Boot process in 6 steps</h2><div class="why"><b>Why?</b> If a server does not start, you must know <b>which step</b> failed. Each step has its own fix.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="140" height="95" rx="12"/><text class="bd" x="80" y="58" text-anchor="middle">Firmware</text><text x="80" y="84" text-anchor="middle">UEFI / BIOS</text><text class="sm" x="80" y="106" text-anchor="middle"></text><line class="ar" x1="152" y1="72" x2="193" y2="72" marker-end="url(#ma)"/><rect class="bx" x="195" y="25" width="140" height="95" rx="12"/><text class="bd" x="265" y="58" text-anchor="middle">Bootloader</text><text x="265" y="84" text-anchor="middle">GRUB2</text><text class="sm" x="265" y="106" text-anchor="middle"></text><line class="ar" x1="337" y1="72" x2="378" y2="72" marker-end="url(#ma)"/><rect class="bx" x="380" y="25" width="140" height="95" rx="12"/><text class="bd" x="450" y="58" text-anchor="middle">Kernel + initramfs</text><text x="450" y="84" text-anchor="middle">loads drivers</text><text class="sm" x="450" y="106" text-anchor="middle"></text><line class="ar" x1="522" y1="72" x2="563" y2="72" marker-end="url(#ma)"/><rect class="bx" x="565" y="25" width="140" height="95" rx="12"/><text class="bd" x="635" y="58" text-anchor="middle">systemd</text><text x="635" y="84" text-anchor="middle">PID 1</text><text class="sm" x="635" y="106" text-anchor="middle"></text><line class="ar" x1="707" y1="72" x2="748" y2="72" marker-end="url(#ma)"/><rect class="ok" x="750" y="25" width="140" height="95" rx="12"/><text class="bd" x="820" y="58" text-anchor="middle">Target</text><text x="820" y="84" text-anchor="middle">multi-user / graphical</text><text class="sm" x="820" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Order of boot. Fix problems at the step where it stops.</text></svg><div class="tblwrap"><table class=""><tr><th>Step</th><th>Full form</th><th>What happens</th></tr><tr><td><b>UEFI / BIOS</b></td><td>Unified Extensible Firmware Interface / Basic Input Output System</td><td>hardware test (POST), finds the boot disk</td></tr><tr><td><b>GRUB2</b></td><td>GRand Unified Bootloader 2</td><td>shows the menu, loads kernel and initramfs</td></tr><tr><td><b>Kernel</b></td><td></td><td>starts, mounts a temporary root from the initramfs</td></tr><tr><td><b>initramfs</b></td><td>initial RAM file system</td><td>small image with drivers needed to find the real root disk</td></tr><tr><td><b>systemd</b></td><td></td><td>first process (PID 1), starts services</td></tr><tr><td><b>Target</b></td><td></td><td>a group of services = the final state (login prompt or desktop)</td></tr></table></div><div class="note"><b>Where are the files?</b><code>/boot/vmlinuz-*</code> kernel, <code>/boot/initramfs-*.img</code>, <code>/boot/grub2/grub.cfg</code> menu (do not edit by hand), <code>/etc/default/grub</code> settings you edit.</div></section>
+<section id="targets"><h2><span class="n">2</span>Targets: get-default, set-default, isolate</h2><div class="why"><b>Why?</b> A <b>target</b> is a goal state. Servers usually boot to text mode (no desktop) to save resources. You choose which one.</div><div class="tblwrap"><table class=""><tr><th>Target</th><th>Meaning</th></tr><tr><td><code>graphical.target</code></td><td>multi-user + desktop (GUI)</td></tr><tr><td><code>multi-user.target</code></td><td>full text mode, network, all services</td></tr><tr><td><code>rescue.target</code></td><td>single-user, basic system, root password, file systems mounted</td></tr><tr><td><code>emergency.target</code></td><td>smallest shell, root file system read-only only</td></tr><tr><td><code>reboot.target</code> / <code>poweroff.target</code></td><td>restart / shut down</td></tr></table></div><pre class="term"><span class="p">$ </span>systemctl get-default
+<span class="o">graphical.target</span>
+<span class="p">$ </span>sudo systemctl set-default multi-user.target
+<span class="o">Removed '/etc/systemd/system/default.target'.</span>
+<span class="o">Created symlink '/etc/systemd/system/default.target' -&gt; '/usr/lib/systemd/system/multi-user.target'.</span>
+<span class="p">$ </span>sudo systemctl isolate rescue.target
+<span class="p">$ </span>systemctl list-units --type=target</pre><ul><li><code>get-default</code> shows the target used at next boot.</li><li><code>set-default</code> changes the <b>next boot</b> (permanent). Nothing changes now.</li><li><code>isolate</code> switches <b>right now</b>, stopping what that target does not need. <b>Your SSH session may drop!</b></li></ul><div class="warn"><b>Careful with isolate on a remote server</b><code>systemctl isolate emergency.target</code> kills the network and your SSH login. Use it on a console only.</div></section>
+<section id="rescue"><h2><span class="n">3</span>Rescue and emergency mode at boot</h2><div class="why"><b>Why?</b> When the system fails to boot, rescue or emergency mode gives you a root shell so you can repair it.</div><div class="tblwrap"><table class=""><tr><th></th><th>rescue.target</th><th>emergency.target</th></tr><tr><td>Root file system</td><td>mounted read-write</td><td>mounted <b>read-only</b></td></tr><tr><td>Other file systems (fstab)</td><td>mounted</td><td>not mounted</td></tr><tr><td>Services</td><td>few basic ones</td><td>none</td></tr><tr><td>Use when</td><td>forgotten fstab problem, service breaks boot</td><td>fstab is broken or rescue also fails</td></tr></table></div><h3>Enter rescue mode from the GRUB menu</h3><ol class="steps"><li><span>Reboot. At the GRUB menu press any key to stop the timer.</span></li><li><span>Highlight the kernel line and press <mark>e</mark> (edit).</span></li><li><span>Go to the line that starts with <code>linux</code> and press <code>End</code>.</span></li><li><span>Add a space and <code>systemd.unit=rescue.target</code> (or <code>systemd.unit=emergency.target</code>).</span></li><li><span>Press <mark>Ctrl+X</mark> to boot with this change (only once, not saved).</span></li><li><span>Enter the root password when asked.</span></li></ol><div class="file"><b>GRUB edit screen (the linux line)</b><pre><span class="add">linux ($root)/vmlinuz-6.12.0-55.el10.x86_64 root=/dev/mapper/rhel-root ro crashkernel=auto rd.lvm.lv=rhel/root rd.lvm.lv=rhel/swap rhgb quiet systemd.unit=rescue.target</span></pre></div><pre class="term"><span class="o">Give root password for maintenance</span>
+<span class="o">(or press Control-D to continue):</span>
+<span class="p">[root@server ~]# </span>systemctl default      # leave rescue mode, boot normally
+<span class="p">[root@server ~]# </span>mount -o remount,rw /  # in emergency mode only</pre><div class="note"><b>Temporary</b>Changes made with <code>e</code> in GRUB are used for this boot only.</div></section>
+<section id="grub"><h2><span class="n">4</span>GRUB settings: grubby and /etc/default/grub</h2><div class="why"><b>Why?</b> To add a kernel option permanently, for example to print boot messages, you must change the saved settings, not only the one-time edit.</div><h3>grubby: easy way, changes every kernel entry</h3><pre class="term"><span class="p">$ </span>sudo grubby --default-kernel
+<span class="o">/boot/vmlinuz-6.12.0-55.el10.x86_64</span>
+<span class="p">$ </span>sudo grubby --info=ALL | grep args
+<span class="o">args="ro crashkernel=auto rd.lvm.lv=rhel/root rhgb quiet"</span>
+<span class="p">$ </span>sudo grubby --update-kernel=ALL --remove-args="rhgb quiet"
+<span class="p">$ </span>sudo grubby --update-kernel=ALL --args="console=ttyS0"</pre><ul><li><code>--update-kernel=ALL</code> = every installed kernel.</li><li><code>--args="..."</code> adds, <code>--remove-args="..."</code> removes.</li><li>Removing <code>rhgb quiet</code> shows boot messages instead of the graphic splash.</li></ul><h3>/etc/default/grub: classic way</h3><div class="file"><b>/etc/default/grub</b><pre><span class="add">GRUB_TIMEOUT=5</span>
+GRUB_DEFAULT=saved
+GRUB_CMDLINE_LINUX="crashkernel=auto rd.lvm.lv=rhel/root rd.lvm.lv=rhel/swap"</pre></div><p>Change a value (for example <code>GRUB_TIMEOUT=10</code> for a longer menu time) and then rebuild the menu file:</p><pre class="term"><span class="p">$ </span>sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+<span class="o">Generating grub configuration file ...</span>
+<span class="o">Adding boot menu entry for UEFI Firmware Settings ...</span>
+<span class="o">done</span></pre><div class="warn"><b>Never edit /boot/grub2/grub.cfg directly</b>It is generated. Your hand edits are lost at the next kernel update.</div></section>
+<section id="fstab"><h2><span class="n">5</span>Fix a bad fstab at boot</h2><div class="why"><b>Why?</b> A wrong line in <code>/etc/fstab</code> (wrong UUID, wrong disk) makes systemd wait 90 seconds and then drop to emergency mode. This is a very common interview scenario.</div><pre class="term"><span class="o">[  OK  ] Reached target Local File Systems (Pre).</span>
+<span class="o">[DEPEND] Dependency failed for /data.</span>
+<span class="o">[DEPEND] Dependency failed for Local File Systems.</span>
+<span class="o">You are in emergency mode. After logging in, type "journalctl -xb" to view</span>
+<span class="o">system logs, "systemctl reboot" to reboot, "systemctl default" or "exit"</span>
+<span class="o">to boot into default mode.</span>
+<span class="o">Give root password for maintenance</span>
+<span class="o">(or press Control-D to continue):</span></pre><ol class="steps"><li><span>Enter the root password.</span></li><li><span>Make the root file system writable: <code>mount -o remount,rw /</code></span></li><li><span>Open the file: <code>vim /etc/fstab</code></span></li><li><span>Comment the bad line with <code>#</code> (or fix the UUID, check with <code>blkid</code>).</span></li><li><span>Test: <code>mount -a</code> (no message = OK).</span></li><li><span><code>systemctl daemon-reload</code> then <code>systemctl reboot</code>.</span></li></ol><div class="file"><b>/etc/fstab  (before and after)</b><pre>UUID=aaaa-1111  /data  xfs  defaults  0 0
+<span class="add">#UUID=aaaa-1111  /data  xfs  defaults  0 0</span></pre></div><div class="tip"><b>Prevent boot hangs for optional disks</b>Add <code>nofail</code> in the options: <code>UUID=...  /data  xfs  defaults,nofail  0 0</code>. The system boots even if this disk is missing.</div></section>
+<section id="logs"><h2><span class="n">6</span>Boot messages: dmesg and journalctl -b</h2><div class="why"><b>Why?</b> After the system is up, read what happened during boot to find errors.</div><pre class="term"><span class="p">$ </span>sudo dmesg | head -3
+<span class="o">[    0.000000] Linux version 6.12.0-55.el10.x86_64 ...</span>
+<span class="p">$ </span>sudo dmesg --level=err,warn
+<span class="p">$ </span>journalctl -b -p err
+<span class="o">Nov 20 08:01:10 server systemd[1]: Failed to mount /data.</span>
+<span class="p">$ </span>journalctl --list-boots
+<span class="o">-1 8a1b... Thu 2026-11-19 09:02:11 IST—Thu 2026-11-19 23:50:01 IST</span>
+<span class="o"> 0 c7d2... Fri 2026-11-20 08:01:05 IST—Fri 2026-11-20 11:20:44 IST</span>
+<span class="p">$ </span>journalctl -b -1 -p err      # previous boot</pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>dmesg</code></td><td>kernel ring buffer (hardware and driver messages)</td></tr><tr><td><code>journalctl -b</code></td><td>all messages of this boot</td></tr><tr><td><code>journalctl -b -1</code></td><td>previous boot (needs a persistent journal)</td></tr><tr><td><code>journalctl -b -p err</code></td><td>only errors of this boot</td></tr><tr><td><code>systemd-analyze blame</code></td><td>which service took longest to start</td></tr></table></div></section>
+<section id="cheat"><h2><span class="n">7</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>systemctl get-default</code></td><td>show default target</td></tr><tr><td><code>systemctl set-default multi-user.target</code></td><td>text mode at next boot</td></tr><tr><td><code>systemctl isolate rescue.target</code></td><td>switch now</td></tr><tr><td><code>systemd.unit=rescue.target</code></td><td>GRUB kernel option</td></tr><tr><td><code>grubby --update-kernel=ALL --args=...</code></td><td>permanent kernel option</td></tr><tr><td><code>grub2-mkconfig -o /boot/grub2/grub.cfg</code></td><td>rebuild menu</td></tr><tr><td><code>mount -o remount,rw /</code></td><td>make / writable</td></tr><tr><td><code>mount -a</code></td><td>test fstab</td></tr><tr><td><code>journalctl -b -p err</code></td><td>boot errors</td></tr><tr><td><code>dmesg</code></td><td>kernel messages</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">8</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 12 &middot; Controlling and Troubleshooting the Boot Process</footer></div>
+<script>
+const Q=[{"q": "What is the correct boot order?", "o": ["GRUB, UEFI, systemd, kernel", "UEFI/BIOS, GRUB2, kernel, systemd", "systemd, kernel, GRUB, UEFI", "Kernel, GRUB, UEFI, systemd"], "a": 1, "e": "Firmware, bootloader, kernel+initramfs, systemd."}, {"q": "What is the full form of GRUB?", "o": ["General Root Unit Boot", "GRand Unified Bootloader", "GNU Root Boot", "Grand Reboot Utility"], "a": 1, "e": "GRand Unified Bootloader."}, {"q": "What is initramfs?", "o": ["A log file", "A small RAM file system with drivers to reach the real root", "A backup disk", "A network protocol"], "a": 1, "e": "Initial RAM file system."}, {"q": "What is PID 1 on a RHEL system?", "o": ["systemd", "bash", "init.d", "grub"], "a": 0, "e": "systemd is the first process."}, {"q": "Which command shows the target used at next boot?", "o": ["systemctl get-default", "runlevel -s", "systemctl target", "systemctl list-boot"], "a": 0, "e": "systemctl get-default."}, {"q": "Which command sets text mode as default?", "o": ["systemctl set-default multi-user.target", "systemctl text", "systemctl isolate multi-user.target", "grubby --text"], "a": 0, "e": "set-default changes the next boot."}, {"q": "What does <code>systemctl isolate rescue.target</code> do?", "o": ["Deletes rescue", "Switches to rescue mode now", "Reboots", "Changes next boot only"], "a": 1, "e": "isolate switches right now."}, {"q": "Which target mounts / as read-only and starts almost nothing?", "o": ["emergency.target", "rescue.target", "graphical.target", "multi-user.target"], "a": 0, "e": "emergency.target."}, {"q": "Which key edits a menu entry at the GRUB screen?", "o": ["Enter", "F10", "e", "Esc"], "a": 2, "e": "Press e. Ctrl+X boots."}, {"q": "What do you add to the linux line to enter rescue mode?", "o": ["single-mode", "systemd.unit=rescue.target", "rescue=1", "init=rescue"], "a": 1, "e": "systemd.unit=rescue.target."}, {"q": "Are changes made with <code>e</code> in GRUB permanent?", "o": ["Only for root", "Yes", "No, only for this boot", "Only on UEFI"], "a": 2, "e": "They apply once."}, {"q": "Which tool adds a kernel argument to all kernels permanently?", "o": ["grubby --update-kernel=ALL --args", "systemctl --args", "dmesg --args", "fdisk"], "a": 0, "e": "grubby."}, {"q": "Which file holds GRUB settings that you edit?", "o": ["/etc/default/grub", "/var/grub", "/boot/grub2/grub.cfg", "/etc/grub.d/00"], "a": 0, "e": "/etc/default/grub. grub.cfg is generated."}, {"q": "What do you run after editing /etc/default/grub?", "o": ["reboot only", "grub2-install /", "grub2-mkconfig -o /boot/grub2/grub.cfg", "systemctl restart grub"], "a": 2, "e": "Regenerate grub.cfg."}, {"q": "A bad fstab line drops the server into emergency mode. What is the first fix step after the password?", "o": ["yum clean", "reinstall", "fdisk", "mount -o remount,rw /"], "a": 3, "e": "Make / writable so you can edit fstab."}, {"q": "Which option lets the system boot even if a disk is missing?", "o": ["nofail", "ignore", "noboot", "skip"], "a": 0, "e": "nofail in the fstab options."}, {"q": "Which command tests fstab without reboot?", "o": ["grubby -t", "mount -a", "lsblk -a", "fsck -a"], "a": 1, "e": "mount -a."}, {"q": "Which command shows errors of the current boot from the journal?", "o": ["journalctl -b -p err", "systemctl boot", "logger -b", "dmesg -c"], "a": 0, "e": "journalctl -b -p err."}, {"q": "Which command lists which service started slowly at boot?", "o": ["journalctl --slow", "top -b", "systemd-analyze blame", "dmesg -w"], "a": 2, "e": "systemd-analyze blame."}, {"q": "Which command lists previous boots in the journal?", "o": ["last boots", "dmesg -l", "systemctl boots", "journalctl --list-boots"], "a": 3, "e": "journalctl --list-boots."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

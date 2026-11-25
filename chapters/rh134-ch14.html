@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 14: Managing Network Security</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#d6455d;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 14 &middot; RHEL 10</small><h1>Managing Network Security</h1><p>Control which network traffic may reach your server with <mark>firewalld</mark>, and which ports a service may use with <mark>SELinux</mark>. Both must allow, or the connection fails.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Two gates</a><a href="#zones">Zones</a><a href="#list">list-all</a><a href="#add">Add service and port</a><a href="#rich">Rich rules</a><a href="#port">SELinux ports</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Two gates: firewall and SELinux port label</h2><div class="why"><b>Why?</b> A new web server on port 8080 can be reached only if <b>two</b> things allow it: the firewall must open the port, and SELinux must allow the service to use that port.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">Client</text><text x="103" y="84" text-anchor="middle">browser</text><text class="sm" x="103" y="106" text-anchor="middle"></text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#ma)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">firewalld</text><text x="334" y="84" text-anchor="middle">port open?</text><text class="sm" x="334" y="106" text-anchor="middle"></text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#ma)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">SELinux</text><text x="565" y="84" text-anchor="middle">port label ok?</text><text class="sm" x="565" y="106" text-anchor="middle"></text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#ma)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">Service</text><text x="796" y="84" text-anchor="middle">httpd :8080</text><text class="sm" x="796" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Blocked at any gate = connection fails. Check both.</text></svg><div class="tblwrap"><table class=""><tr><th>Tool</th><th>Full form</th><th>Controls</th></tr><tr><td><b>firewalld</b></td><td>firewall daemon</td><td>which incoming traffic is allowed (services, ports, sources)</td></tr><tr><td><b>firewall-cmd</b></td><td>firewall command</td><td>the command that talks to firewalld</td></tr><tr><td><b>semanage port</b></td><td>SELinux manage</td><td>which ports a service type may bind to</td></tr></table></div><div class="note"><b>Start the service</b><code>sudo systemctl enable --now firewalld</code>. Check: <code>firewall-cmd --state</code> prints <code>running</code>.</div></section>
+<section id="zones"><h2><span class="n">2</span>firewalld zones</h2><div class="why"><b>Why?</b> A <b>zone</b> is a set of rules for a level of trust. Home network = trusted, public Wi-Fi = strict. Each network interface or source IP belongs to one zone.</div><div class="tblwrap"><table class=""><tr><th>Zone</th><th>Default behaviour</th></tr><tr><td><code>drop</code></td><td>all incoming dropped silently</td></tr><tr><td><code>block</code></td><td>incoming rejected with a message</td></tr><tr><td><code>public</code></td><td><b>default</b>. Only selected services (ssh, cockpit, dhcpv6-client)</td></tr><tr><td><code>internal</code> / <code>home</code> / <code>work</code></td><td>more trusted</td></tr><tr><td><code>trusted</code></td><td>everything allowed</td></tr><tr><td><code>dmz</code></td><td>limited access from outside</td></tr></table></div><pre class="term"><span class="p">$ </span>sudo firewall-cmd --get-default-zone
+<span class="o">public</span>
+<span class="p">$ </span>sudo firewall-cmd --get-active-zones
+<span class="o">public</span>
+<span class="o">  interfaces: ens160</span>
+<span class="p">$ </span>sudo firewall-cmd --get-zones
+<span class="o">block dmz drop external home internal nm-shared public trusted work</span>
+<span class="p">$ </span>sudo firewall-cmd --set-default-zone=internal
+<span class="p">$ </span>sudo firewall-cmd --permanent --zone=internal --add-source=192.168.1.0/24</pre><div class="note"><b>Which zone wins?</b>1) a rule matching the <b>source IP</b> 2) the zone of the <b>interface</b> 3) the default zone.</div></section>
+<section id="list"><h2><span class="n">3</span>firewall-cmd --list-all</h2><div class="why"><b>Why?</b> Always look first. This one command shows everything open in a zone.</div><pre class="term"><span class="p">$ </span>sudo firewall-cmd --list-all
+<span class="o">public (active)</span>
+<span class="o">  target: default</span>
+<span class="o">  icmp-block-inversion: no</span>
+<span class="o">  interfaces: ens160</span>
+<span class="o">  sources:</span>
+<span class="o">  services: cockpit dhcpv6-client ssh</span>
+<span class="o">  ports:</span>
+<span class="o">  protocols:</span>
+<span class="o">  forward: yes</span>
+<span class="o">  masquerade: no</span>
+<span class="o">  forward-ports:</span>
+<span class="o">  source-ports:</span>
+<span class="o">  icmp-blocks:</span>
+<span class="o">  rich rules:</span>
+<span class="p">$ </span>sudo firewall-cmd --list-services
+<span class="o">cockpit dhcpv6-client ssh</span>
+<span class="p">$ </span>sudo firewall-cmd --get-services | tr ' ' '\n' | head -5
+<span class="o">0-AD</span>
+<span class="o">RH-Satellite-6</span>
+<span class="o">amanda-client</span>
+<span class="o">amanda-k5-client</span>
+<span class="o">bacula</span></pre></section>
+<section id="add"><h2><span class="n">4</span>Open a service or port: --permanent and --reload</h2><div class="why"><b>Why?</b> Two kinds of rules: <b>runtime</b> (active now, lost at reboot) and <b>permanent</b> (saved, active after reload). Forgetting this is the number one firewall mistake.</div><div class="tblwrap"><table class=""><tr><th>Way</th><th>Command</th><th>Result</th></tr><tr><td>Runtime only</td><td><code>firewall-cmd --add-service=http</code></td><td>works now, gone after reboot or reload</td></tr><tr><td>Permanent only</td><td><code>firewall-cmd --permanent --add-service=http</code></td><td>saved, <b>not active</b> until <code>--reload</code></td></tr><tr><td>Both (best)</td><td>add with <code>--permanent</code>, then <code>--reload</code></td><td>saved and active</td></tr></table></div><h3>Standard way: 3 commands</h3><pre class="term"><span class="p">$ </span>sudo firewall-cmd --permanent --add-service=http
+<span class="o">success</span>
+<span class="p">$ </span>sudo firewall-cmd --permanent --add-port=8080/tcp
+<span class="o">success</span>
+<span class="p">$ </span>sudo firewall-cmd --reload
+<span class="o">success</span>
+<span class="p">$ </span>sudo firewall-cmd --list-all | grep -E "services|ports"
+<span class="o">  services: cockpit dhcpv6-client http ssh</span>
+<span class="o">  ports: 8080/tcp</span></pre><ul><li><code>--add-service=NAME</code> opens the ports of a known service (http = 80). Names are in <code>/usr/lib/firewalld/services/</code>.</li><li><code>--add-port=8080/tcp</code> opens a port number and protocol (tcp or udp). A range: <code>5000-5100/tcp</code>.</li><li><code>--remove-service</code> and <code>--remove-port</code> close them.</li><li><code>--zone=ZONE</code> chooses a zone. No option = default zone.</li></ul><h3>Other way: test first, then save</h3><pre class="term"><span class="p">$ </span>sudo firewall-cmd --add-service=https
+<span class="o">success</span>
+<span class="c"># test it works, then save the running rules to permanent:</span>
+<span class="p">$ </span>sudo firewall-cmd --runtime-to-permanent
+<span class="o">success</span></pre><div class="tip"><b>Where are permanent rules stored?</b>In <code>/etc/firewalld/zones/public.xml</code>. You can read it but do not edit by hand. Use the command.</div><div class="warn"><b>Do not close SSH by mistake</b>On a remote server never remove <code>ssh</code>. You will lock yourself out. Use a safety <code>at</code> job (chapter 3) when testing risky changes.</div></section>
+<section id="rich"><h2><span class="n">5</span>Rich rules</h2><div class="why"><b>Why?</b> When normal rules are not enough, for example "allow SSH only from one IP", you write a <b>rich rule</b>.</div><pre class="term"><span class="p">$ </span>sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.1.50" service name="ssh" accept'
+<span class="o">success</span>
+<span class="p">$ </span>sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port port="8080" protocol="tcp" reject'
+<span class="o">success</span>
+<span class="p">$ </span>sudo firewall-cmd --reload
+<span class="p">$ </span>sudo firewall-cmd --list-rich-rules
+<span class="o">rule family="ipv4" source address="192.168.1.50" service name="ssh" accept</span>
+<span class="p">$ </span>sudo firewall-cmd --permanent --remove-rich-rule='rule family="ipv4" source address="192.168.1.50" service name="ssh" accept'</pre><div class="tblwrap"><table class=""><tr><th>Part</th><th>Meaning</th></tr><tr><td><code>rule family="ipv4"</code></td><td>IPv4 (or ipv6)</td></tr><tr><td><code>source address="IP"</code></td><td>who the rule is for</td></tr><tr><td><code>service name</code> or <code>port port=.. protocol=..</code></td><td>what traffic</td></tr><tr><td><code>accept</code> / <code>reject</code> / <code>drop</code></td><td>action. reject sends a reply, drop is silent</td></tr><tr><td><code>log prefix="SSH "</code></td><td>optional: write matches to the log</td></tr></table></div><div class="note"><b>Remove: use the exact same text</b>To remove a rich rule, copy the whole line used to add it and use <code>--remove-rich-rule</code>.</div></section>
+<section id="port"><h2><span class="n">6</span>SELinux ports: semanage port -a</h2><div class="why"><b>Why?</b> SELinux allows httpd only on ports labelled <code>http_port_t</code> (80, 443, 8008, 8009, 8443, 9000...). If you move Apache to port 82, SELinux blocks it, even if the firewall is open.</div><pre class="term"><span class="p">$ </span>sudo semanage port -l | grep http_port_t
+<span class="o">http_port_t                    tcp      80, 81, 443, 488, 8008, 8009, 8443, 9000</span>
+<span class="p">$ </span>sudo sed -i 's/^Listen 80/Listen 82/' /etc/httpd/conf/httpd.conf
+<span class="p">$ </span>sudo systemctl restart httpd
+<span class="o">Job for httpd.service failed because the control process exited with error code.</span>
+<span class="p">$ </span>sudo journalctl -u httpd | tail -2
+<span class="o">(13)Permission denied: AH00072: make_sock: could not bind to address [::]:82</span></pre><ol class="steps"><li><span>Add the port label: <code>semanage port -a -t http_port_t -p tcp 82</code></span></li><li><span>Check: <code>semanage port -l | grep http_port_t</code></span></li><li><span>Restart the service: <code>systemctl restart httpd</code></span></li><li><span>Open the firewall: <code>firewall-cmd --permanent --add-port=82/tcp</code> then <code>--reload</code></span></li></ol><pre class="term"><span class="p">$ </span>sudo semanage port -a -t http_port_t -p tcp 82
+<span class="p">$ </span>sudo semanage port -l | grep http_port_t
+<span class="o">http_port_t                    tcp      82, 80, 81, 443, 488, 8008, 8009, 8443, 9000</span>
+<span class="p">$ </span>sudo systemctl restart httpd
+<span class="p">$ </span>sudo firewall-cmd --permanent --add-port=82/tcp &amp;&amp; sudo firewall-cmd --reload
+<span class="p">$ </span>ss -tulpn | grep :82
+<span class="o">tcp   LISTEN 0   511   *:82   *:*   users:(("httpd",pid=3720,fd=4))</span></pre><div class="tblwrap"><table class=""><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>-a</code></td><td>add</td></tr><tr><td><code>-t TYPE</code></td><td>port type, e.g. <code>http_port_t</code>, <code>ssh_port_t</code></td></tr><tr><td><code>-p tcp</code></td><td>protocol</td></tr><tr><td><code>-m</code></td><td>modify an existing port</td></tr><tr><td><code>-d</code></td><td>delete</td></tr></table></div><div class="note"><b>ss -tulpn</b><b>ss</b> = socket statistics. Options: <b>t</b>cp, <b>u</b>dp, <b>l</b>istening, <b>p</b>rocess, <b>n</b>umeric. It proves that the service listens on the port.</div><div class="tip"><b>Find the type name</b><code>sudo semanage port -l | grep -i ssh</code> shows the type for a service. If a port is already assigned to another type use <code>-m</code> instead of <code>-a</code>.</div></section>
+<section id="cheat"><h2><span class="n">7</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>firewall-cmd --state</code></td><td>is it running</td></tr><tr><td><code>firewall-cmd --get-default-zone</code></td><td>default zone</td></tr><tr><td><code>firewall-cmd --list-all</code></td><td>all rules in a zone</td></tr><tr><td><code>firewall-cmd --permanent --add-service=http</code></td><td>save a service</td></tr><tr><td><code>firewall-cmd --permanent --add-port=8080/tcp</code></td><td>save a port</td></tr><tr><td><code>firewall-cmd --reload</code></td><td>activate saved rules</td></tr><tr><td><code>firewall-cmd --add-rich-rule=...</code></td><td>rich rule</td></tr><tr><td><code>semanage port -a -t http_port_t -p tcp 82</code></td><td>label a port</td></tr><tr><td><code>semanage port -l</code></td><td>list port labels</td></tr><tr><td><code>ss -tulpn</code></td><td>listening ports</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">8</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 14 &middot; Managing Network Security</footer></div>
+<script>
+const Q=[{"q": "What does firewalld control?", "o": ["User passwords", "Disk space", "Which traffic may reach the server", "Boot order"], "a": 2, "e": "It filters network traffic."}, {"q": "What is a firewalld zone?", "o": ["A time zone", "A set of rules for a trust level", "A disk area", "A DNS record"], "a": 1, "e": "Zones group rules by trust level."}, {"q": "Which zone is the default on RHEL?", "o": ["drop", "home", "trusted", "public"], "a": 3, "e": "public."}, {"q": "Which command lists all rules of the default zone?", "o": ["firewall-cmd --show", "firewall-cmd --list-all", "firewalld list", "iptables -z"], "a": 1, "e": "firewall-cmd --list-all."}, {"q": "You ran <code>firewall-cmd --permanent --add-service=http</code>. When is it active?", "o": ["Never", "After firewall-cmd --reload", "Only after reboot of the browser", "Immediately"], "a": 1, "e": "--permanent only saves. Reload to activate."}, {"q": "What happens to a rule added WITHOUT --permanent after a reboot?", "o": ["Is lost", "Becomes rich rule", "Stays", "Moves to /etc"], "a": 0, "e": "Runtime rules are lost."}, {"q": "Which command opens TCP port 8080 permanently?", "o": ["firewall-cmd --permanent --add-port=8080/tcp", "firewall-cmd --add-service=8080", "firewall-cmd -p 8080", "firewall-cmd --open 8080"], "a": 0, "e": "--add-port=PORT/PROTOCOL."}, {"q": "Which command closes a service?", "o": ["--block=NAME", "--remove-service=NAME", "--delete-service=NAME", "--close=NAME"], "a": 1, "e": "--remove-service."}, {"q": "Which command saves the current runtime rules as permanent?", "o": ["firewall-cmd --save", "firewall-cmd --store", "firewall-cmd --commit", "firewall-cmd --runtime-to-permanent"], "a": 3, "e": "--runtime-to-permanent."}, {"q": "Which firewalld rule type lets you allow SSH from one IP only?", "o": ["tuned profile", "Zone default", "Port forward only", "Rich rule"], "a": 3, "e": "Rich rule with source address."}, {"q": "What is the difference between reject and drop?", "o": ["None", "reject is faster", "drop sends a reply", "reject sends a reply, drop is silent"], "a": 3, "e": "drop gives no answer at all."}, {"q": "Why can httpd fail on port 82 even if the firewall is open?", "o": ["SELinux only allows labelled ports", "Apache cannot use port 82 ever", "DNS", "SELinux is too old"], "a": 0, "e": "The port needs the http_port_t label."}, {"q": "Which command labels TCP port 82 for httpd?", "o": ["chcon -p 82", "semanage port -a -t http_port_t -p tcp 82", "restorecon 82", "setsebool -P http_port 82"], "a": 1, "e": "semanage port -a -t TYPE -p PROTO PORT."}, {"q": "Which command lists SELinux port labels?", "o": ["semanage port -l", "getsebool -a", "firewall-cmd -l", "ls -Z"], "a": 0, "e": "semanage port -l."}, {"q": "What does ss -tulpn show?", "o": ["Zones", "Users", "Listening TCP/UDP ports with processes", "Disk usage"], "a": 2, "e": "Listening sockets and their process."}, {"q": "What does the <code>-p</code> in semanage port -p tcp mean?", "o": ["Permanent", "Process", "Protocol", "Policy"], "a": 2, "e": "Protocol (tcp or udp)."}, {"q": "A port already has another SELinux type. Which option changes it?", "o": ["-m", "-x", "-d", "-c"], "a": 0, "e": "semanage port -m (modify)."}, {"q": "Which log shows why httpd could not bind to a port?", "o": ["dmesg only for disks", "/boot/grub", "journalctl -u httpd", "/etc/hosts"], "a": 2, "e": "The journal has the bind error."}, {"q": "Where are permanent firewalld zone rules stored?", "o": ["/boot/firewalld/", "/var/lib/firewall/", "/usr/bin/firewalld", "/etc/firewalld/zones/"], "a": 3, "e": "/etc/firewalld/zones/*.xml."}, {"q": "A new service is unreachable from outside. What do you check?", "o": ["Only the disk", "Service listening (ss), firewall, and SELinux", "Only the hostname", "Only the time zone"], "a": 1, "e": "Check all three: ss -tulpn, firewall-cmd --list-all, and SELinux."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

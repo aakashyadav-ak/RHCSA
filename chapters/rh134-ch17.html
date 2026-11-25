@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Ch17: Containers with Podman</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#2f6fd6;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+
+details{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--card)}
+summary{cursor:pointer;padding:9px 14px;font-weight:600}
+details[open] summary{border-bottom:1px solid var(--line);color:var(--c)}
+details .ans{padding:6px 14px 10px}
+.good{color:var(--ok);font-weight:700}
+.goal{border:1px dashed var(--c);border-radius:10px;padding:8px 14px;margin:10px 0;background:var(--c-soft)}
+.steps li>span{flex:1}
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 17 &middot; RHEL 10</small><h1>Managing Containers with Podman</h1><p><mark>Containers</mark> package an application so it runs the same everywhere. <mark>Podman</mark> finds, runs and builds them. Learn it step by step, with commands, files to edit, output and a full lab.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#intro">Containers intro</a><a href="#install">Install Podman</a><a href="#registry">Registries</a><a href="#images">Images</a><a href="#run">Run containers</a><a href="#life">Stop and remove</a><a href="#ports">Expose ports</a><a class="ex" href="#storage">Volumes</a><a href="#build">Build image</a><a href="#push">Push image</a><a href="#lab">Final lab</a><a href="#prac">Class practice</a><a href="#interview">Interview Q&A</a><a href="#exam">Exam and errors</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="intro"><h2><span class="n">1</span>What are containers and Podman?</h2><div class="why"><b>Why?</b> Containers let you package an application once and run it anywhere, quickly and with little resource use.</div><p>A <b>container</b> is a small, isolated box that holds <b>one application</b> and everything it needs (libraries, settings). It starts in seconds and runs the same on every machine. It shares the <b>kernel</b> of the host, so it does not need a full operating system of its own.</p><svg class="dg" viewBox="0 0 900 285" role="img" aria-label="A virtual machine has a guest OS, a container does not"><defs><marker id="c1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text class="bd" x="220" y="22" text-anchor="middle">Virtual machine (heavy)</text><text class="bd" x="680" y="22" text-anchor="middle">Container (light)</text><rect class="bx" x="40" y="200" width="360" height="44" rx="10"/><text class="bd" x="220" y="227" text-anchor="middle">Hardware</text><rect class="bx" x="40" y="148" width="360" height="44" rx="10"/><text class="bd" x="220" y="175" text-anchor="middle">Host OS + hypervisor</text><rect class="wn" x="40" y="96" width="360" height="44" rx="10"/><text class="bd" x="220" y="123" text-anchor="middle">Guest OS (full copy, own kernel)</text><rect class="ok" x="40" y="44" width="360" height="44" rx="10"/><text class="bd" x="220" y="71" text-anchor="middle">Application</text><rect class="bx" x="500" y="200" width="360" height="44" rx="10"/><text class="bd" x="680" y="227" text-anchor="middle">Hardware</text><rect class="bx" x="500" y="148" width="360" height="44" rx="10"/><text class="bd" x="680" y="175" text-anchor="middle">Host OS (one shared kernel)</text><rect class="bs" x="500" y="96" width="360" height="44" rx="10"/><text class="bd" x="680" y="123" text-anchor="middle">Podman</text><rect class="ok" x="500" y="44" width="170" height="44" rx="10"/><text class="bd" x="585" y="71" text-anchor="middle">App 1</text><rect class="ok" x="690" y="44" width="170" height="44" rx="10"/><text class="bd" x="775" y="71" text-anchor="middle">App 2</text></svg><div class="tblwrap"><table class=""><tr><th></th><th>Virtual machine</th><th>Container</th></tr><tr><td>Contains</td><td>a whole operating system with its own kernel</td><td>only the app and its libraries. Shares the host kernel</td></tr><tr><td>Size</td><td>gigabytes</td><td>megabytes</td></tr><tr><td>Start time</td><td>minutes</td><td>seconds</td></tr><tr><td>Isolation</td><td>very strong</td><td>good, but lighter</td></tr><tr><td>Good for</td><td>running a whole separate system</td><td>packaging and running one application</td></tr></table></div><h3>The words you need</h3><div class="tblwrap"><table class=""><tr><th>Word</th><th>Full form</th><th>Simple meaning</th></tr><tr><td><b>image</b></td><td></td><td>a read-only template (like an installer). You start containers from it</td></tr><tr><td><b>container</b></td><td></td><td>a running (or stopped) copy made from an image</td></tr><tr><td><b>registry</b></td><td></td><td>a server that stores images, like an app store</td></tr><tr><td><b>Podman</b></td><td>Pod Manager</td><td>the tool that finds, runs and builds containers</td></tr><tr><td><b>OCI</b></td><td>Open Container Initiative</td><td>the standard for image format, so tools like Podman and Docker understand each other</td></tr><tr><td><b>UBI</b></td><td>Universal Base Image</td><td>free Red Hat base image you can build on</td></tr><tr><td><b>Containerfile</b></td><td></td><td>a text file with the steps to build an image</td></tr></table></div><h3>Podman is daemonless and rootless</h3><div class="tblwrap"><table class=""><tr><th></th><th>Podman</th><th>Docker</th></tr><tr><td>Background service (daemon)</td><td><b>none</b>. Each podman command runs by itself</td><td>always-running <code>dockerd</code> service</td></tr><tr><td>Runs as</td><td>a normal user (<b>rootless</b>) by default</td><td>usually root</td></tr><tr><td>Commands</td><td>almost the same as Docker. <code>alias docker=podman</code> works</td><td></td></tr></table></div><p>Daemonless means there is no big always-on program that runs as root. That is safer, and a normal user can run containers without admin power.</p></section>
+<section id="install"><h2><span class="n">2</span>Install and check Podman</h2><div class="why"><b>Why?</b> Podman is not always installed. You check for it and add the container-tools package first.</div><p>Install the container tools once (needs admin rights). After that, work as a normal user.</p><pre class="term"><span class="p">$ </span>sudo dnf install -y container-tools
+<span class="o">...output omitted...</span>
+<span class="o">Complete!</span>
+<span class="p">$ </span>which podman
+<span class="o">/usr/bin/podman</span>
+<span class="p">$ </span>podman -v
+<span class="o">podman version 5.4.0</span>
+<span class="p">$ </span>podman info | head -12
+<span class="o">host:</span>
+<span class="o">  arch: amd64</span>
+<span class="o">  buildahVersion: 1.39.0</span>
+<span class="o">  distribution:</span>
+<span class="o">    distribution: rhel</span>
+<span class="o">    version: "10.0"</span>
+<span class="o">  hostname: workstation</span>
+<span class="o">  ...</span>
+<span class="o">  security:</span>
+<span class="o">    rootless: true</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>dnf install container-tools</code></td><td>one package group that installs <b>podman</b> (run containers), <b>buildah</b> (build images) and <b>skopeo</b> (inspect and copy images)</td></tr><tr><td><code>which podman</code></td><td>shows where the command is installed</td></tr><tr><td><code>podman -v</code></td><td>shows the version</td></tr><tr><td><code>podman info</code></td><td>shows details: registries, storage location, rootless or not</td></tr></table></div><div class="note"><b><span class="tag">note</span> Network first</b>Images are downloaded from the internet, so the machine needs a network connection. If the VM has none, make one (<code>ens160</code> is the usual VMware interface name, check yours with <code>nmcli device</code>):<pre class="term"><span class="p">$ </span>sudo nmcli connection add type ethernet ifname ens160 con-name mycon
+<span class="p">$ </span>sudo nmcli connection up mycon</pre></div></section>
+<section id="registry"><h2><span class="n">3</span>Registries and login</h2><div class="why"><b>Why?</b> Images live in registries. Some, like registry.redhat.io, need a login before you can pull.</div><div class="tblwrap"><table class=""><tr><th>Registry</th><th>What it is</th></tr><tr><td><b>registry.redhat.io</b></td><td>Red Hat official images. You must <b>log in</b></td></tr><tr><td><b>registry.access.redhat.com</b></td><td>Red Hat images that need <b>no login</b></td></tr><tr><td><b>quay.io</b></td><td>public registry where you can store your own images</td></tr><tr><td><b>docker.io</b></td><td>Docker Hub, the best known public registry</td></tr><tr><td><b>Amazon ECR</b></td><td>Elastic Container Registry, the registry of AWS (Amazon Web Services)</td></tr></table></div><h3>Log in and log out</h3><pre class="term"><span class="p">$ </span>podman login registry.redhat.io
+<span class="o">Username: myuser</span>
+<span class="o">Password:</span>
+<span class="o">Login Succeeded!</span>
+<span class="p">$ </span>podman logout registry.redhat.io
+<span class="o">Removed login credentials for registry.redhat.io</span></pre><div class="note"><b><span class="tag">note</span> Where the login is stored</b>Podman saves the login in <code>${XDG_RUNTIME_DIR}/containers/auth.json</code>. (<b>XDG_RUNTIME_DIR</b> is a folder for your session files, normally <code>/run/user/1000</code>.)<pre class="term"><span class="p">$ </span>echo ${XDG_RUNTIME_DIR}
+<span class="o">/run/user/1000</span>
+<span class="p">$ </span>cat ${XDG_RUNTIME_DIR}/containers/auth.json
+<span class="o">{"auths": {"registry.redhat.io": {"auth": "bXl1c2VyOm15cGFzcw=="}}}</span>
+<span class="p">$ </span>echo bXl1c2VyOm15cGFzcw== | base64 -d
+<span class="o">myuser:mypass</span></pre>The text is only <b>base64 encoded</b>, which anyone can decode. It is not secret. So do not use your main Red Hat password. Make a <b>service account</b> (token) at <code>access.redhat.com/terms-based-registry</code> and log in with it: <code>podman login -u "SERVICE_ACCOUNT_NAME" registry.redhat.io</code>. The file is removed at logout and when the session ends.</div><div class="note"><b><span class="tag">note</span> Search other registries: registries.conf</b>When you give a short name like <code>httpd-24</code>, Podman looks in the registries listed in <code>/etc/containers/registries.conf</code> (drop-in files go in <code>/etc/containers/registries.conf.d/</code>). Open <code>sudo vim /etc/containers/registries.conf</code> and change or add this line:</div><div class="file"><b>/etc/containers/registries.conf</b><pre><span class="add">unqualified-search-registries = ["registry.access.redhat.com", "registry.redhat.io", "quay.io"]</span></pre></div><pre class="term"><span class="p">$ </span>podman info | grep -i registries: -A 4
+<span class="o">registries:</span>
+<span class="o">  search:</span>
+<span class="o">  - registry.access.redhat.com</span>
+<span class="o">  - registry.redhat.io</span>
+<span class="o">  - quay.io</span></pre></section>
+<section id="images"><h2><span class="n">4</span>Find and manage images</h2><div class="why"><b>Why?</b> Every container starts from an image. You must be able to find an image, download it and see what is inside.</div><h3>Parts of an image name</h3><svg class="dg" viewBox="0 0 900 150" role="img" aria-label="registry slash namespace slash name colon tag"><defs><marker id="c2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bs" x="10" y="25" width="300" height="50" rx="10"/><text class="bd" x="160" y="55" text-anchor="middle">registry.redhat.io</text><rect class="ok" x="320" y="25" width="150" height="50" rx="10"/><text class="bd" x="395" y="55" text-anchor="middle">rhel10</text><rect class="wn" x="480" y="25" width="180" height="50" rx="10"/><text class="bd" x="570" y="55" text-anchor="middle">httpd-24</text><rect class="bx" x="670" y="25" width="120" height="50" rx="10"/><text class="bd" x="730" y="55" text-anchor="middle">latest</text><text class="sm" x="160" y="104" text-anchor="middle">registry</text><text class="sm" x="160" y="124" text-anchor="middle">(which server)</text><text class="sm" x="395" y="104" text-anchor="middle">namespace</text><text class="sm" x="395" y="124" text-anchor="middle">(a group)</text><text class="sm" x="570" y="104" text-anchor="middle">image name</text><text class="sm" x="730" y="104" text-anchor="middle">tag</text><text class="sm" x="730" y="124" text-anchor="middle">(version)</text></svg><p>If you give no tag, Podman uses <code>latest</code>. Always use the <b>full name</b> in notes and exams to avoid confusion.</p><h3>Search, pull and list</h3><pre class="term"><span class="p">$ </span>podman search ubi | head -4
+<span class="o">NAME                                  DESCRIPTION</span>
+<span class="o">registry.access.redhat.com/ubi10/ubi  Provides the latest release of Red Hat Universal Base Image 10.</span>
+<span class="o">registry.access.redhat.com/ubi9/ubi   Provides the latest release of Red Hat Universal Base Image 9.</span>
+<span class="o">registry.access.redhat.com/ubi8/ubi   Provides the latest release of Red Hat Universal Base Image 8.</span>
+<span class="p">$ </span>podman search registry.redhat.io/ubi10
+<span class="p">$ </span>podman pull registry.redhat.io/ubi10/ubi
+<span class="o">Trying to pull registry.redhat.io/ubi10/ubi:latest...</span>
+<span class="o">Getting image source signatures</span>
+<span class="o">Copying blob 3f2a1c9d7e44 done</span>
+<span class="o">Copying config 7b1e0c5a92d8 done</span>
+<span class="o">Writing manifest to image destination</span>
+<span class="o">7b1e0c5a92d8b6e4f1a0c3d5e7f9a1b2c3d4e5f60718293a4b5c6d7e8f901234</span>
+<span class="p">$ </span>podman images
+<span class="o">REPOSITORY                    TAG     IMAGE ID      CREATED      SIZE</span>
+<span class="o">registry.redhat.io/ubi10/ubi  latest  7b1e0c5a92d8  2 weeks ago  236 MB</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>podman search NAME</code></td><td>asks the registries for images whose name matches. (It lists names only, it does not download)</td></tr><tr><td><code>podman pull IMAGE</code></td><td>downloads an image to this machine</td></tr><tr><td><code>podman images</code></td><td>lists the images stored <b>locally</b></td></tr><tr><td><code>podman rmi IMAGE</code></td><td><b>r</b>e<b>m</b>ove <b>i</b>mage from this machine</td></tr></table></div><h3>Look inside an image</h3><pre class="term"><span class="p">$ </span>podman image inspect registry.redhat.io/rhel10/httpd-24 | less
+<span class="p">$ </span>podman image inspect --format '{{.Config.ExposedPorts}}' registry.redhat.io/rhel10/httpd-24
+<span class="o">map[8080/tcp:{} 8443/tcp:{}]</span></pre><p><code>inspect</code> shows details in JSON: layers, the ports it listens on, the default user and the command it starts. Here you learn that the web server image listens on port 8080.</p><div class="note"><b><span class="tag">note</span> skopeo: look without downloading</b><code>podman search</code> finds names. To read the details of an image <b>in a registry</b> without pulling it, use <b>skopeo</b>:<pre class="term"><span class="p">$ </span>skopeo inspect docker://registry.redhat.io/rhel10/httpd-24
+<span class="o">{ "Name": "registry.redhat.io/rhel10/httpd-24", "Architecture": "amd64", "Os": "linux", ... }</span></pre>It uses the same login as podman.</div><div class="note"><b><span class="tag">note</span> Other images in your practice</b>Besides <code>ubi10/ubi</code> and <code>rhel10/httpd-24</code> you used <code>ubi8/ubi</code>, <code>ubi9/python-312</code> (Python 3.12 image) and <code>rhel10/rhel-bootc</code> (a bootable container image, used to build a whole OS from a container. Just know that it exists). From quay.io: <code>podman pull quay.io/rdacosta/my_httpd</code>.</div><h3>Layers (union file system)</h3><svg class="dg" viewBox="0 0 900 250" role="img" aria-label="Image layers and the container layer"><defs><marker id="c3" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="wn" x="40" y="30" width="420" height="46" rx="10"/><text class="bd" x="250" y="58" text-anchor="middle">Container layer: thin, read-write</text><rect class="bs" x="40" y="84" width="420" height="46" rx="10"/><text class="bd" x="250" y="112" text-anchor="middle">Layer 3: index.html (read-only)</text><rect class="bs" x="40" y="138" width="420" height="46" rx="10"/><text class="bd" x="250" y="166" text-anchor="middle">Layer 2: httpd installed (read-only)</text><rect class="bs" x="40" y="192" width="420" height="46" rx="10"/><text class="bd" x="250" y="220" text-anchor="middle">Layer 1: ubi10 base (read-only)</text><text class="sm" x="480" y="60" text-anchor="start"></text><text class="bd" x="500" y="60" text-anchor="start">Image = a stack of read-only layers.</text><text class="sm" x="500" y="92" text-anchor="start">Each Containerfile step makes one layer.</text><text class="sm" x="500" y="120" text-anchor="start">A container adds one thin writable layer on top.</text><text class="sm" x="500" y="148" text-anchor="start">Files you change or create go there.</text><text class="sm" x="500" y="176" text-anchor="start">Remove the container = that layer is deleted.</text><text class="sm" x="500" y="204" text-anchor="start">The stack looks like one single file system.</text></svg><p>A <b>union file system</b> (Podman uses OverlayFS) shows many layers as one file system. Layers are shared: ten containers from one image use the same read-only layers, so they save space.</p></section>
+<section id="run"><h2><span class="n">5</span>Run containers</h2><div class="why"><b>Why?</b> This is the core skill: start a container, look at it, go into it, and understand why it stops.</div><h3>Run a container and get a shell</h3><pre class="term"><span class="p">$ </span>podman run -it registry.redhat.io/ubi10/ubi bash
+<span class="o">[root@3a9f1c2d4e5b /]# cat /etc/redhat-release</span>
+<span class="o">Red Hat Enterprise Linux release 10.0 (Coughlan)</span>
+<span class="o">[root@3a9f1c2d4e5b /]# exit</span>
+<span class="o">exit</span>
+<span class="p">$ </span>podman run -it --name con02 registry.redhat.io/ubi8/ubi bash
+<span class="o">[root@8d2c7a1b9e30 /]# exit</span>
+<span class="p">$ </span>podman ps -a
+<span class="o">CONTAINER ID  IMAGE                                COMMAND  CREATED        STATUS                    PORTS  NAMES</span>
+<span class="o">3a9f1c2d4e5b  registry.redhat.io/ubi10/ubi:latest  bash     2 minutes ago  Exited (0) 2 minutes ago         sweet_curie</span>
+<span class="o">8d2c7a1b9e30  registry.redhat.io/ubi8/ubi:latest   bash     1 minute ago   Exited (0) 1 minute ago          con02</span></pre><div class="tblwrap"><table class=""><tr><th>Option</th><th>Meaning</th></tr><tr><td><code>-i</code></td><td><b>i</b>nteractive: keep the keyboard input open</td></tr><tr><td><code>-t</code></td><td><b>t</b>erminal (tty = teletype): give the container a terminal</td></tr><tr><td><code>-d</code></td><td><b>d</b>etached: run in the background and give the prompt back</td></tr><tr><td><code>--name con02</code></td><td>choose a name. Without it Podman picks a random name like <code>sweet_curie</code></td></tr><tr><td><code>--rm</code></td><td>remove the container automatically when it stops</td></tr><tr><td><code>bash</code></td><td>the command to run inside. It replaces the image default</td></tr></table></div><p>The prompt <code>root@3a9f1c2d4e5b</code> shows you are <b>root inside</b> the container. The name after @ is the container ID. Outside, this root is only your normal user, which is why rootless is safe.</p><h3>Run in the background and enter it</h3><pre class="term"><span class="p">$ </span>podman run -dit --name con01 registry.redhat.io/ubi8/ubi bash
+<span class="o">b4e1a07c2d9f8a3b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b</span>
+<span class="p">$ </span>podman ps
+<span class="o">CONTAINER ID  IMAGE                               COMMAND  CREATED         STATUS         PORTS  NAMES</span>
+<span class="o">b4e1a07c2d9f  registry.redhat.io/ubi8/ubi:latest  bash     5 seconds ago   Up 4 seconds          con01</span>
+<span class="p">$ </span>podman exec -it con01 bash
+<span class="o">[root@b4e1a07c2d9f /]# whoami</span>
+<span class="o">root</span>
+<span class="o">[root@b4e1a07c2d9f /]# ip a | grep inet</span>
+<span class="o">[root@b4e1a07c2d9f /]# exit</span>
+<span class="p">$ </span>podman ps
+<span class="c"># (con01 is still Up)</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>podman ps</code></td><td><b>p</b>rocess <b>s</b>tatus: list <b>running</b> containers</td></tr><tr><td><code>podman ps -a</code></td><td>list <b>all</b> containers, also stopped ones</td></tr><tr><td><code>podman exec -it con01 bash</code></td><td><b>exec</b>ute a new command (a shell) inside a <b>running</b> container. Leaving it with <code>exit</code> does not stop the container</td></tr></table></div><div class="note"><b><span class="tag">note</span> Ctrl+p then Ctrl+q</b>If you started a container with <code>-it</code> and you are inside its main shell, pressing <code>Ctrl+p</code> then <code>Ctrl+q</code> <b>detaches</b> you and leaves the container running. If you press <code>exit</code> in that main shell, the container stops.</div><h3>Why did it say Exited (0)?</h3><p>A container lives only while its <b>main process</b> runs. When that program ends, the container stops. <b>Exited (0)</b> means it ended normally. A number other than 0 means an error.</p><pre class="term"><span class="p">$ </span>podman run --name my_python registry.redhat.io/ubi9/python-312 which python
+<span class="o">/opt/app-root/bin/python</span>
+<span class="p">$ </span>podman ps -a
+<span class="o">CONTAINER ID  IMAGE                                    COMMAND       CREATED        STATUS                    NAMES</span>
+<span class="o">c91f0d3a7b21  registry.redhat.io/ubi9/python-312:latest  which python  4 seconds ago  Exited (0) 3 seconds ago  my_python</span>
+<span class="p">$ </span>podman run -dit --name my_python01 registry.redhat.io/ubi9/python-312 bash
+<span class="p">$ </span>podman ps
+<span class="o">CONTAINER ID  IMAGE                                    COMMAND  CREATED        STATUS        NAMES</span>
+<span class="o">f27a5c6e8d10  registry.redhat.io/ubi9/python-312:latest  bash     3 seconds ago  Up 2 seconds  my_python01</span></pre><div class="tip"><b>When do I need -it?</b>An <b>OS image</b> such as ubi runs <code>bash</code> as its main process. Bash needs a terminal, and without <code>-it</code> it ends at once. A <b>service image</b> such as <code>httpd-24</code> runs its web server and stays up without <code>-it</code>.</div><h3>Web server container</h3><pre class="term"><span class="p">$ </span>podman pull registry.redhat.io/rhel10/httpd-24
+<span class="p">$ </span>podman run -d --name web01 registry.redhat.io/rhel10/httpd-24
+<span class="p">$ </span>podman ps -a
+<span class="o">CONTAINER ID  IMAGE                                       COMMAND               CREATED        STATUS        PORTS  NAMES</span>
+<span class="o">a5d3e9f01c47  registry.redhat.io/rhel10/httpd-24:latest   /usr/bin/run-httpd    5 seconds ago  Up 5 seconds         web01</span>
+<span class="p">$ </span>podman exec -it web01 bash
+<span class="o">bash-5.2$ curl localhost:8080</span>
+<span class="c"># (the default web page of the server is shown)</span>
+<span class="o">bash-5.2$ cd /var/www/html</span>
+<span class="o">bash-5.2$ echo "this is container" &gt; index.html</span>
+<span class="o">bash-5.2$ curl localhost:8080</span>
+<span class="o">this is container</span>
+<span class="o">bash-5.2$ pwd</span>
+<span class="o">/opt/app-root/src</span>
+<span class="o">bash-5.2$ touch test.txt</span>
+<span class="o">bash-5.2$ ls -l test.txt</span>
+<span class="o">-rw-r--r--. 1 default root 0 Nov 24 09:10 test.txt</span>
+<span class="o">bash-5.2$ exit</span>
+<span class="p">$ </span>podman logs web01 | tail -2
+<span class="o">[Tue Nov 24 03:41:10] [notice] Apache/2.4.62 configured -- resuming normal operations</span>
+<span class="o">[Tue Nov 24 03:41:10] [notice] Command line: 'httpd -D FOREGROUND'</span></pre><p>Inside, the web server listens on port <b>8080</b>. The first folder you land in is <code>/opt/app-root/src</code>. New files get the owner <code>default</code> and the group <code>root</code>. <code>podman logs NAME</code> shows what the container printed.</p><div class="warn"><b>Changes are lost with the container</b>The <code>index.html</code> you wrote lives in the container's thin writable layer. When you remove <code>web01</code> it is gone. To keep data, use a volume (section 8) or build it into an image (section 9).</div></section>
+<section id="life"><h2><span class="n">6</span>Stop, restart and remove containers</h2><div class="why"><b>Why?</b> Containers pile up. You must know how to stop, restart and clean them.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="Life cycle of a container"><defs><marker id="c4" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="150" height="70" rx="10"/><text class="bd" x="85" y="65" text-anchor="middle">Image</text><line class="ar" x1="162" y1="60" x2="218" y2="60" marker-end="url(#c4)"/><text class="sm" x="190" y="50" text-anchor="middle">run</text><rect class="ok" x="220" y="25" width="190" height="70" rx="10"/><text class="bd" x="315" y="56" text-anchor="middle">Running</text><text class="sm" x="315" y="78" text-anchor="middle">status: Up</text><line class="ar" x1="412" y1="60" x2="478" y2="60" marker-end="url(#c4)"/><text class="sm" x="445" y="50" text-anchor="middle">stop</text><rect class="wn" x="480" y="25" width="190" height="70" rx="10"/><text class="bd" x="575" y="56" text-anchor="middle">Stopped</text><text class="sm" x="575" y="78" text-anchor="middle">status: Exited</text><line class="ar" x1="672" y1="60" x2="728" y2="60" marker-end="url(#c4)"/><text class="sm" x="700" y="50" text-anchor="middle">rm</text><rect class="bx" x="730" y="25" width="150" height="70" rx="10"/><text class="bd" x="805" y="65" text-anchor="middle">Removed</text><path d="M575,97 C575,150 315,150 315,99" fill="none" class="ar" marker-end="url(#c4)"/><text class="sm" x="445" y="160" text-anchor="middle">start or restart</text></svg><pre class="term"><span class="p">$ </span>podman ps -a
+<span class="o">CONTAINER ID  IMAGE                                      COMMAND             STATUS        NAMES</span>
+<span class="o">a5d3e9f01c47  registry.redhat.io/rhel10/httpd-24:latest  /usr/bin/run-httpd  Up 3 minutes  web01</span>
+<span class="p">$ </span>podman stop web01
+<span class="o">web01</span>
+<span class="p">$ </span>podman ps -a
+<span class="o">... STATUS                    NAMES</span>
+<span class="o">... Exited (0) 5 seconds ago  web01</span>
+<span class="p">$ </span>podman restart web01
+<span class="o">web01</span>
+<span class="p">$ </span>podman rm web01
+<span class="o">Error: cannot remove container a5d3e9f01c47... as it is running - running or paused containers cannot be removed without force: container state improper</span>
+<span class="p">$ </span>podman stop web01
+<span class="o">web01</span>
+<span class="p">$ </span>podman rm web01
+<span class="o">web01</span>
+<span class="p">$ </span>podman stop --all
+<span class="p">$ </span>podman rm -a
+<span class="p">$ </span>podman run --rm registry.redhat.io/ubi10/ubi echo 'hello world'
+<span class="o">hello world</span>
+<span class="p">$ </span>podman ps -a
+<span class="c"># (empty: --rm removed it)</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>podman stop NAME</code></td><td>stop a running container (it stays, as Exited)</td></tr><tr><td><code>podman start NAME</code></td><td>start a stopped container again</td></tr><tr><td><code>podman restart NAME</code></td><td>stop and start</td></tr><tr><td><code>podman rm NAME</code></td><td>delete a <b>stopped</b> container</td></tr><tr><td><code>podman rm -f NAME</code></td><td>force: stop and delete in one step</td></tr><tr><td><code>podman stop --all</code></td><td>stop every running container</td></tr><tr><td><code>podman rm -a</code></td><td>delete all stopped containers (add <code>-f</code> to include running ones)</td></tr><tr><td><code>podman run --rm ...</code></td><td>run once and clean up automatically</td></tr></table></div></section>
+<section id="ports"><h2><span class="n">7</span>Expose container ports</h2><div class="why"><b>Why?</b> Without a published port, nobody outside the container can use the service inside it.</div><p><b>Exposing a port</b> means making a port of the container reachable from <b>outside</b> the container. A container has its own private network. By default nothing from the host can reach the web server inside it. The option <code>-p</code> (publish) builds a bridge.</p><svg class="dg" viewBox="0 0 900 215" role="img" aria-label="Host port forwarded to the container port"><defs><marker id="p1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="70" width="190" height="70" rx="10"/><text class="bd" x="105" y="101" text-anchor="middle">curl</text><text class="sm" x="105" y="123" text-anchor="middle">localhost:8080</text><line class="ar" x1="202" y1="105" x2="258" y2="105" marker-end="url(#p1)"/><rect class="bs" x="260" y="20" width="380" height="175" rx="10"/><text class="bd" x="450" y="46" text-anchor="middle">HOST (your machine)</text><rect class="wn" x="285" y="90" width="120" height="70" rx="10"/><text class="bd" x="345" y="130" text-anchor="middle">port 8080</text><text class="bd" x="450" y="130" text-anchor="middle">forwarding &rarr;</text><line class="ar" x1="408" y1="125" x2="478" y2="125" marker-end="url(#p1)"/><rect class="ok" x="480" y="60" width="140" height="110" rx="10"/><text class="bd" x="550" y="111" text-anchor="middle">CONTAINER</text><text class="sm" x="550" y="133" text-anchor="middle">httpd on 8080</text><line class="ar" x1="642" y1="105" x2="698" y2="105" marker-end="url(#p1)"/><rect class="bx" x="700" y="70" width="190" height="70" rx="10"/><text class="bd" x="795" y="101" text-anchor="middle">web page</text><text class="sm" x="795" y="123" text-anchor="middle">comes back</text></svg><pre class="term"><span class="p">$ </span>podman run -p 8080:8080 registry.redhat.io/rhel10/httpd-24:latest
+<span class="c"># (the server runs in the foreground. Press Ctrl+c to stop it)</span>
+<span class="p">$ </span>podman run -d --name web02 -p 8080:8080 registry.redhat.io/rhel10/httpd-24:latest
+<span class="p">$ </span>podman ps
+<span class="o">CONTAINER ID  IMAGE                                      COMMAND             STATUS        PORTS                   NAMES</span>
+<span class="o">7e0b4c2a9d13  registry.redhat.io/rhel10/httpd-24:latest  /usr/bin/run-httpd  Up 4 seconds  0.0.0.0:8080-&gt;8080/tcp  web02</span>
+<span class="p">$ </span>curl localhost:8080
+<span class="p">$ </span>curl 127.0.0.1:8080
+<span class="p">$ </span>curl 0.0.0.0:8080
+<span class="c"># (all three reach the container web server)</span></pre><h3>What does 8080:8080 mean?</h3><svg class="dg" viewBox="0 0 900 130" role="img" aria-label="host port colon container port"><defs><marker id="p2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bs" x="190" y="15" width="150" height="50" rx="10"/><text class="bd" x="265" y="45" text-anchor="middle">8080</text><text class="bd" x="265" y="90" text-anchor="middle">host port</text><text class="sm" x="265" y="110" text-anchor="middle">the port on your machine</text><text class="bd" x="365" y="47" text-anchor="middle">:</text><rect class="ok" x="390" y="15" width="150" height="50" rx="10"/><text class="bd" x="465" y="45" text-anchor="middle">8080</text><text class="bd" x="465" y="90" text-anchor="middle">container port</text><text class="sm" x="465" y="110" text-anchor="middle">the port the program uses inside</text></svg><p><code>-p HOST_PORT:CONTAINER_PORT</code>. Yes, it is <b>port forwarding</b>: traffic that arrives at the host port is passed into the container port. Podman sets up this forwarding for you. A normal user (rootless) gets a small helper program for this, and a root user gets firewall rules.</p><div class="tblwrap"><table class=""><tr><th>Example</th><th>Meaning</th></tr><tr><td><code>-p 8080:8080</code></td><td>host 8080 goes to container 8080. Test with <code>curl localhost:8080</code></td></tr><tr><td><code>-p 8081:8080</code></td><td>host 8081 goes to container 8080. Useful when 8080 is already used. Test with <code>curl localhost:8081</code></td></tr></table></div><div class="tip"><b>Which container port?</b>Use the port the program listens on <b>inside</b> the container. Find it with <code>podman image inspect</code> (ExposedPorts). The web server image uses 8080.</div><div class="note"><b>Good to know</b>A normal user cannot publish host ports below 1024 (like 80). Use ports above 1024. To reach the container from <b>another</b> machine, use the host IP, and open the port in the firewall: <code>sudo firewall-cmd --add-port=8080/tcp --permanent</code> then <code>--reload</code>.</div></section>
+<section id="storage" class="extra"><h2><span class="n">8</span>Keep data: volumes<span class="tag">extra</span></h2><div class="why"><b>Why?</b> Container data is lost when the container is removed. A volume keeps it on the host.</div><div class="note"><b><span class="tag">note</span> Extra topic: save data with a volume</b>A <b>volume</b> (bind mount) links a folder of the host to a folder in the container. The data lives on the host, so it stays when the container is removed.</div><svg class="dg" viewBox="0 0 900 150" role="img" aria-label="Host folder linked to container folder"><defs><marker id="v1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bs" x="20" y="30" width="330" height="70" rx="10"/><text class="bd" x="185" y="61" text-anchor="middle">Host folder</text><text class="sm" x="185" y="83" text-anchor="middle">~/mycon-data</text><line class="ar" x1="352" y1="65" x2="538" y2="65" marker-end="url(#v1)"/><line class="ar" x1="538" y1="80" x2="352" y2="80" marker-end="url(#v1)"/><rect class="ok" x="540" y="30" width="330" height="70" rx="10"/><text class="bd" x="705" y="61" text-anchor="middle">Container folder</text><text class="sm" x="705" y="83" text-anchor="middle">/tmp</text><text class="sm" x="445" y="125" text-anchor="middle">the same files, seen from both sides</text></svg><pre class="term"><span class="p">$ </span>mkdir ~/mycon-data
+<span class="p">$ </span>podman run -dit --name data01 -v ~/mycon-data:/tmp:Z registry.redhat.io/ubi10/ubi bash
+<span class="p">$ </span>touch ~/mycon-data/test.txt
+<span class="p">$ </span>podman exec data01 ls /tmp/
+<span class="o">test.txt</span>
+<span class="p">$ </span>podman rm -f data01
+<span class="p">$ </span>ls ~/mycon-data
+<span class="o">test.txt</span>
+<span class="p">$ </span>podman run -dit registry.redhat.io/ubi10/ubi sleep infinity</pre><div class="tblwrap"><table class=""><tr><th>Part</th><th>Meaning</th></tr><tr><td><code>-v ~/mycon-data:/tmp:Z</code></td><td><b>v</b>olume: <code>HOST_FOLDER:CONTAINER_FOLDER:OPTIONS</code>. The host folder must exist first</td></tr><tr><td><code>:Z</code></td><td>tells <b>SELinux</b> to label the folder for this container only. Without it the container may get <i>Permission denied</i></td></tr><tr><td><code>sleep infinity</code></td><td>a command that never ends, so the container stays up (a trick for tests)</td></tr></table></div></section>
+<section id="build"><h2><span class="n">9</span>Build an image from a Containerfile</h2><div class="why"><b>Why?</b> Your own image lets you start the same ready-made application on any machine, again and again.</div><div class="goal"><b>Goal:</b> Build your own image <code>myhttpd</code> that serves a page <code>index.html</code>, then run it.</div><svg class="dg" viewBox="0 0 900 170" role="img" aria-label="Containerfile to image to container"><defs><marker id="b1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="wn" x="10" y="40" width="190" height="70" rx="10"/><text class="bd" x="105" y="71" text-anchor="middle">Containerfile</text><text class="sm" x="105" y="93" text-anchor="middle">the recipe</text><line class="ar" x1="202" y1="75" x2="258" y2="75" marker-end="url(#b1)"/><text class="sm" x="230" y="62" text-anchor="middle">build</text><rect class="bs" x="260" y="40" width="190" height="70" rx="10"/><text class="bd" x="355" y="71" text-anchor="middle">Image</text><text class="sm" x="355" y="93" text-anchor="middle">myhttpd</text><line class="ar" x1="452" y1="75" x2="508" y2="75" marker-end="url(#b1)"/><text class="sm" x="480" y="62" text-anchor="middle">run</text><rect class="ok" x="510" y="40" width="190" height="70" rx="10"/><text class="bd" x="605" y="71" text-anchor="middle">Container</text><text class="sm" x="605" y="93" text-anchor="middle">myweb1</text><line class="ar" x1="702" y1="75" x2="748" y2="75" marker-end="url(#b1)"/><rect class="bx" x="750" y="40" width="140" height="70" rx="10"/><text class="bd" x="820" y="80" text-anchor="middle">web page</text><text class="bd" x="450" y="150" text-anchor="middle">podman build -t myhttpd .</text></svg><ol class="steps"><li><span>Make a folder and a test page: <code>mkdir images-container</code>, <code>cd images-container</code>, <code>echo test &gt; index.html</code></span></li><li><span>Create the file <code>Containerfile</code> (capital C, no extension). Add the lines below</span></li><li><span>Build: <code>podman build -t myhttpd .</code></span></li><li><span>Run: <code>podman run -d --name myweb1 -p 8080:8080 localhost/myhttpd:latest</code></span></li><li><span>Test: <code>curl localhost:8080</code></span></li></ol><p>Open <code>vim Containerfile</code> and write these lines:</p><div class="file"><b>images-container/Containerfile</b><pre><span class="add"># Use the ubi10 base image</span>
+<span class="add">FROM registry.redhat.io/ubi10/ubi</span>
+<span class="add"># Install httpd</span>
+<span class="add">RUN dnf install -y httpd</span>
+<span class="add"># Let httpd listen on 8080 instead of 80</span>
+<span class="add">RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/httpd/conf/httpd.conf</span>
+<span class="add"># Copy the test page into the web server root</span>
+<span class="add">COPY index.html /var/www/html/index.html</span>
+<span class="add"># Document that the container uses port 8080</span>
+<span class="add">EXPOSE 8080</span>
+<span class="add"># Run httpd in the foreground</span>
+<span class="add">ENTRYPOINT ["/usr/sbin/httpd", "-DFOREGROUND"]</span></pre></div><div class="tblwrap"><table class=""><tr><th>Instruction</th><th>Meaning</th></tr><tr><td><code>FROM</code></td><td>the <b>base image</b> to start from</td></tr><tr><td><code>RUN</code></td><td>run a command <b>while building</b> (install software)</td></tr><tr><td><code>COPY</code></td><td>copy a file from your folder into the image</td></tr><tr><td><code>EXPOSE</code></td><td>note which port the program uses. It is documentation only. It does <b>not</b> publish the port. <code>-p</code> does that</td></tr><tr><td><code>ENTRYPOINT</code></td><td>the program that starts when the container starts. It must run in the <b>foreground</b>, or the container stops at once</td></tr><tr><td><code>#</code></td><td>a comment</td></tr></table></div><pre class="term"><span class="p">$ </span>podman build -t myhttpd .
+<span class="o">STEP 1/6: FROM registry.redhat.io/ubi10/ubi</span>
+<span class="o">STEP 2/6: RUN dnf install -y httpd</span>
+<span class="o">...output omitted...</span>
+<span class="o">STEP 3/6: RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/httpd/conf/httpd.conf</span>
+<span class="o">STEP 4/6: COPY index.html /var/www/html/index.html</span>
+<span class="o">STEP 5/6: EXPOSE 8080</span>
+<span class="o">STEP 6/6: ENTRYPOINT ["/usr/sbin/httpd", "-DFOREGROUND"]</span>
+<span class="o">COMMIT myhttpd</span>
+<span class="o">--&gt; 4c1e9a7b2d03</span>
+<span class="o">Successfully tagged localhost/myhttpd:latest</span>
+<span class="o">4c1e9a7b2d03a8f6e5d4c3b2a1908f7e6d5c4b3a29181716151413121110f0e0</span>
+<span class="p">$ </span>podman images
+<span class="o">REPOSITORY                    TAG     IMAGE ID      CREATED         SIZE</span>
+<span class="o">localhost/myhttpd             latest  4c1e9a7b2d03  20 seconds ago  372 MB</span>
+<span class="o">registry.redhat.io/ubi10/ubi  latest  7b1e0c5a92d8  2 weeks ago     236 MB</span>
+<span class="p">$ </span>podman run -d --name myweb1 -p 8080:8080 localhost/myhttpd:latest
+<span class="p">$ </span>podman ps -a
+<span class="o">CONTAINER ID  IMAGE                     COMMAND               STATUS        PORTS                   NAMES</span>
+<span class="o">9d1f3b5a7c20  localhost/myhttpd:latest  /usr/sbin/httpd -...  Up 3 seconds  0.0.0.0:8080-&gt;8080/tcp  myweb1</span>
+<span class="p">$ </span>curl localhost:8080
+<span class="o">test</span></pre><div class="tblwrap"><table class=""><tr><th>Part of the build command</th><th>Meaning</th></tr><tr><td><code>-t myhttpd</code></td><td><b>t</b>ag (name) the new image. Without a tag after the name it becomes <code>latest</code>. Images built here get the prefix <code>localhost/</code></td></tr><tr><td><code>.</code></td><td>the build folder, which holds the <code>Containerfile</code> and the files you copy</td></tr></table></div><div class="tip"><b>Build tips</b>Each instruction makes one layer, so put the steps that change most at the end. Podman looks for a file named exactly <code>Containerfile</code> (or <code>Dockerfile</code>). With another name use <code>podman build -f NAME -t myhttpd .</code>. If port 8080 is busy, remove the old container first: <code>podman rm -f web02</code>.</div></section>
+<section id="push"><h2><span class="n">10</span>Push an image to a registry</h2><div class="why"><b>Why?</b> A pushed image can be pulled and run on any other machine that can reach the registry.</div><p>An image built locally is only on your machine. To share it, <b>push</b> it to a registry. You must be logged in to that registry first.</p><svg class="dg" viewBox="0 0 900 160" role="img" aria-label="Push an image to a registry and pull it elsewhere"><defs><marker id="u1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bs" x="10" y="30" width="220" height="70" rx="10"/><text class="bd" x="120" y="61" text-anchor="middle">Local image</text><text class="sm" x="120" y="83" text-anchor="middle">localhost/custom_app:1.0</text><line class="ar" x1="232" y1="65" x2="328" y2="65" marker-end="url(#u1)"/><text class="sm" x="280" y="52" text-anchor="middle">push</text><rect class="wn" x="330" y="30" width="240" height="70" rx="10"/><text class="bd" x="450" y="61" text-anchor="middle">Registry</text><text class="sm" x="450" y="83" text-anchor="middle">registry.lab.example.com:5000</text><line class="ar" x1="572" y1="65" x2="668" y2="65" marker-end="url(#u1)"/><text class="sm" x="620" y="52" text-anchor="middle">pull / run</text><rect class="ok" x="670" y="30" width="220" height="70" rx="10"/><text class="bd" x="780" y="61" text-anchor="middle">Any machine</text><text class="sm" x="780" y="83" text-anchor="middle">custom_app:1.0</text><text class="sm" x="450" y="140" text-anchor="middle">The image name tells podman where to push: registry/name:tag</text></svg><pre class="term"><span class="p">$ </span>podman login registry.lab.example.com:5000
+<span class="o">Username: student</span>
+<span class="o">Password:</span>
+<span class="o">Login Succeeded!</span>
+<span class="p">$ </span>podman image push localhost/custom_app:1.0 registry.lab.example.com:5000/custom_app:1.0
+<span class="o">...output omitted...</span>
+<span class="o">Writing manifest to image destination</span>
+<span class="p">$ </span>podman search registry.lab.example.com:5000/
+<span class="o">NAME                                    DESCRIPTION</span>
+<span class="o">registry.lab.example.com:5000/custom_app</span>
+<span class="o">...output omitted...</span>
+<span class="p">$ </span>podman rmi localhost/custom_app:1.0
+<span class="o">Untagged: localhost/custom_app:1.0</span>
+<span class="o">Deleted: f8f36fe8e2edb1d0c4a9...</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>podman image push SOURCE DESTINATION</code></td><td>upload the image. The destination is <code>registry/name:tag</code></td></tr><tr><td><code>podman rmi IMAGE</code></td><td>delete the local copy. The copy in the registry stays</td></tr><tr><td><code>podman run ... registry/name:tag</code></td><td>if the image is not local, Podman pulls it first</td></tr></table></div><div class="note"><b><span class="tag">note</span> Your own registry: quay.io</b>To store your own custom images for free, make an account on <b>quay.io</b>, log in with <code>podman login quay.io</code>, and push to <code>quay.io/YOUR_NAME/IMAGE:TAG</code>.</div></section>
+<section id="lab"><h2><span class="n">11</span>Lab: manage containers with Podman</h2><div class="why"><b>Why?</b> This lab uses every skill of the chapter in one go: login, pull, run, build, push, delete and run again.</div><div class="goal"><b>Goal:</b> Log in to the classroom registry, run a web image, build the image <code>custom_app:1.0</code> from a Containerfile, push it, delete it locally, and run it as <code>my_app</code> on port 8080.</div><svg class="dg" viewBox="0 0 900 135" role="img" aria-label="Five steps of the lab"><defs><marker id="l1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="160" height="60" rx="10"/><text class="bd" x="90" y="60" text-anchor="middle">1 Login</text><line class="ar" x1="172" y1="55" x2="188" y2="55" marker-end="url(#l1)"/><rect class="bx" x="190" y="25" width="160" height="60" rx="10"/><text class="bd" x="270" y="60" text-anchor="middle">2 Pull and run</text><line class="ar" x1="352" y1="55" x2="368" y2="55" marker-end="url(#l1)"/><rect class="bs" x="370" y="25" width="160" height="60" rx="10"/><text class="bd" x="450" y="60" text-anchor="middle">3 Build image</text><line class="ar" x1="532" y1="55" x2="548" y2="55" marker-end="url(#l1)"/><rect class="wn" x="550" y="25" width="160" height="60" rx="10"/><text class="bd" x="630" y="60" text-anchor="middle">4 Push, rmi</text><line class="ar" x1="712" y1="55" x2="728" y2="55" marker-end="url(#l1)"/><rect class="ok" x="730" y="25" width="160" height="60" rx="10"/><text class="bd" x="810" y="60" text-anchor="middle">5 Run my_app</text></svg><pre class="term"><span class="p">$ </span>lab start containers-review</pre><div class="warn"><b>Do not exit the SSH session</b>Containers you start here stop when the SSH session ends. Stay in the same session until you have run <code>lab grade</code>. Making containers survive logout is a different topic.</div><h3>1. Log in to the registry</h3><pre class="term"><span class="p">$ </span>podman login registry.lab.example.com:5000
+<span class="o">Username: student</span>
+<span class="o">Password: redhat</span>
+<span class="o">Login Succeeded!</span></pre><h3>2. Search for an HTTP image, pull it and run a detached container</h3><pre class="term"><span class="p">$ </span>podman search registry.lab.example.com:5000/
+<span class="o">NAME                                                  DESCRIPTION</span>
+<span class="o">...output omitted...</span>
+<span class="o">registry.lab.example.com:5000/rhel10/httpd-24</span>
+<span class="o">registry.lab.example.com:5000/rhel10/rhel-bootc</span>
+<span class="o">registry.lab.example.com:5000/ubi10/ubi</span>
+<span class="o">registry.lab.example.com:5000/ubi8/ubi</span>
+<span class="p">$ </span>podman pull registry.lab.example.com:5000/rhel10/httpd-24
+<span class="o">...output omitted...</span>
+<span class="o">Writing manifest to image destination</span>
+<span class="o">53d5db9e1d42...</span>
+<span class="p">$ </span>podman images
+<span class="o">REPOSITORY                                     TAG     IMAGE ID      CREATED       SIZE</span>
+<span class="o">registry.lab.example.com:5000/rhel10/httpd-24  latest  53d5db9e1d42  2 months ago  326 MB</span>
+<span class="p">$ </span>podman run -d --name lab_web registry.lab.example.com:5000/rhel10/httpd-24
+<span class="o">c4a8d1e2f7b3...</span></pre><h3>3. Build custom_app:1.0</h3><pre class="term"><span class="p">$ </span>mkdir ~/custom_app</pre><div class="file"><b>~/custom_app/Containerfile</b><pre><span class="add">FROM registry.lab.example.com:5000/rhel10/httpd-24</span>
+<span class="add">RUN echo "This is my containerized webserver." &gt; /var/www/html/index.html</span></pre></div><pre class="term"><span class="p">$ </span>podman build -t custom_app:1.0 ~/custom_app
+<span class="o">STEP 1/2: FROM registry.lab.example.com:5000/rhel10/httpd-24</span>
+<span class="o">STEP 2/2: RUN echo "This is my containerized webserver." &gt; /var/www/html/index.html</span>
+<span class="o">COMMIT custom_app:1.0</span>
+<span class="o">--&gt; f8f36fe8e2ed</span>
+<span class="o">Successfully tagged localhost/custom_app:1.0</span>
+<span class="p">$ </span>podman images
+<span class="o">REPOSITORY            TAG  IMAGE ID      CREATED         SIZE</span>
+<span class="o">localhost/custom_app  1.0  f8f36fe8e2ed  17 seconds ago  326 MB</span>
+<span class="o">...output omitted...</span></pre><h3>4. Push the image and delete it locally</h3><pre class="term"><span class="p">$ </span>podman image push localhost/custom_app:1.0 registry.lab.example.com:5000/custom_app:1.0
+<span class="o">...output omitted...</span>
+<span class="o">Writing manifest to image destination</span>
+<span class="p">$ </span>podman search registry.lab.example.com:5000/
+<span class="o">NAME</span>
+<span class="o">registry.lab.example.com:5000/custom_app</span>
+<span class="o">...output omitted...</span>
+<span class="p">$ </span>podman rmi localhost/custom_app:1.0
+<span class="o">Untagged: localhost/custom_app:1.0</span>
+<span class="o">Deleted: f8f36fe8e2ed...</span></pre><h3>5. Run my_app and test it</h3><pre class="term"><span class="p">$ </span>podman run -d -p 8080:8080 --name my_app registry.lab.example.com:5000/custom_app:1.0
+<span class="o">Trying to pull registry.lab.example.com:5000/custom_app:1.0...</span>
+<span class="o">...output omitted...</span>
+<span class="o">Writing manifest to image destination</span>
+<span class="o">f0336a1b9c24...</span>
+<span class="p">$ </span>podman ps
+<span class="o">CONTAINER ID  IMAGE                                          COMMAND             STATUS         PORTS                   NAMES</span>
+<span class="o">f0336a1b9c24  registry.lab.example.com:5000/custom_app:1.0   /usr/bin/run-httpd  Up 11 seconds  0.0.0.0:8080-&gt;8080/tcp  my_app</span>
+<span class="p">$ </span>curl localhost:8080
+<span class="o">This is my containerized webserver.</span>
+<span class="p">$ </span>lab grade containers-review
+<span class="p">$ </span>lab finish containers-review</pre><div class="note"><b>What the image is built from</b>The base image <code>httpd-24</code> already starts the web server. The Containerfile only adds your message as <code>index.html</code>. That is why two lines are enough.</div></section>
+<section id="prac"><h2><span class="n">12</span>Practice with the classroom registry</h2><div class="why"><b>Why?</b> The classroom registry is the safe place to repeat the build and run steps without any account.</div><p>Practice the same flow with the classroom registry. Start the lab from the workstation:</p><pre class="term"><span class="p">$ </span>lab start containers-image
+<span class="p">$ </span>podman login registry.lab.example.com:5000
+<span class="o">Username: student</span>
+<span class="o">Password: redhat</span>
+<span class="o">Login Succeeded!</span>
+<span class="p">$ </span>podman search registry.lab.example.com:5000/ubi
+<span class="o">NAME                                    DESCRIPTION</span>
+<span class="o">registry.lab.example.com:5000/ubi10/ubi</span>
+<span class="o">registry.lab.example.com:5000/ubi8/ubi</span>
+<span class="p">$ </span>mkdir image
+<span class="p">$ </span>cd image
+<span class="p">$ </span>echo "hello from my image" &gt; index.html</pre><div class="file"><b>image/Containerfile</b><pre><span class="add">FROM registry.lab.example.com:5000/ubi10/ubi</span>
+<span class="add">RUN dnf install -y httpd</span>
+<span class="add">RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/httpd/conf/httpd.conf</span>
+<span class="add">COPY index.html /var/www/html/index.html</span>
+<span class="add">EXPOSE 8080</span>
+<span class="add">ENTRYPOINT ["/usr/sbin/httpd", "-DFOREGROUND"]</span></pre></div><pre class="term"><span class="p">$ </span>podman build -t classweb:1.0 .
+<span class="p">$ </span>podman run -d --name classweb -p 8080:8080 localhost/classweb:1.0
+<span class="p">$ </span>curl localhost:8080
+<span class="o">hello from my image</span>
+<span class="p">$ </span>podman rm -f classweb
+<span class="p">$ </span>lab finish containers-image</pre><div class="tip"><b>Always finish</b>Run <code>lab finish</code> at the end of every lab so that old containers and images do not disturb the next one.</div></section>
+<section id="interview"><h2><span class="n">13</span>Interview questions</h2><div class="why"><b>Why?</b> Interviewers often start with containers. Click a question, answer in your own words, then check.</div><details><summary>What is a container?</summary><div class="ans">An isolated process that holds one application and its libraries. It shares the host kernel, starts in seconds and uses few resources.</div></details><details><summary>Container or virtual machine?</summary><div class="ans">A VM has a full guest OS with its own kernel (heavy, slow to start). A container shares the host kernel and has only the app and libraries (light, fast).</div></details><details><summary>What is the difference between an image and a container?</summary><div class="ans">An <b>image</b> is a read-only template. A <b>container</b> is a running or stopped instance made from it. One image can start many containers.</div></details><details><summary>What is Podman and why daemonless?</summary><div class="ans">Podman is the Red Hat tool to run and build containers. It has <b>no background daemon</b> and runs <b>rootless</b> (as a normal user), so it is safer. The commands match Docker.</div></details><details><summary>What is a registry?</summary><div class="ans">A server that stores images, for example registry.redhat.io, quay.io, Docker Hub, Amazon ECR.</div></details><details><summary>What do -i, -t and -d mean?</summary><div class="ans"><code>-i</code> keeps input open, <code>-t</code> gives a terminal, <code>-d</code> runs in the background (detached).</div></details><details><summary>What does -p 8080:8080 mean?</summary><div class="ans">Publish a port: <b>host port : container port</b>. Traffic to port 8080 of the host is forwarded to port 8080 inside the container.</div></details><details><summary>Why did my container exit immediately?</summary><div class="ans">Its main process ended. For an OS image like ubi, bash ends without a terminal, so use <code>-it</code> or <code>-dit</code>. <code>Exited (0)</code> means a normal end.</div></details><details><summary>What happens to data in a container when it is removed?</summary><div class="ans">It is lost, because it lives in the thin writable layer. Use a volume (<code>-v</code>) to keep data on the host.</div></details><details><summary>What is a Containerfile?</summary><div class="ans">A text file with the steps to build an image: <code>FROM</code>, <code>RUN</code>, <code>COPY</code>, <code>EXPOSE</code>, <code>ENTRYPOINT</code>. Built with <code>podman build -t NAME .</code>.</div></details><details><summary>How do you share an image?</summary><div class="ans">Log in to a registry, then <code>podman image push LOCAL registry/name:tag</code>. Others pull it with <code>podman pull</code>.</div></details><details><summary>What is rootless?</summary><div class="ans">A normal user runs the containers. Root inside the container is only that user outside, so a break-out has little power.</div></details><details><summary>What are image layers?</summary><div class="ans">Each step of a Containerfile adds a read-only layer. A container adds one writable layer on top. Layers are shared between images to save space.</div></details></section>
+<section id="exam"><h2><span class="n">14</span>Exam steps and common errors</h2><div class="why"><b>Why?</b> The same order every time means you do not forget a step.</div><h3>Same order every time</h3><ol class="steps"><li><span><code>podman login REGISTRY</code> (if the registry needs it)</span></li><li><span><code>podman search</code> and <code>podman pull</code> the image. Check with <code>podman images</code>.</span></li><li><span>Run it: <code>podman run -d --name NAME -p HOST:CONTAINER IMAGE</code></span></li><li><span>Check with <code>podman ps</code> and <code>curl localhost:PORT</code></span></li><li><span>To build: write the <code>Containerfile</code>, then <code>podman build -t NAME:TAG .</code></span></li><li><span>To share: <code>podman image push</code>, then <code>podman rmi</code> if asked to delete it locally.</span></li></ol><h3>Common errors</h3><div class="tblwrap"><table class=""><tr><th>You see</th><th>Reason</th><th>Fix</th></tr><tr><td><code>unable to retrieve auth token: invalid username/password</code></td><td>not logged in, or wrong login</td><td><code>podman login REGISTRY</code></td></tr><tr><td><code>short-name ... did not resolve</code></td><td>a short image name and no search registry set</td><td>use the full name, like <code>registry.redhat.io/ubi10/ubi</code></td></tr><tr><td><code>cannot remove container ... running</code></td><td>container is still running</td><td><code>podman stop NAME</code> first, or <code>podman rm -f NAME</code></td></tr><tr><td><code>the container name "web1" is already in use</code></td><td>a container with that name exists</td><td>use another name or <code>podman rm -f web1</code></td></tr><tr><td><code>rootlessport listen tcp 0.0.0.0:8080: bind: address already in use</code></td><td>the host port is taken by another container or program</td><td>stop the old container, or use another host port like <code>-p 8081:8080</code></td></tr><tr><td><code>curl: (7) Failed to connect</code></td><td>no <code>-p</code>, wrong container port, or container not running</td><td>check <code>podman ps</code> (PORTS column) and <code>podman logs NAME</code></td></tr><tr><td><code>no Containerfile or Dockerfile specified or found</code></td><td>wrong file name or wrong folder</td><td>name it exactly <code>Containerfile</code> and run build in that folder (<code>.</code>)</td></tr><tr><td><code>Permission denied</code> in a mounted folder</td><td>SELinux label or folder permissions</td><td>add <code>:Z</code> to the <code>-v</code> option, check the folder permissions</td></tr></table></div></section>
+<section id="cheat"><h2><span class="n">15</span>All commands in one list</h2><div class="why"><b>Why?</b> One page to revise.</div><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>dnf install -y container-tools</code></td><td>install podman, buildah, skopeo</td></tr><tr><td><code>podman -v</code> / <code>podman info</code></td><td>version / details</td></tr><tr><td><code>podman login</code> / <code>logout REGISTRY</code></td><td>log in and out of a registry</td></tr><tr><td><code>podman search NAME</code></td><td>find images</td></tr><tr><td><code>podman pull IMAGE</code></td><td>download an image</td></tr><tr><td><code>podman images</code></td><td>list local images</td></tr><tr><td><code>podman image inspect IMAGE</code></td><td>details of an image</td></tr><tr><td><code>skopeo inspect docker://IMAGE</code></td><td>details of an image in a registry, no download</td></tr><tr><td><code>podman run -it IMAGE bash</code></td><td>run with a terminal</td></tr><tr><td><code>podman run -d --name NAME -p H:C IMAGE</code></td><td>run in the background with a port</td></tr><tr><td><code>podman run --rm IMAGE CMD</code></td><td>run once, then remove</td></tr><tr><td><code>podman run -v HOST:CONT:Z IMAGE</code></td><td>run with a volume</td></tr><tr><td><code>podman ps</code> / <code>podman ps -a</code></td><td>running / all containers</td></tr><tr><td><code>podman exec -it NAME bash</code></td><td>open a shell in a running container</td></tr><tr><td><code>podman logs NAME</code></td><td>show the output of a container</td></tr><tr><td><code>podman stop</code> / <code>start</code> / <code>restart NAME</code></td><td>control a container</td></tr><tr><td><code>podman rm NAME</code> / <code>rm -f NAME</code> / <code>rm -a</code></td><td>delete containers</td></tr><tr><td><code>podman rmi IMAGE</code></td><td>delete an image</td></tr><tr><td><code>podman build -t NAME:TAG .</code></td><td>build an image from a Containerfile</td></tr><tr><td><code>podman image push SRC DEST</code></td><td>push an image to a registry</td></tr></table></div></section>
+<section id="quiz"><h2><span class="n">16</span>Quiz: test yourself</h2><p class="lead">30 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p><div class="qbar"><span id="prog">Answered: 0 / 30</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div><div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 17 &middot; Managing Containers with Podman</footer></div>
+<script>
+const Q=[{"q": "What is a container?", "o": ["An isolated process with one app and its libraries, sharing the host kernel", "A type of disk partition", "A full virtual machine with its own kernel", "A network cable"], "a": 0, "e": "Containers share the host kernel, so they are light."}, {"q": "What is the main difference from a virtual machine?", "o": ["A container cannot run web servers", "A container is always bigger", "A container has no guest operating system of its own", "A container needs a hypervisor"], "a": 2, "e": "No guest OS means small size and fast start."}, {"q": "What does \"daemonless\" mean for Podman?", "o": ["It cannot run containers in the background", "It only works as root", "It has no commands", "It needs no always-running background service"], "a": 3, "e": "Each podman command runs by itself, as your own user."}, {"q": "Which package group installs podman, buildah and skopeo?", "o": ["container-tools", "podman-all", "docker-ce", "containerd"], "a": 0, "e": "dnf install container-tools."}, {"q": "What is an image?", "o": ["A read-only template that containers start from", "A running container", "A network port", "A registry login"], "a": 0, "e": "An image is the template, a container is the copy that runs."}, {"q": "Which registry needs a login and holds Red Hat official images?", "o": ["docker.io", "registry.access.redhat.com", "registry.redhat.io", "localhost"], "a": 2, "e": "registry.access.redhat.com needs no login."}, {"q": "In <code>registry.redhat.io/rhel10/httpd-24:latest</code>, what is <code>latest</code>?", "o": ["The container name", "The namespace", "The tag (version)", "The registry"], "a": 2, "e": "Format: registry/namespace/name:tag."}, {"q": "Which command lists the images stored on this machine?", "o": ["podman search", "podman images", "podman info", "podman ps"], "a": 1, "e": "podman images shows local images."}, {"q": "Which command downloads an image?", "o": ["podman copy IMAGE", "podman push IMAGE", "podman get IMAGE", "podman pull IMAGE"], "a": 3, "e": "pull downloads, push uploads."}, {"q": "Where is the podman login saved?", "o": ["/root/.bashrc", "/etc/passwd", "/var/log/podman.log", "${XDG_RUNTIME_DIR}/containers/auth.json"], "a": 3, "e": "The auth.json file keeps the encoded login. It is only encoded, not secret."}, {"q": "Which tool reads image details from a registry without downloading it?", "o": ["skopeo inspect", "podman build", "podman exec", "podman rm"], "a": 0, "e": "skopeo inspect docker://IMAGE."}, {"q": "What do <code>-i</code> and <code>-t</code> in <code>-it</code> mean?", "o": ["Internal and temporary", "Image and tag", "Interactive input and a terminal", "Install and test"], "a": 2, "e": "-i keeps input open, -t gives a terminal."}, {"q": "What does <code>-d</code> do in <code>podman run -d</code>?", "o": ["Deletes the container", "Runs the container in the background", "Debugs the container", "Downloads the image"], "a": 1, "e": "d = detached."}, {"q": "Why do OS images like ubi need <code>-it</code>?", "o": ["They need a port", "They cannot be pulled otherwise", "Their main process is bash, which ends without a terminal", "They need root"], "a": 2, "e": "Without a terminal bash ends and the container stops."}, {"q": "A container shows <code>Exited (0)</code>. What does it mean?", "o": ["It crashed", "Its main process ended normally", "It was never created", "It is still running"], "a": 1, "e": "Exit code 0 means success."}, {"q": "Which command lists running and stopped containers?", "o": ["podman ps", "podman images", "podman ps -a", "podman list"], "a": 2, "e": "-a means all."}, {"q": "Which command opens a shell in a running container named con01?", "o": ["podman start con01 bash", "podman login con01", "podman exec -it con01 bash", "podman run con01 bash"], "a": 2, "e": "exec runs a new command in a running container."}, {"q": "You run <code>podman rm web01</code> but it is running. What happens?", "o": ["It restarts", "The image is deleted", "It is deleted", "An error: stop it first or use rm -f"], "a": 3, "e": "Running containers cannot be removed without force."}, {"q": "What does <code>podman run --rm</code> do?", "o": ["Removes the image", "Reboots the machine", "Removes the container when it stops", "Removes the registry login"], "a": 2, "e": "Good for one-time commands."}, {"q": "What does <code>-p 8081:8080</code> mean?", "o": ["Host port 8081 goes to container port 8080", "Container 8081 goes to host 8080", "Port 8081 is blocked", "Both ports are closed"], "a": 0, "e": "The first number is the host port."}, {"q": "A container web server listens on 8080. Which command reaches it after <code>-p 8080:8080</code>?", "o": ["ping 8080", "curl localhost:8080", "curl localhost:80", "curl container:8080"], "a": 1, "e": "The host port is 8080."}, {"q": "Does <code>EXPOSE 8080</code> in a Containerfile publish the port?", "o": ["Only with ENTRYPOINT", "Yes, always", "No, it is only documentation. -p publishes", "Only for root"], "a": 2, "e": "You still need -p when you run the container."}, {"q": "Which Containerfile instruction sets the starting base image?", "o": ["RUN", "EXPOSE", "FROM", "COPY"], "a": 2, "e": "FROM is the first instruction."}, {"q": "Which instruction runs a command while the image is built?", "o": ["FROM", "ENTRYPOINT", "RUN", "EXPOSE"], "a": 2, "e": "RUN is a build-time command."}, {"q": "Which command builds the image <code>myhttpd</code> from the current folder?", "o": ["podman run -t myhttpd", "podman build -t myhttpd .", "podman make myhttpd", "podman image create ."], "a": 1, "e": "The dot is the build folder."}, {"q": "What is the correct file name for podman build to find?", "o": ["Containerfile", "container.conf", "build.txt", "containerfile.txt"], "a": 0, "e": "The name is Containerfile (or Dockerfile)."}, {"q": "Which command uploads a local image to a registry?", "o": ["podman export", "podman pull", "podman save", "podman image push SOURCE DESTINATION"], "a": 3, "e": "push uploads the image."}, {"q": "What happens to data written inside a container when you remove it?", "o": ["It moves to the host", "It is saved in the registry", "It moves to the image", "It is lost, unless a volume was used"], "a": 3, "e": "Use -v to keep data."}, {"q": "What does the <code>:Z</code> in <code>-v ~/data:/tmp:Z</code> do?", "o": ["Sets the SELinux label so the container may use the folder", "Makes the folder read only", "Compresses the folder", "Mounts it on another machine"], "a": 0, "e": "Z = private SELinux label."}, {"q": "Which command shows what a container printed?", "o": ["podman images", "podman search NAME", "podman logs NAME", "podman info"], "a": 2, "e": "logs shows the container output."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 13: Recovering Superuser Access</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#b5651d;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 13 &middot; RHEL 10</small><h1>Recovering Superuser Access</h1><p>Forgot the root password? You can reset it from the <mark>GRUB</mark> menu using <mark>rd.break</mark>. This chapter shows the exact keys, commands and the SELinux relabel step that people forget.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Why it works</a><a href="#steps">Step by step</a><a href="#verify">After reboot</a><a href="#other">Other cases</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>When and why this works</h2><div class="why"><b>Why?</b> If you have <b>console access</b> to the machine, you can stop the boot early (before the real system is ready) and become root without a password. That is why servers need physical and console security.</div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="140" height="95" rx="12"/><text class="bd" x="80" y="58" text-anchor="middle">GRUB menu</text><text x="80" y="84" text-anchor="middle">press e</text><text class="sm" x="80" y="106" text-anchor="middle"></text><line class="ar" x1="152" y1="72" x2="193" y2="72" marker-end="url(#ma)"/><rect class="bx" x="195" y="25" width="140" height="95" rx="12"/><text class="bd" x="265" y="58" text-anchor="middle">Add rd.break</text><text x="265" y="84" text-anchor="middle">stop early</text><text class="sm" x="265" y="106" text-anchor="middle"></text><line class="ar" x1="337" y1="72" x2="378" y2="72" marker-end="url(#ma)"/><rect class="bx" x="380" y="25" width="140" height="95" rx="12"/><text class="bd" x="450" y="58" text-anchor="middle">initramfs shell</text><text x="450" y="84" text-anchor="middle">root, no password</text><text class="sm" x="450" y="106" text-anchor="middle"></text><line class="ar" x1="522" y1="72" x2="563" y2="72" marker-end="url(#ma)"/><rect class="bx" x="565" y="25" width="140" height="95" rx="12"/><text class="bd" x="635" y="58" text-anchor="middle">Change password</text><text x="635" y="84" text-anchor="middle">chroot + passwd</text><text class="sm" x="635" y="106" text-anchor="middle"></text><line class="ar" x1="707" y1="72" x2="748" y2="72" marker-end="url(#ma)"/><rect class="ok" x="750" y="25" width="140" height="95" rx="12"/><text class="bd" x="820" y="58" text-anchor="middle">Relabel</text><text x="820" y="84" text-anchor="middle">/.autorelabel</text><text class="sm" x="820" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">rd.break = "break" in the initramfs, before the real root is used.</text></svg><div class="note"><b>Full forms</b><b>rd.break</b> = ramdisk break (stop in the initial RAM disk). <b>/sysroot</b> = where the real root file system is mounted during early boot. <b>chroot</b> = change root (make /sysroot look like /).</div><div class="warn"><b>Only with console access</b>This does not work over SSH. You need the VM console or the physical screen.</div></section>
+<section id="steps"><h2><span class="n">2</span>Reset the root password: step by step</h2><div class="why"><b>Why?</b> Each command has a reason. If you skip one, the new password does not work or you cannot log in at all.</div><ol class="steps"><li><span>Reboot the machine. At the GRUB menu press any key, highlight the first kernel and press <mark>e</mark>.</span></li><li><span>Find the line that starts with <code>linux</code>. Press <code>End</code> and add <mark>rd.break</mark> at the end of that line.</span></li><li><span>Press <mark>Ctrl+X</mark> to boot.</span></li><li><span>Wait for the prompt <code>switch_root:/#</code>.</span></li><li><span>Remount the real root as writable: <code>mount -o remount,rw /sysroot</code></span></li><li><span>Enter it: <code>chroot /sysroot</code></span></li><li><span>Set the password: <code>passwd root</code></span></li><li><span>Ask SELinux to fix labels at next boot: <code>touch /.autorelabel</code></span></li><li><span>Leave: type <code>exit</code>, then <code>exit</code> again. The system continues to boot (relabel can take a while).</span></li></ol><div class="file"><b>GRUB edit screen (end of the linux line)</b><pre><span class="add">linux ($root)/vmlinuz-6.12.0-55.el10.x86_64 root=/dev/mapper/rhel-root ro crashkernel=auto rd.lvm.lv=rhel/root rhgb quiet rd.break</span></pre></div><pre class="term"><span class="o">Entering emergency mode. Exit the shell to continue.</span>
+<span class="o">Type "journalctl" to view system logs.</span>
+<span class="o">You might want to save "/run/initramfs/rdsosreport.txt" to a USB stick.</span>
+<span class="o">switch_root:/# mount -o remount,rw /sysroot</span>
+<span class="o">switch_root:/# chroot /sysroot</span>
+<span class="o">sh-5.2# passwd root</span>
+<span class="o">Changing password for user root.</span>
+<span class="o">New password:</span>
+<span class="o">Retype new password:</span>
+<span class="o">passwd: all authentication tokens updated successfully.</span>
+<span class="o">sh-5.2# touch /.autorelabel</span>
+<span class="o">sh-5.2# exit</span>
+<span class="o">exit</span>
+<span class="o">switch_root:/# exit</span>
+<span class="o">logout</span></pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Why it is needed</th></tr><tr><td><code>mount -o remount,rw /sysroot</code></td><td>the real root is mounted <b>read-only</b> at this point, so you cannot write the new password</td></tr><tr><td><code>chroot /sysroot</code></td><td>makes the real system your <code>/</code>, so <code>passwd</code> edits the real <code>/etc/shadow</code></td></tr><tr><td><code>passwd root</code></td><td>sets the new root password</td></tr><tr><td><code>touch /.autorelabel</code></td><td>this shell has no SELinux labels, so the edited <code>/etc/shadow</code> gets a wrong label. This file tells the system to relabel everything at boot</td></tr></table></div><div class="warn"><b>Do not skip /.autorelabel</b>Without it, SELinux blocks the login with the new password (it looks like "Login incorrect"). With it, the next boot relabels all files and may take several minutes.</div><div class="tip"><b>Check after login</b><code>getenforce</code> should say Enforcing and <code>ls /.autorelabel</code> should be gone, because it is deleted after the relabel.</div></section>
+<section id="verify"><h2><span class="n">3</span>After the reboot</h2><pre class="term"><span class="o">Red Hat Enterprise Linux 10.0 (Coughlan)</span>
+<span class="o">server login: root</span>
+<span class="o">Password:</span>
+<span class="o">Last login: Fri Nov 20 11:42:10 on tty1</span>
+<span class="p">[root@server ~]# </span>getenforce
+<span class="o">Enforcing</span>
+<span class="p">[root@server ~]# </span>ls /.autorelabel
+<span class="o">ls: cannot access '/.autorelabel': No such file or directory</span></pre><ul><li>The relabel message on screen is normal: *"*** Warning -- SELinux targeted policy relabel is required."*</li><li>The system reboots by itself once more after the relabel. That is also normal.</li></ul></section>
+<section id="other"><h2><span class="n">4</span>Other cases and good practice</h2><h3>If the file system is damaged</h3><p>Use <code>rescue.target</code> or <code>emergency.target</code> (chapter 12). They ask for the root password, so they do <b>not</b> help when it is forgotten. For a forgotten password use <code>rd.break</code>.</p><h3>Alternative: init=/bin/bash</h3><p>Some admins add <code>init=/bin/bash</code> instead of <code>rd.break</code>. It starts a bash shell as root with <code>/</code> read-only. You must then <code>mount -o remount,rw /</code>, run <code>passwd root</code>, <code>touch /.autorelabel</code>, and reboot with <code>exec /usr/lib/systemd/systemd</code>. <code>rd.break</code> is the standard method for the exam.</p><h3>Protect the server</h3><ul><li>Set a <b>GRUB password</b> so nobody can edit boot options.</li><li>Lock the BIOS/UEFI, physical room, and the VM console.</li><li>Use encrypted disks (LUKS), because root access in this way cannot read encrypted data without the key.</li><li>Prefer <code>sudo</code> and SSH keys for admins, with a locked-down root login.</li></ul></section>
+<section id="cheat"><h2><span class="n">5</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Step</th><th>Command / key</th></tr><tr><td>edit entry</td><td><code>e</code> at GRUB</td></tr><tr><td>stop early</td><td>add <code>rd.break</code> to the linux line, <code>Ctrl+X</code></td></tr><tr><td>writable root</td><td><code>mount -o remount,rw /sysroot</code></td></tr><tr><td>enter real root</td><td><code>chroot /sysroot</code></td></tr><tr><td>new password</td><td><code>passwd root</code></td></tr><tr><td>SELinux fix</td><td><code>touch /.autorelabel</code></td></tr><tr><td>continue boot</td><td><code>exit</code> then <code>exit</code></td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">6</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 13 &middot; Recovering Superuser Access</footer></div>
+<script>
+const Q=[{"q": "What does rd.break do?", "o": ["Disables the firewall", "Reboots the system", "Stops the boot early in the initramfs", "Breaks the disk"], "a": 2, "e": "It gives a shell before the real system starts."}, {"q": "Where do you add rd.break?", "o": ["In /etc/hosts", "In /etc/passwd", "End of the linux line in GRUB", "In /etc/fstab"], "a": 2, "e": "Edit the linux line with e."}, {"q": "Which key combination starts the boot after editing?", "o": ["F5", "Enter", "Ctrl+Alt+Del", "Ctrl+X"], "a": 3, "e": "Ctrl+X."}, {"q": "How is the real root mounted when you get the rd.break prompt?", "o": ["Read-only under /sysroot", "Read-write", "Not mounted at all", "On /boot"], "a": 0, "e": "/sysroot is read-only, so you remount it."}, {"q": "Which command makes /sysroot writable?", "o": ["chmod +w /sysroot", "mount -o remount,rw /sysroot", "umount /sysroot", "fsck /sysroot"], "a": 1, "e": "Remount read-write."}, {"q": "Why do you run chroot /sysroot?", "o": ["To open the firewall", "To change the hostname", "So that passwd changes the real system files", "To format the disk"], "a": 2, "e": "chroot makes /sysroot look like /."}, {"q": "Which command sets the new root password?", "o": ["usermod -p root", "chpasswd -r", "passwd root", "su root"], "a": 2, "e": "passwd root."}, {"q": "Why is /.autorelabel needed?", "o": ["To clear logs", "To speed up boot", "The edited shadow file has a wrong SELinux label, so relabel is needed", "To mount the disk"], "a": 2, "e": "Without it SELinux can block the login."}, {"q": "Which command creates the relabel flag?", "o": ["restorecon /", "chcon /", "setenforce 0", "touch /.autorelabel"], "a": 3, "e": "touch /.autorelabel."}, {"q": "What happens at the next boot after /.autorelabel exists?", "o": ["Disk is formatted", "SELinux relabels the file system, then the system reboots", "Root login is disabled", "Nothing"], "a": 1, "e": "It relabels all files, which can be slow."}, {"q": "Does this method work over SSH?", "o": ["Only with sudo", "No, you need console access", "Yes", "Only as root"], "a": 1, "e": "You must stop the boot at the console."}, {"q": "How many times do you type exit after the password change?", "o": ["5", "1", "2", "0"], "a": 2, "e": "One exit leaves chroot, the second continues the boot."}, {"q": "Which prompt shows you are in the early shell?", "o": ["grub>", "[user@host ~]$", "switch_root:/#", "login:"], "a": 2, "e": "switch_root:/# (initramfs)."}, {"q": "What is /sysroot?", "o": ["A log folder", "A swap file", "A user home", "The real root file system mounted during early boot"], "a": 3, "e": "The real root during initramfs."}, {"q": "After the reset you log in and getenforce says?", "o": ["Disabled", "Broken", "Unknown", "Enforcing"], "a": 3, "e": "SELinux was never turned off."}, {"q": "Which setting stops others from editing GRUB entries?", "o": ["SELinux boolean", "GRUB password", "firewalld zone", "tuned profile"], "a": 1, "e": "Set a GRUB password."}, {"q": "Full form of chroot?", "o": ["create root", "check root", "clear root", "change root"], "a": 3, "e": "change root."}, {"q": "Does rescue.target help when the root password is forgotten?", "o": ["No, it asks for the root password", "Yes, no password", "Only on GPT", "Only on VMs"], "a": 0, "e": "Rescue mode asks for the password."}, {"q": "Which method is the standard one on the RHCSA exam for a lost root password?", "o": ["rd.break", "Edit /etc/shadow over SSH", "Boot from USB only", "Reinstall"], "a": 0, "e": "rd.break."}, {"q": "What is the safest way to avoid this attack on a real server?", "o": ["Disable SELinux", "Physical and console security plus a GRUB password", "Use a long hostname", "Remove passwd"], "a": 1, "e": "Secure console access and set a GRUB password."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>

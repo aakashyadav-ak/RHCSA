@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RH134 Chapter 18: Working with Image-based Red Hat Enterprise Linux</title>
+<style>
+
+:root{--bg:#eef2f5;--card:#fff;--ink:#12263a;--mute:#5d6f80;--line:#d5dde4;--track:#c3cfda;--ok:#12805c;--accent:#0f7b8a;--c:#12a3a3;--c-soft:#e4edfb;--warn:#b4570a;--warn-soft:#fdf0e1;--tip:#12805c;--tip-soft:#e2f4ec;--bad:#b3261e;--bad-soft:#fbe9e7;--mark:#fff0a8;--term:#0f1b27;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1822;--card:#16232f;--ink:#e8eef3;--mute:#8da0b1;--line:#27394a;--track:#33485b;--ok:#3cc790;--accent:#4fc3d2;--c:#6b9bf0;--c-soft:#1b2d4a;--warn:#f0a35a;--warn-soft:#33261a;--tip:#3cc790;--tip-soft:#15302a;--bad:#f2867f;--bad-soft:#3a1d1b;--mark:#5a4a10;--term:#08111a;--term-ink:#d7e3ee;--term-p:#6fd3a0;--term-o:#8da0b1;--term-c:#e6b455;color-scheme:dark}}
+:root{--hero-bg:#12263a;--hero-text:#f3f6f8;--hero-mute:#b9c7d3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{font-family:Rockwell,"Roboto Slab",Georgia,serif;margin:0;line-height:1.25}
+a{color:var(--accent);font-weight:600}
+.back{display:inline-block;margin-bottom:12px;font-size:14px}
+.hero{background:var(--hero-bg);color:var(--hero-text);border-radius:18px;padding:28px}
+.hero small{color:var(--hero-mute);font-size:13px;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,38px);margin:6px 0 8px}
+.hero p{margin:0;color:var(--hero-mute);max-width:60ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:13.5px;text-decoration:none;color:var(--ink);font-weight:500}
+.toc a:hover{border-color:var(--c);color:var(--c)}
+.toc a.ex{border-style:dashed}
+section{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:22px 24px;margin:22px 0}
+section.extra{border-top-style:dashed;border-top-color:var(--mute)}
+section.extra h2 .n{color:var(--mute)}
+section h2{font-size:23px;margin-bottom:4px}
+section h2 .n{color:var(--c);margin-right:8px}
+.tag{display:inline-block;font:600 12px "Segoe UI",system-ui,sans-serif;border:1px dashed var(--mute);color:var(--mute);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:middle}
+section h3{font-size:17px;margin:22px 0 6px;color:var(--c)}
+.lead{color:var(--mute);margin:0 0 10px}
+.why{margin:10px 0 14px;padding:8px 14px;border-left:5px solid var(--accent);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px}
+.why b{color:var(--accent)}
+p{margin:8px 0}
+mark,.k{background:var(--mark);color:inherit;border-radius:4px;padding:0 4px;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.92em;background:var(--c-soft);border-radius:5px;padding:1px 6px}
+pre.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;margin:10px 0;white-space:pre}
+pre.term .p{color:var(--term-p)}
+pre.term .o{color:var(--term-o)}
+pre.term .c{color:var(--term-c)}
+.file{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:10px 0}
+.file>b{display:block;background:var(--c-soft);padding:6px 14px;font-size:13.5px;font-family:Consolas,monospace}
+.file pre{margin:0;padding:12px 16px;background:var(--term);color:var(--term-ink);font:13.5px/1.6 Consolas,"Cascadia Mono",monospace;overflow-x:auto}
+.file .add{color:var(--term-p);font-weight:700}
+.note,.warn,.tip{border-radius:10px;padding:10px 14px;margin:12px 0;border-left:5px solid;font-size:15px}
+.note{background:var(--c-soft);border-color:var(--c)}
+.warn{background:var(--warn-soft);border-color:var(--warn)}
+.tip{background:var(--tip-soft);border-color:var(--tip)}
+.note b,.warn b,.tip b{display:block;margin-bottom:2px}
+.tblwrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--c-soft)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
+.box{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 16px}
+.box h3{margin:0 0 6px}
+.box ul{margin:6px 0 0;padding-left:20px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:6px 0}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font:700 14px Rockwell,Georgia,serif;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--bg);font-size:14px}
+.chip b{color:var(--c)}
+svg.dg{width:100%;height:auto;display:block;margin:14px 0}
+svg.dg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink);font-size:15px}
+svg.dg .sm{font-size:13px;fill:var(--mute)}
+svg.dg .bd{font-weight:700}
+svg.dg .bx{fill:var(--card);stroke:var(--c);stroke-width:2}
+svg.dg .bs{fill:var(--c-soft);stroke:var(--c);stroke-width:1.5}
+svg.dg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+svg.dg .ok{fill:var(--tip-soft);stroke:var(--tip);stroke-width:1.5}
+svg.dg .ar{stroke:var(--mute);stroke-width:2;fill:none}
+svg.dg .ah{fill:var(--mute)}
+.cmdtable td:first-child{white-space:nowrap}
+.gl td:first-child{white-space:nowrap;font-weight:700}
+/* quiz */
+.qbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--c-soft);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:600}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--card)}
+.qcard h3{margin:0 0 10px;font-size:16px;color:var(--ink)}
+.qcard h3 span{color:var(--c);margin-right:6px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--tip-soft);border-color:var(--tip);font-weight:600}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.exp{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--c-soft);font-size:14.5px}
+.exp.show{display:block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#result{display:none;margin:14px 0;padding:14px 16px;border-radius:12px;border:2px solid var(--c);background:var(--card);font-size:17px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:30px}
+@media(max-width:560px){section{padding:16px 14px}}
+
+</style></head>
+<body><div class="wrap">
+<a class="back" href="../rhcsa-dashboard.html">&larr; Back to dashboard</a>
+<header class="hero"><small>RH134 &middot; CHAPTER 18 &middot; RHEL 10</small><h1>Working with Image-based Red Hat Enterprise Linux</h1><p>In <mark>image mode</mark>, the whole operating system is built like a container image with a <mark>Containerfile</mark> and updated with <mark>bootc</mark>. This is new in RHEL 10, so this chapter is concepts and a few commands.</p></header>
+<nav class="toc" aria-label="Chapter sections"><a href="#big">Package vs image mode</a><a href="#build">Containerfile</a><a href="#disk">Disk images</a><a href="#bootc">bootc</a><a href="#cheat">Commands list</a><a href="#quiz">Quiz</a></nav>
+<section id="big"><h2><span class="n">1</span>Package mode vs image mode</h2><div class="why"><b>Why?</b> Normal RHEL (package mode) is changed server by server with dnf. After years every server is a little different. In <b>image mode</b> the OS is one image. You rebuild the image and every server gets exactly the same system.</div><div class="tblwrap"><table class=""><tr><th></th><th>Package mode (classic)</th><th>Image mode</th></tr><tr><td>Update with</td><td><code>dnf update</code></td><td><code>bootc upgrade</code> (new image)</td></tr><tr><td>Change the OS by</td><td>installing packages on each server</td><td>editing the Containerfile and rebuilding</td></tr><tr><td><code>/usr</code></td><td>writable</td><td><b>read-only</b></td></tr><tr><td>Rollback</td><td>difficult</td><td><code>bootc rollback</code>, one command</td></tr><tr><td>Servers stay identical</td><td>no, they drift</td><td>yes</td></tr></table></div><svg class="dg" viewBox="0 0 900 190" role="img" aria-label="flow diagram"><defs><marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect class="bx" x="10" y="25" width="186" height="95" rx="12"/><text class="bd" x="103" y="58" text-anchor="middle">Containerfile</text><text x="103" y="84" text-anchor="middle">OS recipe</text><text class="sm" x="103" y="106" text-anchor="middle"></text><line class="ar" x1="198" y1="72" x2="239" y2="72" marker-end="url(#ma)"/><rect class="bx" x="241" y="25" width="186" height="95" rx="12"/><text class="bd" x="334" y="58" text-anchor="middle">podman build</text><text x="334" y="84" text-anchor="middle">build image</text><text class="sm" x="334" y="106" text-anchor="middle"></text><line class="ar" x1="429" y1="72" x2="470" y2="72" marker-end="url(#ma)"/><rect class="bx" x="472" y="25" width="186" height="95" rx="12"/><text class="bd" x="565" y="58" text-anchor="middle">Registry</text><text x="565" y="84" text-anchor="middle">store the image</text><text class="sm" x="565" y="106" text-anchor="middle"></text><line class="ar" x1="660" y1="72" x2="701" y2="72" marker-end="url(#ma)"/><rect class="ok" x="703" y="25" width="186" height="95" rx="12"/><text class="bd" x="796" y="58" text-anchor="middle">bootc</text><text x="796" y="84" text-anchor="middle">server runs the image</text><text class="sm" x="796" y="106" text-anchor="middle"></text><text class="sm" x="450" y="170" text-anchor="middle">Developers and admins build once, many servers use the same image.</text></svg><div class="note"><b>Full forms</b><b>bootc</b> = bootable container. A bootc image is a container image that also holds a kernel, so it can start a real machine. <b>OCI</b> = Open Container Initiative (the image standard).</div></section>
+<section id="build"><h2><span class="n">2</span>Build an OS image with a Containerfile</h2><div class="why"><b>Why?</b> The Containerfile is now the blueprint of the whole operating system.</div><div class="file"><b>Containerfile</b><pre>FROM registry.redhat.io/rhel10/rhel-bootc:10.0
+<span class="add">RUN dnf install -y httpd &amp;&amp; dnf clean all</span>
+<span class="add">RUN systemctl enable httpd</span>
+<span class="add">COPY motd /etc/motd</span>
+<span class="add">RUN useradd -m -G wheel admin1</span></pre></div><pre class="term"><span class="p">$ </span>podman login registry.redhat.io
+<span class="p">$ </span>podman build -t quay.io/student/my-rhel:1.0 -f Containerfile .
+<span class="p">$ </span>podman push quay.io/student/my-rhel:1.0</pre><ul><li><code>FROM ...rhel-bootc</code> = the base OS image from Red Hat.</li><li><code>RUN dnf install</code> runs <b>at build time</b>. You do not run dnf on the live server.</li><li><code>systemctl enable httpd</code> makes the service start at boot.</li><li><code>podman push</code> uploads the image so servers can pull it.</li></ul><div class="note"><b>Rule</b>Anything the server needs (packages, users, services, config files) goes <b>into the Containerfile</b>, and then you rebuild.</div></section>
+<section id="disk"><h2><span class="n">3</span>From image to a bootable disk</h2><div class="why"><b>Why?</b> A new server needs a first install. Tools turn the image into a disk or install it directly.</div><div class="tblwrap"><table class=""><tr><th>Method</th><th>Result</th></tr><tr><td><b>bootc-image-builder</b></td><td>creates a disk image: qcow2 (KVM), raw, AMI (AWS), ISO</td></tr><tr><td><b>bootc install to-disk</b></td><td>installs the image to a disk from a running bootc container</td></tr><tr><td><b>Anaconda</b> with <code>ostreecontainer</code> Kickstart line</td><td>normal installer that installs the image</td></tr></table></div><div class="file"><b>Kickstart line (chapter 16) for image mode</b><pre><span class="add">ostreecontainer --url=quay.io/student/my-rhel:1.0</span></pre></div></section>
+<section id="bootc"><h2><span class="n">4</span>bootc basics on a running server</h2><div class="why"><b>Why?</b> <code>bootc</code> is the one command to see, update and roll back the OS on the server.</div><pre class="term"><span class="p">$ </span>sudo bootc status
+<span class="o">● Booted image: quay.io/student/my-rhel:1.0</span>
+<span class="o">        Digest: sha256:4b2a...</span>
+<span class="o">       Version: 10.0 (2026-11-18)</span>
+<span class="o">  Rollback image: quay.io/student/my-rhel:0.9</span>
+<span class="p">$ </span>sudo bootc upgrade
+<span class="o">Fetching layers...</span>
+<span class="o">Queued for next boot: quay.io/student/my-rhel:1.1</span>
+<span class="p">$ </span>sudo systemctl reboot
+<span class="p">$ </span>sudo bootc rollback
+<span class="o">Next boot: rollback deployment</span>
+<span class="p">$ </span>sudo bootc switch quay.io/student/other-image:2.0</pre><div class="tblwrap"><table class=""><tr><th>Command</th><th>Meaning</th></tr><tr><td><code>bootc status</code></td><td>booted image, staged image, rollback image</td></tr><tr><td><code>bootc upgrade</code></td><td>download the newer image of the same tag. Used after <b>reboot</b></td></tr><tr><td><code>bootc switch IMAGE</code></td><td>change to a different image</td></tr><tr><td><code>bootc rollback</code></td><td>go back to the previous OS on next boot</td></tr><tr><td><code>bootc upgrade --check</code></td><td>only check for an update</td></tr></table></div><div class="note"><b>Reboot activates it</b>The new image is staged in the background. You keep working, and the change is applied at the next reboot. If it fails, roll back.</div><div class="warn"><b>Do not install packages on the server</b><code>/usr</code> is read-only. A change made by hand is not part of the image. Change the Containerfile instead.</div><h3>What stays writable?</h3><ul><li><code>/etc</code> and <code>/var</code> are writable. Config changes are kept across upgrades (merged with the new image).</li><li><code>/home</code> and <code>/root</code> hold user data.</li><li><code>/usr</code> is read-only.</li></ul></section>
+<section id="cheat"><h2><span class="n">5</span>All commands in one list</h2><div class="tblwrap"><table class="cmdtable"><tr><th>Command</th><th>Use</th></tr><tr><td><code>podman build -t IMG:TAG .</code></td><td>build the OS image</td></tr><tr><td><code>podman push IMG:TAG</code></td><td>upload it</td></tr><tr><td><code>bootc status</code></td><td>show images</td></tr><tr><td><code>bootc upgrade</code></td><td>stage a new image</td></tr><tr><td><code>bootc switch IMAGE</code></td><td>use another image</td></tr><tr><td><code>bootc rollback</code></td><td>go back</td></tr><tr><td><code>systemctl reboot</code></td><td>apply</td></tr></table></div></section>
+
+<section id="quiz"><h2><span class="n">6</span>Quiz: test yourself</h2>
+<p class="lead">20 multiple-choice questions. Click an answer to see right or wrong with a short reason.</p>
+<div class="qbar"><span id="prog">Answered: 0 / 20</span><span id="sc">Correct: 0</span><button class="btn" id="rs" type="button">Restart quiz</button></div>
+<div id="qs"></div><div id="result" role="status"></div></section>
+<footer>RH134 &middot; Chapter 18 &middot; Working with Image-based Red Hat Enterprise Linux</footer></div>
+<script>
+const Q=[{"q": "What is image mode in RHEL?", "o": ["A graphical mode", "A recovery mode", "The OS is delivered and updated as a container image", "A tuned profile"], "a": 2, "e": "The whole OS comes from an image."}, {"q": "What does bootc stand for?", "o": ["Bootable container", "Binary container", "Boot control", "Basic OS tool config"], "a": 0, "e": "bootc = bootable container."}, {"q": "Which file defines the OS in image mode?", "o": ["Containerfile", "grub.cfg", "/etc/fstab", "kickstart only"], "a": 0, "e": "The Containerfile is the blueprint."}, {"q": "How do you update a server in image mode?", "o": ["dnf update on the server", "Build a new image and run bootc upgrade", "Reinstall by USB only", "Edit /usr by hand"], "a": 1, "e": "Update the image, then bootc upgrade."}, {"q": "Which directory is read-only in image mode?", "o": ["/var", "/usr", "/etc", "/home"], "a": 1, "e": "/usr is read-only."}, {"q": "Which directories are writable?", "o": ["/etc and /var", "None", "Only /boot", "/usr and /bin"], "a": 0, "e": "/etc and /var stay writable."}, {"q": "Which command shows the booted, staged and rollback images?", "o": ["bootc info -a", "bootc status", "podman ps", "bootc list"], "a": 1, "e": "bootc status."}, {"q": "Which command goes back to the previous OS version?", "o": ["bootc undo", "dnf history undo", "bootc rollback", "bootc reset"], "a": 2, "e": "bootc rollback."}, {"q": "When does a staged image become active?", "o": ["Never", "After a reboot", "After 1 hour", "Immediately"], "a": 1, "e": "The new image starts at next boot."}, {"q": "Which command changes the server to a different image?", "o": ["bootc switch", "bootc change", "podman switch", "dnf swap"], "a": 0, "e": "bootc switch IMAGE."}, {"q": "Where do you install httpd in image mode?", "o": ["In /etc/fstab", "In grub", "In the Containerfile with RUN dnf install", "On each server with dnf"], "a": 2, "e": "Changes go into the image."}, {"q": "Which base image is used for RHEL 10 image mode?", "o": ["ubi10-minimal", "rhel-bootc", "busybox", "rhel-live"], "a": 1, "e": "registry.redhat.io/rhel10/rhel-bootc."}, {"q": "Which tool builds qcow2 or ISO disk images from a bootc image?", "o": ["podman run -d", "tuned-adm", "ksvalidator", "bootc-image-builder"], "a": 3, "e": "bootc-image-builder."}, {"q": "Which Kickstart command installs an image with Anaconda?", "o": ["containerinstall", "ostreecontainer", "bootcimage", "imagemode"], "a": 1, "e": "ostreecontainer --url=IMAGE."}, {"q": "What is the big benefit of image mode?", "o": ["All servers stay identical and rollback is easy", "It needs no disks", "It removes SELinux", "It uses no network"], "a": 0, "e": "Consistency and easy rollback."}, {"q": "Which command uploads your OS image to a registry?", "o": ["dnf upload", "bootc push", "podman push", "podman send"], "a": 2, "e": "podman push."}, {"q": "Why not run dnf install on a live image-mode server?", "o": ["It is slow", "It is not part of the image and /usr is read-only", "dnf is removed", "dnf needs a GUI"], "a": 1, "e": "Put packages in the Containerfile."}, {"q": "What does OCI stand for?", "o": ["Open Cloud Installer", "Operating Core Interface", "Open Container Initiative", "Online Container Index"], "a": 2, "e": "The container image standard."}, {"q": "What does <code>bootc upgrade --check</code> do?", "o": ["Switches image", "Deletes the old image", "Reboots", "Checks for an update without applying it"], "a": 3, "e": "A dry check."}, {"q": "Which command applies a staged image?", "o": ["bootc apply-now only", "systemctl daemon-reload", "exportfs -r", "systemctl reboot"], "a": 3, "e": "Reboot into the new image."}];
+const N=Q.length,qs=document.getElementById("qs"),prog=document.getElementById("prog"),sc=document.getElementById("sc"),res=document.getElementById("result");
+let done=0,good=0;
+function build(){
+ qs.innerHTML="";done=0;good=0;res.style.display="none";upd();
+ Q.forEach((it,i)=>{
+  const c=document.createElement("div");c.className="qcard";
+  const h=document.createElement("h3");h.innerHTML="<span>Q"+(i+1)+".</span>"+it.q;c.appendChild(h);
+  const ex=document.createElement("div");ex.className="exp";
+  const bs=[];
+  it.o.forEach((t,j)=>{
+   const b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;
+   b.onclick=()=>{
+    bs.forEach(x=>x.disabled=true);
+    bs[it.a].classList.add("right");
+    if(j===it.a){good++;ex.innerHTML="<b>Right.</b> "+it.e}else{b.classList.add("wrong");ex.innerHTML="<b>Not quite.</b> "+it.e}
+    ex.classList.add("show");done++;upd();
+    if(done===N)finish();
+   };
+   bs.push(b);c.appendChild(b);
+  });
+  c.appendChild(ex);qs.appendChild(c);
+ });
+}
+function upd(){prog.textContent="Answered: "+done+" / "+N;sc.textContent="Correct: "+good}
+function finish(){
+ const p=Math.round(good*100/N);
+ let m=p>=85?"Great work. You know this chapter.":p>=60?"Good. Read the questions you missed again.":"Read the chapter once more, then retry.";
+ res.innerHTML="<b>Final score: "+good+" / "+N+" ("+p+"%)</b><br>"+m;
+ res.style.display="block";res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.getElementById("rs").onclick=()=>{build();document.getElementById("quiz").scrollIntoView({behavior:"smooth"})};
+build();
+</script></body></html>
